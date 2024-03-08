@@ -15,12 +15,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.NavHostController
 import com.anshyeon.fashioncode.R
-import com.anshyeon.fashioncode.ui.theme.FashionCodeTheme
 
 @Composable
-fun SignInScreen() {
+fun SignInScreen(
+    navHostController: NavHostController,
+) {
     Column(
         modifier = Modifier
             .fillMaxSize(),
