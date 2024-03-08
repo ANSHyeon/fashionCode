@@ -9,13 +9,14 @@ import com.anshyeon.fashioncode.ui.screen.home.style.StyleScreen
 import com.anshyeon.fashioncode.ui.screen.home.community.CommunityScreen
 import com.anshyeon.fashioncode.ui.screen.home.bookmark.BookMarkScreen
 import com.anshyeon.fashioncode.ui.screen.home.setting.SettingScreen
+import com.anshyeon.fashioncode.util.Constants
 
 @Composable
 fun HomeNavGraph(navController: NavHostController) {
     NavHost(
         navController = navController,
         startDestination = BottomNavItem.Style.route,
-        route = Graph.HOME
+        route = Constants.HOME_GRAPH
     ) {
         composable(route = BottomNavItem.Style.route) {
             StyleScreen()

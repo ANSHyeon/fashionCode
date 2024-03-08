@@ -1,37 +1,44 @@
 package com.anshyeon.fashioncode
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.navigation.compose.rememberNavController
-import com.anshyeon.fashioncode.ui.graph.RootNavigationGraph
+import androidx.lifecycle.lifecycleScope
+import com.anshyeon.fashioncode.ui.screen.home.HomeScreen
+import com.anshyeon.fashioncode.ui.screen.signin.SignInViewModel
 import com.anshyeon.fashioncode.ui.theme.FashionCodeTheme
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
+    private val viewModel by viewModels<SignInViewModel>()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        viewModel.tryLogin(this)
+
+        lifecycleScope.launch {
+            viewModel.loginResult.collect { isLogin ->
+                if (!isLogin) {
+                    startActivity(Intent(this@MainActivity, SignInActivity::class.java))
+                }
+            }
+        }
         setContent {
             FashionCodeTheme {
-                // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    MainNavigationScreen()
+                    HomeScreen()
                 }
             }
         }
     }
-}
-
-@Composable
-fun MainNavigationScreen() {
-    val navController = rememberNavController()
-
-    RootNavigationGraph(navController)
 }

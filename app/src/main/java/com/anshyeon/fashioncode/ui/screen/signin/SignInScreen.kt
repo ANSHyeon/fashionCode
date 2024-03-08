@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -15,12 +14,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
-import androidx.navigation.NavHostController
+import androidx.compose.ui.unit.dp
 import com.anshyeon.fashioncode.R
 
 @Composable
 fun SignInScreen(
-    navHostController: NavHostController,
+    onClick: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -35,16 +34,16 @@ fun SignInScreen(
             modifier = Modifier.fillMaxHeight(0.3f)
         )
         Spacer(modifier = Modifier.fillMaxHeight(0.1f))
-        SignInGoogleButton()
+        SignInGoogleButton { onClick() }
     }
 }
 
 @Composable
-fun SignInGoogleButton() {
+fun SignInGoogleButton(onClick: () -> Unit) {
     Surface(
         modifier = Modifier
-            .fillMaxWidth()
-            .clickable {},
+            .clickable(onClick = onClick),
+        shadowElevation = 3.dp
     ) {
         Image(
             painter = painterResource(id = R.drawable.ic_google_sign_in),
