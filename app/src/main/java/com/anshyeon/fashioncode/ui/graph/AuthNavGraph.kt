@@ -8,7 +8,7 @@ import com.anshyeon.fashioncode.ui.screen.signin.SignInScreen
 
 fun NavGraphBuilder.authNavGraph(navController: NavHostController) {
     navigation(
-        route = "AUTHENTICATION",
+        route = Graph.AUTH,
         startDestination = AuthScreen.Login.route
     ) {
         composable(route = AuthScreen.Login.route) {

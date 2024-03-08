@@ -14,7 +14,8 @@ import com.anshyeon.fashioncode.ui.screen.home.setting.SettingScreen
 fun HomeNavGraph(navController: NavHostController) {
     NavHost(
         navController = navController,
-        startDestination = BottomNavItem.Style.route
+        startDestination = BottomNavItem.Style.route,
+        route = Graph.HOME
     ) {
         composable(route = BottomNavItem.Style.route) {
             StyleScreen()
