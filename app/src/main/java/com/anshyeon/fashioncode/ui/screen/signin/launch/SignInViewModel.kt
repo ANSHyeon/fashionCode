@@ -1,4 +1,4 @@
-package com.anshyeon.fashioncode.ui.screen.signin
+package com.anshyeon.fashioncode.ui.screen.signin.launch
 
 import android.content.Context
 import androidx.lifecycle.ViewModel
