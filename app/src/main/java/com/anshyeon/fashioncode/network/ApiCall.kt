@@ -1,9 +1,9 @@
-package com.anshyeon.onoff.network
+package com.anshyeon.fashioncode.network
 
-import com.anshyeon.onoff.network.model.ApiResponse
-import com.anshyeon.onoff.network.model.ApiResultError
-import com.anshyeon.onoff.network.model.ApiResultException
-import com.anshyeon.onoff.network.model.ApiResultSuccess
+import com.anshyeon.fashioncode.network.model.ApiResponse
+import com.anshyeon.fashioncode.network.model.ApiResultError
+import com.anshyeon.fashioncode.network.model.ApiResultException
+import com.anshyeon.fashioncode.network.model.ApiResultSuccess
 import okhttp3.Request
 import okio.Timeout
 import retrofit2.Call

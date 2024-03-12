@@ -1,4 +1,4 @@
-package com.anshyeon.onoff.network.model
+package com.anshyeon.fashioncode.network.model
 
 sealed interface ApiResponse<T : Any>
 

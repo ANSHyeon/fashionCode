@@ -1,9 +1,9 @@
-package com.anshyeon.onoff.network.extentions
+package com.anshyeon.fashioncode.network.extentions
 
-import com.anshyeon.onoff.network.model.ApiResponse
-import com.anshyeon.onoff.network.model.ApiResultError
-import com.anshyeon.onoff.network.model.ApiResultException
-import com.anshyeon.onoff.network.model.ApiResultSuccess
+import com.anshyeon.fashioncode.network.model.ApiResponse
+import com.anshyeon.fashioncode.network.model.ApiResultError
+import com.anshyeon.fashioncode.network.model.ApiResultException
+import com.anshyeon.fashioncode.network.model.ApiResultSuccess
 
 suspend inline fun <T : Any> ApiResponse<T>.onSuccess(
     crossinline block: suspend (T) -> Unit

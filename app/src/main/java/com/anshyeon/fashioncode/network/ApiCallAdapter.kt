@@ -1,6 +1,6 @@
-package com.anshyeon.onoff.network
+package com.anshyeon.fashioncode.network
 
-import com.anshyeon.onoff.network.model.ApiResponse
+import com.anshyeon.fashioncode.network.model.ApiResponse
 import retrofit2.Call
 import retrofit2.CallAdapter
 import java.lang.reflect.Type
