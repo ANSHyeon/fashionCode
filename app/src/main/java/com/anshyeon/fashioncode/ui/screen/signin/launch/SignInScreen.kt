@@ -40,7 +40,7 @@ fun SignInScreen(
     viewModel: SignInViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
-    val googleSignInClient = getGoogleSignInClient(context)
+    val googleSignInClient = getGoogleSignInClient(LocalContext.current)
     val signInRequestCode = 1
     val auth: FirebaseAuth = FirebaseAuth.getInstance()
 
@@ -52,7 +52,7 @@ fun SignInScreen(
                     val credential = GoogleAuthProvider.getCredential(account.idToken, null)
                     auth.signInWithCredential(credential).addOnCompleteListener { task ->
                         if (task.isSuccessful) {
-
+                            viewModel.getUserInfo(context, navController)
                         }
                     }
                 }

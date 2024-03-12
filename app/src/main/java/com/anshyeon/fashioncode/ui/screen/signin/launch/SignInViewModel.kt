@@ -1,37 +1,49 @@
 package com.anshyeon.fashioncode.ui.screen.signin.launch
 
 import android.content.Context
+import android.content.Intent
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.android.gms.auth.api.signin.GoogleSignIn
+import androidx.navigation.NavController
+import com.anshyeon.fashioncode.MainActivity
+import com.anshyeon.fashioncode.data.repository.AuthRepository
+import com.anshyeon.fashioncode.network.extentions.onError
+import com.anshyeon.fashioncode.network.extentions.onException
+import com.anshyeon.fashioncode.network.extentions.onSuccess
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class SignInViewModel @Inject constructor(
+    private val repository: AuthRepository
 ) : ViewModel() {
-    private val _loginResult = MutableStateFlow<Boolean>(true)
-    var loginResult = _loginResult.asStateFlow()
 
-    fun tryLogin(context: Context) {
+    fun getUserInfo(context: Context, navController: NavController) {
         viewModelScope.launch {
-            val account = async {
-                getLastSignedInAccount(context)
+            val result = repository.getUser()
+            result.onSuccess {
+                if (it.values.isNotEmpty()) {
+                    saveUserInfo(context)
+                } else {
+                    navController.navigate("InfoInput") {
+                        popUpTo("SignIn") {
+                            inclusive = true
+                        }
+                    }
+                }
+            }.onError { _, message ->
+            }.onException {
             }
-            setLoginResult(account.await() != null)
         }
     }
 
-    private fun getLastSignedInAccount(context: Context) =
-        GoogleSignIn.getLastSignedInAccount(context)
-
-    private fun setLoginResult(isLogin: Boolean) {
-        viewModelScope.launch {
-            _loginResult.emit(isLogin)
+    private suspend fun saveUserInfo(context: Context) {
+        val getSaveIdToken = viewModelScope.async {
+            repository.saveIdToken()
         }
+        getSaveIdToken.await()
+        context.startActivity(Intent(context, MainActivity::class.java))
     }
 }
