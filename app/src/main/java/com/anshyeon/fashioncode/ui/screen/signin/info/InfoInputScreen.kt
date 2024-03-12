@@ -22,6 +22,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
@@ -32,21 +33,26 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.anshyeon.fashioncode.R
 import com.anshyeon.fashioncode.ui.component.button.RectangleButton
+import com.anshyeon.fashioncode.util.isValidNickname
 
 @Composable
 fun InfoInputScreen() {
 
     val viewModel: InfoInputViewModel = hiltViewModel()
+    val context = LocalContext.current
 
     val nickNameState by viewModel.nickName.collectAsStateWithLifecycle()
+    val nextButtonVisibility = isValidNickname(nickNameState)
 
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background
     ) {
         SetUserInfo(nickNameState) { newNickName ->
+            viewModel.changeNickName(newNickName)
         }
-        RectangleButton(text = "시작하기") {
+        RectangleButton(text = "시작하기", visibility = nextButtonVisibility) {
+            viewModel.saveUserInfo(context)
         }
     }
 }

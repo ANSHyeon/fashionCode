@@ -8,11 +8,22 @@ import androidx.compose.material3.Button
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.anshyeon.fashioncode.ui.theme.orange
 
 @Composable
-fun RectangleButton(modifier: Modifier = Modifier, text: String, onclick: () -> Unit) {
+fun RectangleButton(
+    modifier: Modifier = Modifier,
+    text: String,
+    visibility: Boolean,
+    onclick: () -> Unit
+) {
     Box(
         modifier = modifier,
         contentAlignment = Alignment.BottomCenter
@@ -20,13 +31,32 @@ fun RectangleButton(modifier: Modifier = Modifier, text: String, onclick: () -> 
         Button(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(40.dp),
+                .height(48.dp),
             shape = RectangleShape,
+            colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                containerColor = orange,
+                disabledContainerColor = Color.Gray
+            ),
+            enabled = visibility,
             onClick = {
                 onclick()
             }
         ) {
-            Text(text = text)
+            Text(
+                text = text,
+                style = TextStyle(
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White,
+                )
+            )
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun Preview() {
+    RectangleButton(text = "시작하기", visibility = false) {
     }
 }
