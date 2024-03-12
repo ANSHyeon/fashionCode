@@ -1,5 +1,6 @@
 package com.anshyeon.fashioncode.ui.screen.home
 
+import android.content.Intent
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.padding
@@ -8,16 +9,29 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.anshyeon.fashioncode.SignInActivity
 import com.anshyeon.fashioncode.ui.graph.BottomNavItem
 import com.anshyeon.fashioncode.ui.graph.HomeNavGraph
 
 @Composable
 fun HomeScreen(navController: NavHostController = rememberNavController()) {
+
+    val viewModel: HomeViewModel = hiltViewModel()
+    val localGoogleIdToken = viewModel.getLocalGoogleIdToken()
+
+    if (localGoogleIdToken.isEmpty()) {
+        with(LocalContext.current) {
+            startActivity(Intent(this, SignInActivity::class.java))
+        }
+    }
+
     Scaffold(
         bottomBar = { BottomBar(navController = navController) }
     ) {

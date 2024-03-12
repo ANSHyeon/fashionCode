@@ -1,6 +1,8 @@
 package com.anshyeon.fashioncode.data.repository
 
+import android.net.Uri
 import com.anshyeon.fashioncode.data.PreferenceManager
+import com.anshyeon.fashioncode.data.dataSource.ImageDataSource
 import com.anshyeon.fashioncode.data.dataSource.UserDataSource
 import com.anshyeon.fashioncode.data.model.User
 import com.anshyeon.fashioncode.network.FireBaseApiClient
@@ -13,6 +15,7 @@ class AuthRepository @Inject constructor(
     private val fireBaseApiClient: FireBaseApiClient,
     private val preferenceManager: PreferenceManager,
     private val userDataSource: UserDataSource,
+    private val imageDataSource: ImageDataSource,
 ) {
 
     fun getLocalIdToken(): String? {
@@ -32,6 +35,29 @@ class AuthRepository @Inject constructor(
             fireBaseApiClient.getUser(
                 userDataSource.getIdToken(),
                 "\"${userId}\""
+            )
+        } catch (e: Exception) {
+            ApiResultException(e)
+        }
+    }
+
+    suspend fun createUser(
+        nickname: String,
+        uri: Uri?
+    ): ApiResponse<Map<String, String>> {
+        return try {
+            val uriLocation = uri?.let { imageDataSource.uploadImage(it) }
+            val userId = userDataSource.getEmail().replace('@', 'a').replace('.', 'a')
+            val user = User(
+                userId = userId,
+                nickName = nickname,
+                email = userDataSource.getEmail(),
+                profileUri = uriLocation,
+            )
+            fireBaseApiClient.createUser(
+                user.userId,
+                userDataSource.getIdToken(),
+                user
             )
         } catch (e: Exception) {
             ApiResultException(e)
