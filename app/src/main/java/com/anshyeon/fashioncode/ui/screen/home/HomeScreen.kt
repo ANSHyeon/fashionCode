@@ -28,7 +28,11 @@ fun HomeScreen(navController: NavHostController = rememberNavController()) {
 
     if (localGoogleIdToken.isEmpty()) {
         with(LocalContext.current) {
-            startActivity(Intent(this, SignInActivity::class.java))
+            val intent = Intent(this, SignInActivity::class.java).apply {
+                addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            startActivity(intent)
         }
     }
 
