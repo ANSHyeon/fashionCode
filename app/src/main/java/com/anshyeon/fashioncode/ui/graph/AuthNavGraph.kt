@@ -7,19 +7,25 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.anshyeon.fashioncode.ui.screen.signin.info.InfoInputScreen
 import com.anshyeon.fashioncode.ui.screen.signin.launch.SignInScreen
+import com.anshyeon.fashioncode.util.Constants
 
 @Composable
 fun AuthNavGraph(navController: NavHostController = rememberNavController()) {
     NavHost(
         navController = navController,
-        startDestination = "SignIn",
-        route = "AUTH_GRAPH"
+        startDestination = AuthScreen.SignIn.route,
+        route = Constants.AUTH_GRAPH
     ) {
-        composable(route = "SignIn") {
+        composable(route = AuthScreen.SignIn.route) {
             SignInScreen(navController)
         }
-        composable(route = "InfoInput") {
+        composable(route = AuthScreen.InfoInput.route) {
             InfoInputScreen()
         }
     }
+}
+
+sealed class AuthScreen(val route: String) {
+    object SignIn : AuthScreen(route = "SIGN_IN")
+    object InfoInput : AuthScreen(route = "INFO_INPUT")
 }

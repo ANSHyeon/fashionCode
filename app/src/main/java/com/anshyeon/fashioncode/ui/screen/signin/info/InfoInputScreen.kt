@@ -33,6 +33,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
@@ -69,7 +70,10 @@ fun InfoInputScreen() {
         SetUserInfo(imageUriState, nickNameState, launcher) { newNickName ->
             viewModel.changeNickName(newNickName)
         }
-        RectangleButton(text = "시작하기", visibility = nextButtonVisibility) {
+        RectangleButton(
+            text = stringResource(id = R.string.label_start),
+            visibility = nextButtonVisibility
+        ) {
             viewModel.saveUserInfo(context)
         }
     }
@@ -102,7 +106,7 @@ private fun SetUserInfo(
             },
             placeholder = {
                 Text(
-                    text = "닉네임을 입력해주세요.",
+                    text = stringResource(id = R.string.hint_info_input_nickname),
                     style = TextStyle(
                         fontSize = 14.sp,
                         color = Color.Gray
@@ -127,7 +131,9 @@ private fun SetProfileImage(imageUri: Uri?, onclick: () -> Unit) {
             )
         } else {
             AsyncImage(
-                modifier = Modifier.size(100.dp).clip(CircleShape),
+                modifier = Modifier
+                    .size(100.dp)
+                    .clip(CircleShape),
                 model = imageUri,
                 contentDescription = null,
                 contentScale = ContentScale.Crop
