@@ -1,5 +1,6 @@
 package com.anshyeon.fashioncode.network
 
+import com.anshyeon.fashioncode.data.model.Post
 import com.anshyeon.fashioncode.data.model.User
 import com.anshyeon.fashioncode.network.model.ApiResponse
 import retrofit2.http.Body
@@ -23,4 +24,10 @@ interface FireBaseApiClient {
         @Body user: User
     ): ApiResponse<Map<String, String>>
 
+    @PUT("posts/{postId}.json")
+    suspend fun createPost(
+        @Path("postId") postId: String,
+        @Query("auth") auth: String?,
+        @Body post: Post
+    ): ApiResponse<Map<String, String>>
 }

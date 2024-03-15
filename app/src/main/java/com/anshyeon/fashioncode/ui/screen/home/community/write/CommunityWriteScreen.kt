@@ -106,7 +106,9 @@ fun CommunityWriteScreen(navController: NavHostController) {
         RectangleButton(
             text = stringResource(id = R.string.label_submit),
             visibility = isSubmitAble
-        ) { }
+        ) {
+            viewModel.submitPost(navController)
+        }
     }
 }
 

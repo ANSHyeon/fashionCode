@@ -2,14 +2,22 @@ package com.anshyeon.fashioncode.ui.screen.home.community.write
 
 import android.net.Uri
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavHostController
+import com.anshyeon.fashioncode.data.model.User
+import com.anshyeon.fashioncode.data.repository.AuthRepository
+import com.anshyeon.fashioncode.data.repository.PostRepository
+import com.anshyeon.fashioncode.network.extentions.onSuccess
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class CommunityWriteViewModel @Inject constructor(
+    private val authRepository: AuthRepository,
+    private val postRepository: PostRepository
 ) : ViewModel() {
 
     private val _selectedImageList = MutableStateFlow(emptyList<Uri>())
@@ -40,6 +48,31 @@ class CommunityWriteViewModel @Inject constructor(
         _selectedImageList.value = _selectedImageList.value.toMutableList().apply {
             removeAt(index)
         }.toList()
+    }
+
+    fun submitPost(navController: NavHostController) {
+        viewModelScope.launch {
+            val result = authRepository.getUser()
+            result.onSuccess {
+                val user = it.values.first()
+                createPost(user, navController)
+
+            }
+        }
+    }
+
+    private fun createPost(user: User, navController: NavHostController) {
+        viewModelScope.launch {
+            val result = postRepository.createPost(
+                postTitle.value,
+                postBody.value,
+                user,
+                selectedImageList.value
+            )
+            result.onSuccess {
+                navigateBack(navController)
+            }
+        }
     }
 
     fun navigateBack(navController: NavHostController) {
