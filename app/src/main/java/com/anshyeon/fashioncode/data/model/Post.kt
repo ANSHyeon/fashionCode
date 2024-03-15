@@ -9,8 +9,8 @@ import kotlinx.parcelize.Parcelize
 data class Post(
     val postId: String,
     val title: String,
-    val dody: String,
-    val writer: User,
+    val body: String,
+    val writer: String,
     val createdDate: String,
     val imageLocations: List<String>? = null,
     val imageUrlList: List<String> = emptyList(),

@@ -66,15 +66,15 @@ fun CommunityWriteScreen(navController: NavHostController) {
     val viewModel: CommunityWriteViewModel = hiltViewModel()
     val scrollState = rememberScrollState()
 
-    val selectedImageList by viewModel.selectedImageList.collectAsStateWithLifecycle()
-    val postTitle by viewModel.postTitle.collectAsStateWithLifecycle()
-    val postBody by viewModel.postBody.collectAsStateWithLifecycle()
+    val selectedImageListState by viewModel.selectedImageList.collectAsStateWithLifecycle()
+    val postTitleState by viewModel.postTitle.collectAsStateWithLifecycle()
+    val postBodyState by viewModel.postBody.collectAsStateWithLifecycle()
 
-    val isSubmitAble = postTitle.isNotEmpty() && postBody.isNotEmpty()
+    val isSubmitAble = postTitleState.isNotEmpty() && postBodyState.isNotEmpty()
     val multiplePhotoPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetMultipleContents(),
         onResult = { uris ->
-            if (selectedImageList.size + uris.size <= 10) {
+            if (selectedImageListState.size + uris.size <= 10) {
                 viewModel.addImageUris(uris)
             }
         }
@@ -92,14 +92,14 @@ fun CommunityWriteScreen(navController: NavHostController) {
             BackButtonAppBar(title = stringResource(id = R.string.label_app_bar_community_write)) {
                 viewModel.navigateBack(navController)
             }
-            ImageSelector(selectedImageList, multiplePhotoPickerLauncher) { index ->
+            ImageSelector(selectedImageListState, multiplePhotoPickerLauncher) { index ->
                 viewModel.removeImageUris(index)
             }
             Spacer(modifier = Modifier.height(20.dp))
-            TitleTextField(postTitle) { newTitle ->
+            TitleTextField(postTitleState) { newTitle ->
                 viewModel.changeTitle(newTitle)
             }
-            BodyTextField(postBody, scrollState) { newBody ->
+            BodyTextField(postBodyState, scrollState) { newBody ->
                 viewModel.changeBody(newBody)
             }
         }

@@ -4,7 +4,6 @@ import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavHostController
-import com.anshyeon.fashioncode.data.model.User
 import com.anshyeon.fashioncode.data.repository.AuthRepository
 import com.anshyeon.fashioncode.data.repository.PostRepository
 import com.anshyeon.fashioncode.network.extentions.onSuccess
@@ -52,21 +51,10 @@ class CommunityWriteViewModel @Inject constructor(
 
     fun submitPost(navController: NavHostController) {
         viewModelScope.launch {
-            val result = authRepository.getUser()
-            result.onSuccess {
-                val user = it.values.first()
-                createPost(user, navController)
-
-            }
-        }
-    }
-
-    private fun createPost(user: User, navController: NavHostController) {
-        viewModelScope.launch {
             val result = postRepository.createPost(
                 postTitle.value,
                 postBody.value,
-                user,
+                authRepository.getUserId(),
                 selectedImageList.value
             )
             result.onSuccess {
