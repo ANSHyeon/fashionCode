@@ -57,6 +57,8 @@ import coil.compose.AsyncImage
 import com.anshyeon.fashioncode.R
 import com.anshyeon.fashioncode.ui.component.appBar.BackButtonAppBar
 import com.anshyeon.fashioncode.ui.component.button.RectangleButton
+import com.anshyeon.fashioncode.ui.component.loadingView.LoadingView
+import com.anshyeon.fashioncode.ui.component.snackBar.TextSnackBarContainer
 import com.anshyeon.fashioncode.ui.theme.Gray
 import kotlinx.coroutines.launch
 
@@ -69,6 +71,9 @@ fun CommunityWriteScreen(navController: NavHostController) {
     val selectedImageListState by viewModel.selectedImageList.collectAsStateWithLifecycle()
     val postTitleState by viewModel.postTitle.collectAsStateWithLifecycle()
     val postBodyState by viewModel.postBody.collectAsStateWithLifecycle()
+    val isLoadingState by viewModel.isLoading.collectAsStateWithLifecycle()
+    val snackBarTextState by viewModel.snackBarText.collectAsStateWithLifecycle()
+    val showSnackBarState by viewModel.showSnackBar.collectAsStateWithLifecycle()
 
     val isSubmitAble = postTitleState.isNotEmpty() && postBodyState.isNotEmpty()
     val multiplePhotoPickerLauncher = rememberLauncherForActivityResult(
@@ -80,34 +85,43 @@ fun CommunityWriteScreen(navController: NavHostController) {
         }
     )
 
-    Surface(
-        modifier = Modifier.fillMaxSize()
+    TextSnackBarContainer(
+        snackbarText = snackBarTextState,
+        showSnackbar = showSnackBarState,
+        onDismissSnackbar = { viewModel.dismissSnackBar() }
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(bottom = 48.dp)
-                .verticalScroll(scrollState)
+        Surface(
+            modifier = Modifier.fillMaxSize()
         ) {
-            BackButtonAppBar(title = stringResource(id = R.string.label_app_bar_community_write)) {
-                viewModel.navigateBack(navController)
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(bottom = 48.dp)
+                    .verticalScroll(scrollState)
+            ) {
+                BackButtonAppBar(title = stringResource(id = R.string.label_app_bar_community_write)) {
+                    viewModel.navigateBack(navController)
+                }
+                ImageSelector(selectedImageListState, multiplePhotoPickerLauncher) { index ->
+                    viewModel.removeImageUris(index)
+                }
+                Spacer(modifier = Modifier.height(20.dp))
+                TitleTextField(postTitleState) { newTitle ->
+                    viewModel.changeTitle(newTitle)
+                }
+                BodyTextField(postBodyState, scrollState) { newBody ->
+                    viewModel.changeBody(newBody)
+                }
             }
-            ImageSelector(selectedImageListState, multiplePhotoPickerLauncher) { index ->
-                viewModel.removeImageUris(index)
+            RectangleButton(
+                text = stringResource(id = R.string.label_submit),
+                visibility = isSubmitAble
+            ) {
+                viewModel.submitPost(navController)
             }
-            Spacer(modifier = Modifier.height(20.dp))
-            TitleTextField(postTitleState) { newTitle ->
-                viewModel.changeTitle(newTitle)
-            }
-            BodyTextField(postBodyState, scrollState) { newBody ->
-                viewModel.changeBody(newBody)
-            }
-        }
-        RectangleButton(
-            text = stringResource(id = R.string.label_submit),
-            visibility = isSubmitAble
-        ) {
-            viewModel.submitPost(navController)
+            LoadingView(
+                isLoading = isLoadingState
+            )
         }
     }
 }
