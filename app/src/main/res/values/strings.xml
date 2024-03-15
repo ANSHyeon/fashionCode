@@ -6,6 +6,9 @@
     <string name="error_message_sign_in">로그인에 실패했습니다. 잠시후 다시 시도해 주십시오.</string>
 
     <string name="label_start">시작하기</string>
+    <string name="label_submit">등록하기</string>
 
     <string name="hint_info_input_nickname">2~6자 닉네임을 입력해주세요.</string>
+    <string name="hint_post_title">제목을 입력하세요</string>
+    <string name="hint_post_body">내용을 입력하세요</string>
 </resources>

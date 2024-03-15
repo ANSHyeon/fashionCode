@@ -15,6 +15,20 @@ class CommunityWriteViewModel @Inject constructor(
     private val _selectedImageList = MutableStateFlow(emptyList<Uri>())
     val selectedImageList: StateFlow<List<Uri>> = _selectedImageList
 
+    private val _postTitle = MutableStateFlow("")
+    val postTitle: StateFlow<String> = _postTitle
+
+    private val _postBody = MutableStateFlow("")
+    val postBody: StateFlow<String> = _postBody
+
+    fun changeTitle(newTitle: String) {
+        _postTitle.value = newTitle
+    }
+
+    fun changeBody(newBodye: String) {
+        _postBody.value = newBodye
+    }
+
     fun addImageUris(imageUris: List<Uri>) {
         _selectedImageList.value = mutableListOf<Uri>().apply {
             addAll(_selectedImageList.value)

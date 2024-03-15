@@ -14,7 +14,8 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.anshyeon.fashioncode.ui.theme.orange
+import com.anshyeon.fashioncode.ui.theme.Gray
+import com.anshyeon.fashioncode.ui.theme.Orange
 
 @Composable
 fun RectangleButton(
@@ -33,8 +34,8 @@ fun RectangleButton(
                 .height(48.dp),
             shape = RectangleShape,
             colors = androidx.compose.material3.ButtonDefaults.buttonColors(
-                containerColor = orange,
-                disabledContainerColor = Color.Gray
+                containerColor = Orange,
+                disabledContainerColor = Gray
             ),
             enabled = visibility,
             onClick = {

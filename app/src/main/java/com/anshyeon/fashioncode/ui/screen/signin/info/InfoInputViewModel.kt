@@ -18,8 +18,9 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class InfoInputViewModel @Inject constructor(private val authRepository: AuthRepository) :
-    ViewModel() {
+class InfoInputViewModel @Inject constructor(
+    private val authRepository: AuthRepository
+) : ViewModel() {
 
     private val _nickName = MutableStateFlow("")
     val nickName: StateFlow<String> = _nickName

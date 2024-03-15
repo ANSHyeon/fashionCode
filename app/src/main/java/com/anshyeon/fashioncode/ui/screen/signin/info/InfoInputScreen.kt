@@ -29,7 +29,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Color.Companion.Gray
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -44,7 +44,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.anshyeon.fashioncode.R
 import com.anshyeon.fashioncode.ui.component.button.RectangleButton
-import com.anshyeon.fashioncode.ui.theme.gray
 import com.anshyeon.fashioncode.util.isValidNickname
 
 @Composable
@@ -109,7 +108,7 @@ private fun SetUserInfo(
                     text = stringResource(id = R.string.hint_info_input_nickname),
                     style = TextStyle(
                         fontSize = 14.sp,
-                        color = Color.Gray
+                        color = Gray
                     ),
                     textAlign = TextAlign.Center
                 )
@@ -145,7 +144,7 @@ private fun SetProfileImage(imageUri: Uri?, onclick: () -> Unit) {
                 .align(Alignment.BottomEnd)
         ) {
             drawCircle(
-                color = gray,
+                color = Gray,
             )
         }
         IconButton(
