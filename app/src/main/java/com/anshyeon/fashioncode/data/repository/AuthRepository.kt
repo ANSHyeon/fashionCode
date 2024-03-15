@@ -29,12 +29,15 @@ class AuthRepository @Inject constructor(
         )
     }
 
+    fun getUserId(): String {
+        return userDataSource.getEmail().replace('@', 'a').replace('.', 'a')
+    }
+
     suspend fun getUser(): ApiResponse<Map<String, User>> {
         return try {
-            val userId = userDataSource.getEmail().replace('@', 'a').replace('.', 'a')
             fireBaseApiClient.getUser(
                 userDataSource.getIdToken(),
-                "\"${userId}\""
+                "\"${getUserId()}\""
             )
         } catch (e: Exception) {
             ApiResultException(e)

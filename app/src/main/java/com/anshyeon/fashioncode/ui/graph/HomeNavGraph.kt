@@ -6,8 +6,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.anshyeon.fashioncode.R
 import com.anshyeon.fashioncode.ui.screen.home.style.StyleScreen
-import com.anshyeon.fashioncode.ui.screen.home.community.CommunityScreen
+import com.anshyeon.fashioncode.ui.screen.home.community.home.CommunityScreen
 import com.anshyeon.fashioncode.ui.screen.home.bookmark.BookMarkScreen
+import com.anshyeon.fashioncode.ui.screen.home.community.write.CommunityWriteScreen
 import com.anshyeon.fashioncode.ui.screen.home.setting.SettingScreen
 import com.anshyeon.fashioncode.util.Constants
 
@@ -19,16 +20,19 @@ fun HomeNavGraph(navController: NavHostController) {
         route = Constants.HOME_GRAPH
     ) {
         composable(route = BottomNavItem.Style.route) {
-            StyleScreen()
+            StyleScreen(navController)
         }
         composable(route = BottomNavItem.BookMark.route) {
-            BookMarkScreen()
+            BookMarkScreen(navController)
         }
         composable(route = BottomNavItem.Community.route) {
-            CommunityScreen()
+            CommunityScreen(navController)
         }
         composable(route = BottomNavItem.Setting.route) {
-            SettingScreen()
+            SettingScreen(navController)
+        }
+        composable(route = DetailHomeScreen.CommunityWrite.route) {
+            CommunityWriteScreen(navController)
         }
     }
 }
@@ -66,4 +70,8 @@ sealed class BottomNavItem(
         icon = R.drawable.ic_person,
         outlinedIcon = R.drawable.ic_person_outline,
     )
+}
+
+sealed class DetailHomeScreen(val route: String) {
+    object CommunityWrite : DetailHomeScreen(route = "COMMUNITY_WRITE")
 }

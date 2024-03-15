@@ -29,10 +29,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Color.Companion.Gray
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
@@ -43,7 +44,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.anshyeon.fashioncode.R
 import com.anshyeon.fashioncode.ui.component.button.RectangleButton
-import com.anshyeon.fashioncode.ui.theme.gray
 import com.anshyeon.fashioncode.util.isValidNickname
 
 @Composable
@@ -69,7 +69,10 @@ fun InfoInputScreen() {
         SetUserInfo(imageUriState, nickNameState, launcher) { newNickName ->
             viewModel.changeNickName(newNickName)
         }
-        RectangleButton(text = "시작하기", visibility = nextButtonVisibility) {
+        RectangleButton(
+            text = stringResource(id = R.string.label_start),
+            visibility = nextButtonVisibility
+        ) {
             viewModel.saveUserInfo(context)
         }
     }
@@ -102,10 +105,10 @@ private fun SetUserInfo(
             },
             placeholder = {
                 Text(
-                    text = "닉네임을 입력해주세요.",
+                    text = stringResource(id = R.string.hint_info_input_nickname),
                     style = TextStyle(
                         fontSize = 14.sp,
-                        color = Color.Gray
+                        color = Gray
                     ),
                     textAlign = TextAlign.Center
                 )
@@ -127,7 +130,9 @@ private fun SetProfileImage(imageUri: Uri?, onclick: () -> Unit) {
             )
         } else {
             AsyncImage(
-                modifier = Modifier.size(100.dp).clip(CircleShape),
+                modifier = Modifier
+                    .size(100.dp)
+                    .clip(CircleShape),
                 model = imageUri,
                 contentDescription = null,
                 contentScale = ContentScale.Crop
@@ -139,7 +144,7 @@ private fun SetProfileImage(imageUri: Uri?, onclick: () -> Unit) {
                 .align(Alignment.BottomEnd)
         ) {
             drawCircle(
-                color = gray,
+                color = Gray,
             )
         }
         IconButton(

@@ -18,8 +18,9 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class InfoInputViewModel @Inject constructor(private val authRepository: AuthRepository) :
-    ViewModel() {
+class InfoInputViewModel @Inject constructor(
+    private val authRepository: AuthRepository
+) : ViewModel() {
 
     private val _nickName = MutableStateFlow("")
     val nickName: StateFlow<String> = _nickName
@@ -41,9 +42,10 @@ class InfoInputViewModel @Inject constructor(private val authRepository: AuthRep
             result.onSuccess {
                 val saveIdToken = async { authRepository.saveIdToken() }
                 saveIdToken.await()
-                val intent = Intent(context, MainActivity::class.java)
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                val intent = Intent(context, MainActivity::class.java).apply {
+                    addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
                 context.startActivity(intent)
 
             }.onError { code, message ->

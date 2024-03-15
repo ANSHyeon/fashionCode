@@ -10,6 +10,7 @@ import com.anshyeon.fashioncode.data.repository.AuthRepository
 import com.anshyeon.fashioncode.network.extentions.onError
 import com.anshyeon.fashioncode.network.extentions.onException
 import com.anshyeon.fashioncode.network.extentions.onSuccess
+import com.anshyeon.fashioncode.ui.graph.AuthScreen
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
@@ -27,8 +28,8 @@ class SignInViewModel @Inject constructor(
                 if (it.values.isNotEmpty()) {
                     saveUserInfo(context)
                 } else {
-                    navController.navigate("InfoInput") {
-                        popUpTo("SignIn") {
+                    navController.navigate(AuthScreen.InfoInput.route) {
+                        popUpTo(AuthScreen.SignIn.route) {
                             inclusive = true
                         }
                     }
