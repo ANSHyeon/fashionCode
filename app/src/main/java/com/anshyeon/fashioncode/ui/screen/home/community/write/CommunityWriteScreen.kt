@@ -200,7 +200,7 @@ fun SelectedImage(imageUri: Uri, onclick: () -> Unit) {
             model = imageUri,
             contentDescription = null,
             contentScale = ContentScale.Crop,
-            placeholder = painterResource(id = R.drawable.ic_launcher_background)
+            placeholder = painterResource(id = R.drawable.ic_place_holder)
         )
         IconButton(
             modifier = Modifier
