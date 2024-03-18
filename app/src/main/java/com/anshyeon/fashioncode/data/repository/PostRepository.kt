@@ -65,9 +65,8 @@ class PostRepository @Inject constructor(
                 emit(data.map { entry ->
                     entry.value.run {
                         copy(
-                            imageUrlList = imageLocations?.map { location ->
-                                imageDataSource.downloadImage(location)
-                            } ?: emptyList()
+                            profileImageUrl = imageLocations?.first()
+                                ?.let { imageDataSource.downloadImage(it) }
                         )
                     }
                 })

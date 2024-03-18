@@ -13,6 +13,7 @@ data class Post(
     val writer: String,
     val createdDate: String,
     val imageLocations: List<String>? = null,
+    val profileImageUrl: String? = null,
     val imageUrlList: List<String> = emptyList(),
     val commentList: List<Comment> = emptyList()
 ) : Parcelable
