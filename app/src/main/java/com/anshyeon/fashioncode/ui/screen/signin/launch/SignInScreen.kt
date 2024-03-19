@@ -96,6 +96,7 @@ fun SignInGoogleButton(onClick: () -> Unit) {
 fun getGoogleSignInClient(context: Context): GoogleSignInClient {
     val signInOptions = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
         .requestIdToken(BuildConfig.GOOGLE_CLIENT_ID)
+        .requestEmail()
         .build()
 
     return GoogleSignIn.getClient(context, signInOptions)
