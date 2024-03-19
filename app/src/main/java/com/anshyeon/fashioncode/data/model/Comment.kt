@@ -8,9 +8,10 @@ import kotlinx.parcelize.Parcelize
 @JsonClass(generateAdapter = true)
 data class Comment(
     val commentId: String,
-    val dody: String,
+    val body: String,
     val writer: String,
     val nickName: String,
     val createdDate: String,
+    val profileImageUri: String? = null,
     val profileImageUrl: String? = null,
 ) : Parcelable
