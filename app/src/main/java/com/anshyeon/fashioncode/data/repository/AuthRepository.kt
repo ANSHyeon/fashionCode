@@ -71,14 +71,16 @@ class AuthRepository @Inject constructor(
         onError: () -> Unit
     ): Flow<ApiResponse<User>> = flow {
         try {
-            val response = fireBaseApiClient.getUserInfo(
-                userId,
-                userDataSource.getIdToken()
+            val response = fireBaseApiClient.getUser(
+                userDataSource.getIdToken(),
+                "\"${userId}\""
             )
             response.onSuccess { data ->
-                emit(
-                    ApiResultSuccess(data)
-                )
+                if (data.values.isNotEmpty()) {
+                    emit(
+                        ApiResultSuccess(data.values.first())
+                    )
+                }
             }.onError { _, _ ->
                 onError()
             }.onException {
@@ -105,7 +107,6 @@ class AuthRepository @Inject constructor(
                 profileUri = uriLocation,
             )
             fireBaseApiClient.createUser(
-                user.userId,
                 userDataSource.getIdToken(),
                 user
             )
