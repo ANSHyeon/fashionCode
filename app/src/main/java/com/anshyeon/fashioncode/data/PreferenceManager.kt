@@ -10,11 +10,19 @@ class PreferenceManager @Inject constructor(@ApplicationContext context: Context
         Context.MODE_PRIVATE
     )
 
-    fun getString(key: String, defValue: String?): String? {
+    fun getString(key: String, defValue: String): String {
         return sharedPreferences.getString(key, defValue) ?: defValue
     }
 
     fun setGoogleIdToken(key: String, googleIdToken: String) {
         sharedPreferences.edit().putString(key, googleIdToken).apply()
+    }
+
+    fun setUserNickName(key: String, nickName: String) {
+        sharedPreferences.edit().putString(key, nickName).apply()
+    }
+
+    fun setUserImage(key: String, imageUri: String?) {
+        sharedPreferences.edit().putString(key, imageUri).apply()
     }
 }

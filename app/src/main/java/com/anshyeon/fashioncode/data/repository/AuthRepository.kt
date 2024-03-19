@@ -27,15 +27,27 @@ class AuthRepository @Inject constructor(
     private val imageDataSource: ImageDataSource,
 ) {
 
-    fun getLocalIdToken(): String? {
+    fun getLocalIdToken(): String {
         return preferenceManager.getString(Constants.KEY_GOOGLE_ID_TOKEN, "")
     }
 
-    suspend fun saveIdToken() {
-        preferenceManager.setGoogleIdToken(
-            Constants.KEY_GOOGLE_ID_TOKEN,
-            userDataSource.getIdToken()
-        )
+    suspend fun saveUserInfo(nickname: String, uri: String?) {
+        with(preferenceManager) {
+            setGoogleIdToken(
+                Constants.KEY_GOOGLE_ID_TOKEN,
+                userDataSource.getIdToken()
+            )
+            setUserNickName(
+                Constants.KEY_USER_NICKNAME,
+                nickname
+            )
+            uri?.let {
+                setUserImage(
+                    Constants.KEY_USER_PROFILE_URI,
+                    it
+                )
+            }
+        }
     }
 
     fun getUserId(): String {

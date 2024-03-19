@@ -40,7 +40,9 @@ class InfoInputViewModel @Inject constructor(
         viewModelScope.launch {
             val result = authRepository.createUser(nickName.value, imageUri.value)
             result.onSuccess {
-                val saveIdToken = async { authRepository.saveIdToken() }
+                val saveIdToken = async {
+                    authRepository.saveUserInfo(nickName.value, imageUri.value.toString())
+                }
                 saveIdToken.await()
                 val intent = Intent(context, MainActivity::class.java).apply {
                     addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)

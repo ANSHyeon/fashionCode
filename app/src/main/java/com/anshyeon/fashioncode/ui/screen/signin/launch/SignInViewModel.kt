@@ -26,7 +26,8 @@ class SignInViewModel @Inject constructor(
             val result = repository.getUser()
             result.onSuccess {
                 if (it.values.isNotEmpty()) {
-                    saveUserInfo(context)
+                    val user = it.values.first()
+                    saveUserInfo(context, user.nickName, user.profileUri)
                 } else {
                     navController.navigate(AuthScreen.InfoInput.route) {
                         popUpTo(AuthScreen.SignIn.route) {
@@ -40,9 +41,9 @@ class SignInViewModel @Inject constructor(
         }
     }
 
-    private suspend fun saveUserInfo(context: Context) {
+    private suspend fun saveUserInfo(context: Context, nickName: String, uri: String?) {
         val getSaveIdToken = viewModelScope.async {
-            repository.saveIdToken()
+            repository.saveUserInfo(nickName, uri)
         }
         getSaveIdToken.await()
         context.startActivity(Intent(context, MainActivity::class.java))
