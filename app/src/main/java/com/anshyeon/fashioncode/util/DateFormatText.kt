@@ -28,29 +28,31 @@ object DateFormatText {
         return formatter.format(currentDate)
     }
 
-    fun getElapsedTime(dateString: String): String {
-        val publishedDate = convertToDate(dateString)
-        val currentDate = getCurrentDate()
+    fun getElapsedTime(dateString: String?): String {
+        return dateString?.let { date ->
+            val publishedDate = convertToDate(date)
+            val currentDate = getCurrentDate()
 
-        val seconds = (currentDate.time - publishedDate.time) / 1000
-        val minutes = seconds / 60
-        val hours = minutes / 60
-        val days = hours / 24
-        val weeks = days / 7
-        val month = days / 30
+            val seconds = (currentDate.time - publishedDate.time) / 1000
+            val minutes = seconds / 60
+            val hours = minutes / 60
+            val days = hours / 24
+            val weeks = days / 7
+            val month = days / 30
 
-        return when {
-            minutes < 1 -> "${seconds}초 전"
+            when {
+                minutes < 1 -> "${seconds}초 전"
 
-            hours < 1 -> "${minutes}분 전"
+                hours < 1 -> "${minutes}분 전"
 
-            days < 1 -> "${hours}시간 전"
+                days < 1 -> "${hours}시간 전"
 
-            weeks < 1 -> "${days}일 전"
+                weeks < 1 -> "${days}일 전"
 
-            month < 1 -> "${weeks}주 전"
+                month < 1 -> "${weeks}주 전"
 
-            else -> "${month}달 전"
-        }
+                else -> "${month}달 전"
+            }
+        } ?: "값을 불러올 수 없습니다."
     }
 }

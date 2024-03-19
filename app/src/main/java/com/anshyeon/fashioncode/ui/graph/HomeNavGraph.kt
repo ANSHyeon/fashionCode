@@ -2,12 +2,15 @@ package com.anshyeon.fashioncode.ui.graph
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 import com.anshyeon.fashioncode.R
 import com.anshyeon.fashioncode.ui.screen.home.style.StyleScreen
 import com.anshyeon.fashioncode.ui.screen.home.community.home.CommunityScreen
 import com.anshyeon.fashioncode.ui.screen.home.bookmark.BookMarkScreen
+import com.anshyeon.fashioncode.ui.screen.home.community.detail.CommunityDetailScreen
 import com.anshyeon.fashioncode.ui.screen.home.community.write.CommunityWriteScreen
 import com.anshyeon.fashioncode.ui.screen.home.setting.SettingScreen
 import com.anshyeon.fashioncode.util.Constants
@@ -33,6 +36,13 @@ fun HomeNavGraph(navController: NavHostController) {
         }
         composable(route = DetailHomeScreen.CommunityWrite.route) {
             CommunityWriteScreen(navController)
+        }
+        composable(
+            route = DetailHomeScreen.CommunityDetail.routeWithArgName(),
+            arguments = listOf(navArgument("postId") { type = NavType.StringType })
+        ) { navBackStackEntry ->
+            val postId = navBackStackEntry.arguments?.getString("postId").toString()
+            CommunityDetailScreen(navController, postId)
         }
     }
 }
@@ -72,6 +82,11 @@ sealed class BottomNavItem(
     )
 }
 
-sealed class DetailHomeScreen(val route: String) {
-    object CommunityWrite : DetailHomeScreen(route = "COMMUNITY_WRITE")
+sealed class DetailHomeScreen(val route: String, val argName: String) {
+    object CommunityWrite : DetailHomeScreen(route = "COMMUNITY_WRITE", argName = "post")
+    object CommunityDetail : DetailHomeScreen(route = "COMMUNITY_DETAIL", argName = "postId")
+
+    fun routeWithArgName(): String {
+        return "$route/{$argName}"
+    }
 }
