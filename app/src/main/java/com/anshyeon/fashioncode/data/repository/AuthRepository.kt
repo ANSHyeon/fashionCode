@@ -6,9 +6,18 @@ import com.anshyeon.fashioncode.data.dataSource.ImageDataSource
 import com.anshyeon.fashioncode.data.dataSource.UserDataSource
 import com.anshyeon.fashioncode.data.model.User
 import com.anshyeon.fashioncode.network.FireBaseApiClient
+import com.anshyeon.fashioncode.network.extentions.onError
+import com.anshyeon.fashioncode.network.extentions.onException
+import com.anshyeon.fashioncode.network.extentions.onSuccess
 import com.anshyeon.fashioncode.network.model.ApiResponse
 import com.anshyeon.fashioncode.network.model.ApiResultException
+import com.anshyeon.fashioncode.network.model.ApiResultSuccess
 import com.anshyeon.fashioncode.util.Constants
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.onCompletion
 import javax.inject.Inject
 
 class AuthRepository @Inject constructor(
@@ -43,6 +52,32 @@ class AuthRepository @Inject constructor(
             ApiResultException(e)
         }
     }
+
+    fun getUserInfo(
+        userId: String,
+        onComplete: () -> Unit,
+        onError: () -> Unit
+    ): Flow<ApiResponse<User>> = flow {
+        try {
+            val response = fireBaseApiClient.getUserInfo(
+                userId,
+                userDataSource.getIdToken()
+            )
+            response.onSuccess { data ->
+                emit(
+                    ApiResultSuccess(data)
+                )
+            }.onError { _, _ ->
+                onError()
+            }.onException {
+                onError()
+            }
+        } catch (e: Exception) {
+            onError()
+        }
+    }.onCompletion {
+        onComplete()
+    }.flowOn(Dispatchers.Default)
 
     suspend fun createUser(
         nickname: String,

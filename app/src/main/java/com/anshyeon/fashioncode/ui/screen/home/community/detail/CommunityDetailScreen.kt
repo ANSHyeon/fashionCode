@@ -23,6 +23,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -31,9 +32,12 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import com.anshyeon.fashioncode.R
+import com.anshyeon.fashioncode.data.model.Comment
 import com.anshyeon.fashioncode.data.model.Post
 import com.anshyeon.fashioncode.data.model.User
 import com.anshyeon.fashioncode.ui.component.appBar.BackButtonAppBar
@@ -46,22 +50,35 @@ import com.anshyeon.fashioncode.util.DateFormatText
 @Composable
 fun CommunityDetailScreen(navController: NavHostController, postId: String) {
 
+    val viewModel: CommunityDetailViewModel = hiltViewModel()
+
+    viewModel.getPost(postId)
+
     val scrollState = rememberScrollState()
+
+    val postState by viewModel.post.collectAsStateWithLifecycle()
+    val userState by viewModel.user.collectAsStateWithLifecycle()
+    val commentBodyState by viewModel.commentBody.collectAsStateWithLifecycle()
+    val isLoadingState by viewModel.isLoading.collectAsStateWithLifecycle()
+    val isGetCompleteState by viewModel.isGetComplete.collectAsStateWithLifecycle()
+    val snackBarTextState by viewModel.snackBarText.collectAsStateWithLifecycle()
+    val showSnackBarState by viewModel.showSnackBar.collectAsStateWithLifecycle()
 
     Scaffold(
         topBar = {
             BackButtonAppBar {
+                viewModel.navigateBack(navController)
             }
         },
         bottomBar = {
-            CommentSubmit("", { }) {
+            CommentSubmit(commentBodyState, { viewModel.changeCommentBody(it) }) {
             }
         }
     ) {
         TextSnackBarContainer(
-            snackbarText = "snackBarTextState",
-            showSnackbar = false,
-            onDismissSnackbar = { }
+            snackbarText = snackBarTextState,
+            showSnackbar = showSnackBarState,
+            onDismissSnackbar = { viewModel.dismissSnackBar() }
         ) {
             Column(
                 modifier = Modifier
@@ -70,12 +87,12 @@ fun CommunityDetailScreen(navController: NavHostController, postId: String) {
                     .padding(10.dp)
                     .verticalScroll(scrollState)
             ) {
-//                if (isGetCompleteState) {
-//                    DetailContent(postState, userState)
-//                }
+                if (isGetCompleteState) {
+                    DetailContent(postState, userState)
+                }
             }
             LoadingView(
-                isLoading = false
+                isLoading = isLoadingState
             )
 
         }

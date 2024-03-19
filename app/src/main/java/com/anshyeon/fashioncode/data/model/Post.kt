@@ -15,5 +15,5 @@ data class Post(
     val imageLocations: List<String>? = null,
     val profileImageUrl: String? = null,
     val imageUrlList: List<String> = emptyList(),
-    val commentList: List<Comment> = emptyList()
+    val commentList: List<String> = emptyList()
 ) : Parcelable
