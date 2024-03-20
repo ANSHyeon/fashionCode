@@ -1,11 +1,8 @@
 package com.anshyeon.fashioncode.data.model
 
-import android.os.Parcelable
-import com.squareup.moshi.JsonClass
-import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.Serializable
 
-@Parcelize
-@JsonClass(generateAdapter = true)
+@Serializable
 data class Comment(
     val commentId: String,
     val body: String,
@@ -14,4 +11,4 @@ data class Comment(
     val createdDate: String,
     val profileImageUri: String? = null,
     val profileImageUrl: String? = null,
-) : Parcelable
+)
