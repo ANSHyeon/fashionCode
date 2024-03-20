@@ -3,16 +3,16 @@ package com.anshyeon.fashioncode.di
 import com.anshyeon.fashioncode.BuildConfig
 import com.anshyeon.fashioncode.network.ApiCallAdapterFactory
 import com.anshyeon.fashioncode.network.FireBaseApiClient
-import com.squareup.moshi.Moshi
-import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
+import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import kotlinx.serialization.json.Json
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
-import retrofit2.converter.moshi.MoshiConverterFactory
 import javax.inject.Qualifier
 import javax.inject.Singleton
 
@@ -38,20 +38,20 @@ object NetworkModule {
 
     @Singleton
     @Provides
-    fun provideMoshi(): Moshi {
-        return Moshi.Builder()
-            .addLast(KotlinJsonAdapterFactory())
-            .build()
+    fun provideJson(): Json {
+        return Json {
+            ignoreUnknownKeys = true
+        }
     }
 
     @FireBaseRetrofit
     @Singleton
     @Provides
-    fun provideFireBaseRetrofit(client: OkHttpClient, moshi: Moshi): Retrofit {
+    fun provideFireBaseRetrofit(client: OkHttpClient, json: Json): Retrofit {
         return Retrofit.Builder()
             .baseUrl(BuildConfig.FIREBASE_REALTIME_DB_URL)
             .client(client)
-            .addConverterFactory(MoshiConverterFactory.create(moshi))
+            .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
             .addCallAdapterFactory(ApiCallAdapterFactory.create())
             .build()
     }

@@ -1,5 +1,6 @@
 package com.anshyeon.fashioncode.ui.screen.home.community.home
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -42,7 +43,9 @@ import com.anshyeon.fashioncode.ui.theme.DarkGray
 import com.anshyeon.fashioncode.util.DateFormatText.getElapsedTime
 
 @Composable
-fun CommunityScreen(navController: NavHostController) {
+fun CommunityScreen(
+    navController: NavHostController
+) {
 
     val viewModel: CommunityViewModel = hiltViewModel()
 
@@ -76,7 +79,7 @@ fun CommunityScreen(navController: NavHostController) {
                 LazyColumn {
                     items(postListState) { post ->
                         PostContent(post) {
-
+                            viewModel.navigateCommunityDetail(navController, post)
                         }
                     }
                 }
@@ -95,6 +98,9 @@ fun PostContent(post: Post, onClick: () -> Unit) {
             .fillMaxWidth()
             .height(100.dp)
             .padding(15.dp)
+            .clickable {
+                onClick()
+            }
     ) {
         Row(
             modifier = Modifier.fillMaxSize(),

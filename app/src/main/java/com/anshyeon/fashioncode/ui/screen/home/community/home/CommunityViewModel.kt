@@ -55,4 +55,8 @@ class CommunityViewModel @Inject constructor(
     fun navigateCommunityWrite(navController: NavHostController) {
         navController.navigate(DetailHomeScreen.CommunityWrite.route)
     }
+
+    fun navigateCommunityDetail(navController: NavHostController, post: Post) {
+        navController.navigate("${DetailHomeScreen.CommunityDetail.route}/${post.postId}")
+    }
 }

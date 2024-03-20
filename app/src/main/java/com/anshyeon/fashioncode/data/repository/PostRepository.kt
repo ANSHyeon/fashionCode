@@ -10,6 +10,7 @@ import com.anshyeon.fashioncode.network.extentions.onException
 import com.anshyeon.fashioncode.network.extentions.onSuccess
 import com.anshyeon.fashioncode.network.model.ApiResponse
 import com.anshyeon.fashioncode.network.model.ApiResultException
+import com.anshyeon.fashioncode.network.model.ApiResultSuccess
 import com.anshyeon.fashioncode.util.DateFormatText
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -52,6 +53,37 @@ class PostRepository @Inject constructor(
             ApiResultException(e)
         }
     }
+
+    fun getPost(
+        postId: String,
+        onComplete: () -> Unit,
+        onError: () -> Unit
+    ): Flow<ApiResponse<Post>> = flow {
+        try {
+            val response = fireBaseApiClient.getPost(
+                postId,
+                userDataSource.getIdToken()
+            )
+            response.onSuccess { data ->
+                val post = data.copy(
+                    imageUrlList = data.imageLocations?.map { location ->
+                        imageDataSource.downloadImage(location)
+                    } ?: emptyList()
+                )
+                emit(
+                    ApiResultSuccess(post)
+                )
+            }.onError { _, _ ->
+                onError()
+            }.onException {
+                onError()
+            }
+        } catch (e: Exception) {
+            onError()
+        }
+    }.onCompletion {
+        onComplete()
+    }.flowOn(Dispatchers.Default)
 
     fun getPostList(
         onComplete: () -> Unit,

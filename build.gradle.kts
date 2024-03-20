@@ -3,6 +3,7 @@ buildscript {
     dependencies {
         classpath("androidx.navigation:navigation-safe-args-gradle-plugin:2.5.3")
         classpath("com.google.dagger:hilt-android-gradle-plugin:2.48.1")
+        classpath ("org.jetbrains.kotlin:kotlin-serialization:1.4.0")
     }
 }
 

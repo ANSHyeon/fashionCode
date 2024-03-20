@@ -7,6 +7,9 @@
 
     <string name="label_start">시작하기</string>
     <string name="label_submit">등록하기</string>
+    <string name="label_comment">댓글</string>
+    <string name="label_reply">답글</string>
+
 
     <string name="hint_info_input_nickname">2~6자 닉네임을 입력해주세요.</string>
     <string name="hint_post_title">제목을 입력하세요</string>

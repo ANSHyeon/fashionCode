@@ -33,7 +33,7 @@ fun DefaultAppBar(title: String, actions: @Composable RowScope.() -> Unit = {}) 
 }
 
 @Composable
-fun BackButtonAppBar(title: String, onclick: () -> Unit) {
+fun BackButtonAppBar(title: String = "", onclick: () -> Unit) {
     TopAppBar(
         title = {
             Text(
