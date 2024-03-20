@@ -47,7 +47,7 @@ class AuthRepository @Inject constructor(
     suspend fun createUser(
         nickname: String,
         uri: Uri?
-    ): ApiResponse<Map<String, String>> {
+    ): ApiResponse<Unit> {
         return try {
             val uriLocation = uri?.let { imageDataSource.uploadImage(it) }
             val userId = userDataSource.getEmail().replace('@', 'a').replace('.', 'a')

@@ -22,12 +22,17 @@ interface FireBaseApiClient {
         @Path("userId") userId: String,
         @Query("auth") auth: String?,
         @Body user: User
-    ): ApiResponse<Map<String, String>>
+    ): ApiResponse<Unit>
+
+    @GET("posts.json")
+    suspend fun getPostList(
+        @Query("auth") auth: String?,
+    ): ApiResponse<Map<String, Post>>
 
     @PUT("posts/{postId}.json")
     suspend fun createPost(
         @Path("postId") postId: String,
         @Query("auth") auth: String?,
         @Body post: Post
-    ): ApiResponse<Map<String, String>>
+    ): ApiResponse<Unit>
 }
