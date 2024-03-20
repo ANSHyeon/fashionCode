@@ -2,6 +2,7 @@ package com.anshyeon.fashioncode.ui.screen.home.community.detail
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -29,6 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -46,6 +48,7 @@ import com.anshyeon.fashioncode.ui.component.snackBar.TextSnackBarContainer
 import com.anshyeon.fashioncode.ui.theme.DarkGray
 import com.anshyeon.fashioncode.ui.theme.Gray
 import com.anshyeon.fashioncode.util.DateFormatText
+import com.anshyeon.fashioncode.util.DateFormatText.getDefaultDatePattern
 
 @Composable
 fun CommunityDetailScreen(navController: NavHostController, postId: String) {
@@ -53,12 +56,14 @@ fun CommunityDetailScreen(navController: NavHostController, postId: String) {
     val viewModel: CommunityDetailViewModel = hiltViewModel()
 
     viewModel.getPost(postId)
+    viewModel.getCommentList(postId)
 
     val scrollState = rememberScrollState()
 
     val postState by viewModel.post.collectAsStateWithLifecycle()
     val userState by viewModel.user.collectAsStateWithLifecycle()
     val commentBodyState by viewModel.commentBody.collectAsStateWithLifecycle()
+    val commentListState by viewModel.commentList.collectAsStateWithLifecycle()
     val isLoadingState by viewModel.isLoading.collectAsStateWithLifecycle()
     val isGetCompleteState by viewModel.isGetComplete.collectAsStateWithLifecycle()
     val snackBarTextState by viewModel.snackBarText.collectAsStateWithLifecycle()
@@ -72,6 +77,7 @@ fun CommunityDetailScreen(navController: NavHostController, postId: String) {
         },
         bottomBar = {
             CommentSubmit(commentBodyState, { viewModel.changeCommentBody(it) }) {
+                viewModel.createComment(navController, postId)
             }
         }
     ) {
@@ -84,11 +90,31 @@ fun CommunityDetailScreen(navController: NavHostController, postId: String) {
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(it)
-                    .padding(10.dp)
+                    .padding(15.dp)
                     .verticalScroll(scrollState)
             ) {
                 if (isGetCompleteState) {
                     DetailContent(postState, userState)
+                    if (commentListState.isNotEmpty()) {
+                        Spacer(modifier = Modifier.size(10.dp))
+                        Spacer(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(10.dp)
+                                .background(Gray)
+                        )
+                        Spacer(modifier = Modifier.size(10.dp))
+                        Text(
+                            text = stringResource(id = R.string.label_comment),
+                            fontWeight = FontWeight.Bold
+                        )
+                        Spacer(modifier = Modifier.size(15.dp))
+                        commentListState.forEach { comment ->
+                            Comment(comment) {
+                                viewModel.navigateCommunityReply(navController, it)
+                            }
+                        }
+                    }
                 }
             }
             LoadingView(
@@ -104,16 +130,18 @@ fun CommunityDetailScreen(navController: NavHostController, postId: String) {
 @Composable
 fun DetailContent(post: Post?, user: User?) {
     UserProfileDefault(post?.createdDate, user)
-    Spacer(modifier = Modifier.size(5.dp))
+    Spacer(modifier = Modifier.size(20.dp))
     Text(
         text = post?.title ?: "제목을 불러올 수 없습니다.",
         fontSize = 20.sp,
         fontWeight = FontWeight.Bold
     )
+    Spacer(modifier = Modifier.size(10.dp))
     Text(
         text = post?.body ?: "내용을 불러올 수 없습니다.",
-        fontSize = 18.sp
+        fontSize = 14.sp
     )
+    Spacer(modifier = Modifier.size(15.dp))
     ImageList(post)
 }
 
@@ -132,7 +160,7 @@ fun UserProfileDefault(createDate: String?, user: User?) {
         } else {
             AsyncImage(
                 modifier = Modifier
-                    .size(30.dp)
+                    .size(40.dp)
                     .clip(CircleShape),
                 model = user.profileUrl,
                 contentDescription = null,
@@ -166,6 +194,61 @@ private fun ImageList(post: Post?) {
             contentScale = ContentScale.Crop,
             placeholder = painterResource(id = R.drawable.ic_place_holder)
         )
+    }
+}
+
+@Composable
+private fun Comment(comment: Comment, onclick: (comment: Comment) -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 5.dp)
+    ) {
+        if (comment.profileImageUrl == null) {
+            Image(
+                modifier = Modifier.size(40.dp),
+                painter = painterResource(id = R.drawable.ic_profile),
+                contentDescription = null
+            )
+        } else {
+            AsyncImage(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(CircleShape),
+                model = comment.profileImageUrl,
+                contentDescription = null,
+                contentScale = ContentScale.Crop
+            )
+        }
+        Spacer(modifier = Modifier.size(10.dp))
+        Column {
+            Text(
+                text = comment.nickName,
+                fontWeight = FontWeight.Bold
+            )
+            Spacer(modifier = Modifier.size(5.dp))
+            Text(
+                text = comment.body,
+            )
+            Spacer(modifier = Modifier.size(5.dp))
+            Row(
+                modifier = Modifier.clickable {
+                    onclick(comment)
+                }
+            ) {
+                Text(
+                    text = getDefaultDatePattern(comment.createdDate),
+                    color = DarkGray,
+                    fontSize = 11.sp
+                )
+                Spacer(modifier = Modifier.size(10.dp))
+                Text(
+                    text = stringResource(id = R.string.label_reply),
+                    color = DarkGray,
+                    fontSize = 11.sp
+                )
+            }
+        }
     }
 }
 

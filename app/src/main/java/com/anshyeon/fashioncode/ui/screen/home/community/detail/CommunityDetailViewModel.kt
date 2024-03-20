@@ -12,6 +12,8 @@ import com.anshyeon.fashioncode.data.repository.PostRepository
 import com.anshyeon.fashioncode.network.extentions.onError
 import com.anshyeon.fashioncode.network.extentions.onException
 import com.anshyeon.fashioncode.network.extentions.onSuccess
+import com.anshyeon.fashioncode.ui.graph.DetailHomeScreen
+import com.anshyeon.fashioncode.util.SerializationUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,6 +23,8 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
 import javax.inject.Inject
 
 @HiltViewModel
@@ -151,6 +155,12 @@ class CommunityDetailViewModel @Inject constructor(
 
     fun dismissSnackBar() {
         _showSnackBar.value = false
+    }
+
+    fun navigateCommunityReply(navController: NavHostController, comment: Comment) {
+        val commentJson = SerializationUtils.toJson(comment)
+        val encodedUrl = URLEncoder.encode(commentJson, StandardCharsets.UTF_8.toString())
+        navController.navigate("${DetailHomeScreen.CommunityReply.route}/${encodedUrl}")
     }
 
     fun navigateBack(navController: NavHostController) {

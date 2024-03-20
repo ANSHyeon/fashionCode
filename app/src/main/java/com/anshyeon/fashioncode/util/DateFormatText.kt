@@ -28,6 +28,10 @@ object DateFormatText {
         return formatter.format(currentDate)
     }
 
+    fun getDefaultDatePattern(dateString: String): String {
+        return dateString.replace("-", ".").replace("T", ". ").take(17)
+    }
+
     fun getElapsedTime(dateString: String?): String {
         return dateString?.let { date ->
             val publishedDate = convertToDate(date)

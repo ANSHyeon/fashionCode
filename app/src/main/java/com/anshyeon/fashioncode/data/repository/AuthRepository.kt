@@ -77,8 +77,13 @@ class AuthRepository @Inject constructor(
             )
             response.onSuccess { data ->
                 if (data.values.isNotEmpty()) {
+                    val user = data.values.first()
                     emit(
-                        ApiResultSuccess(data.values.first())
+                        ApiResultSuccess(
+                            user.copy(
+                                profileUrl = user.profileUri?.let { imageDataSource.downloadImage(it) }
+                            )
+                        )
                     )
                 }
             }.onError { _, _ ->
