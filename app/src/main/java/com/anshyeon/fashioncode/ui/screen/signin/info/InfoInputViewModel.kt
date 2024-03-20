@@ -41,7 +41,7 @@ class InfoInputViewModel @Inject constructor(
             val result = authRepository.createUser(nickName.value, imageUri.value)
             result.onSuccess {
                 val saveIdToken = async {
-                    authRepository.saveUserInfo(nickName.value, imageUri.value.toString())
+                    authRepository.saveUserInfo(nickName.value, null)
                 }
                 saveIdToken.await()
                 val intent = Intent(context, MainActivity::class.java).apply {

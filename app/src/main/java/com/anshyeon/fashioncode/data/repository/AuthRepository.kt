@@ -106,6 +106,7 @@ class AuthRepository @Inject constructor(
                 email = userDataSource.getEmail(),
                 profileUri = uriLocation,
             )
+            preferenceManager.setUserImage(Constants.KEY_USER_PROFILE_URI, uriLocation)
             fireBaseApiClient.createUser(
                 userDataSource.getIdToken(),
                 user
