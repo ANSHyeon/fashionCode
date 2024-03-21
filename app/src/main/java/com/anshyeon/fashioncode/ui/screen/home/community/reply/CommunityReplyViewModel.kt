@@ -13,11 +13,10 @@ import com.anshyeon.fashioncode.network.extentions.onSuccess
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -62,20 +61,20 @@ class CommunityReplyViewModel @Inject constructor(
 
     fun getReplyList(commentId: String) {
         _isGetReplyLoading.value = true
-        replyList = transformReplyList(commentId).stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = emptyList()
-        )
+        viewModelScope.launch {
+            transformReplyList(commentId).onCompletion {
+                _isGetReplyLoading.value = false
+                _isGetReplyComplete.value = true
+            }.collectLatest {
+                _replyList.value = it
+            }
+        }
     }
 
     private fun transformReplyList(commentId: String): Flow<List<Reply>> {
         return replyRepository.getReplyList(
             commentId,
-            onComplete = {
-                _isGetReplyLoading.value = false
-                _isGetReplyComplete.value = true
-            },
+            onComplete = { },
             onError = {
                 _showSnackBar.value = true
                 _snackBarText.value = "잠시 후 다시 시도해 주십시오"

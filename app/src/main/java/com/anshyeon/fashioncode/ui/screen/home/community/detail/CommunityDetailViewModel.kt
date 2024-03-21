@@ -19,12 +19,10 @@ import com.anshyeon.fashioncode.util.SerializationUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onCompletion
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
@@ -84,29 +82,29 @@ class CommunityDetailViewModel @Inject constructor(
         val tempReplyList = MutableStateFlow<List<Reply>>(emptyList())
 
         _isGetCommentListLoading.value = true
-        commentList = transformCommentList(postId).map {
-            it.map { comment ->
-                tempReplyList.value = emptyList()
-                val response = replyRepository.getReplyList(
-                    comment.commentId,
-                    {},
-                    {}
-                )
-                response.collectLatest { replys ->
-                    tempReplyList.value = replys
+        viewModelScope.launch {
+            transformCommentList(postId).map {
+                it.map { comment ->
+                    tempReplyList.value = emptyList()
+                    val response = replyRepository.getReplyList(
+                        comment.commentId,
+                        {},
+                        {}
+                    )
+                    response.collectLatest { replys ->
+                        tempReplyList.value = replys
+                    }
+                    comment.copy(
+                        replyList = tempReplyList.value.sortedBy { reply -> reply.createdDate }
+                    )
                 }
-                comment.copy(
-                    replyList = tempReplyList.value.sortedBy { reply -> reply.createdDate }
-                )
+            }.onCompletion {
+                _isGetCommentListLoading.value = false
+                _isGetCommentListComplete.value = true
+            }.collectLatest {
+                _commentList.value = it
             }
-        }.onCompletion {
-            _isGetCommentListLoading.value = false
-            _isGetCommentListComplete.value = true
-        }.stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = emptyList()
-        )
+        }
     }
 
     private fun transformCommentList(postId: String): Flow<List<Comment>> {

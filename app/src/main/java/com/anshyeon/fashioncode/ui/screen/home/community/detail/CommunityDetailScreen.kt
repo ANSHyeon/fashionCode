@@ -50,9 +50,6 @@ fun CommunityDetailScreen(navController: NavHostController, postId: String) {
 
     val viewModel: CommunityDetailViewModel = hiltViewModel()
 
-    viewModel.getPost(postId)
-    viewModel.getCommentList(postId)
-
     val scrollState = rememberScrollState()
 
     val postState by viewModel.post.collectAsStateWithLifecycle()
@@ -70,9 +67,14 @@ fun CommunityDetailScreen(navController: NavHostController, postId: String) {
     val snackBarTextState by viewModel.snackBarText.collectAsStateWithLifecycle()
     val showSnackBarState by viewModel.showSnackBar.collectAsStateWithLifecycle()
 
+    if (postState == null) {
+        viewModel.getPost(postId)
+        viewModel.getCommentList(postId)
+    }
+
     Scaffold(
         topBar = {
-            BackButtonAppBar {
+            BackButtonAppBar(stringResource(id = R.string.label_app_bar_community_detail)) {
                 viewModel.navigateBack(navController)
             }
         },
@@ -96,7 +98,7 @@ fun CommunityDetailScreen(navController: NavHostController, postId: String) {
             ) {
                 if (isGetPostCompleteState && isGetCommentListCompleteState && isGetUserCompleteState) {
                     DetailContent(postState, userState)
-                    if (commentListState.isNotEmpty()) {
+                    if (commentListState.isNotEmpty() || addedCommentListState.isNotEmpty()) {
                         Spacer(modifier = Modifier.size(10.dp))
                         Spacer(
                             modifier = Modifier
