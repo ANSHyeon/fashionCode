@@ -42,6 +42,9 @@ fun CommunityReplyScreen(navController: NavHostController, comment: Comment) {
 
     val viewModel: CommunityReplyViewModel = hiltViewModel()
 
+    viewModel.getUser(comment.writer)
+    viewModel.getReplyList(comment.commentId)
+
     val scrollState = rememberScrollState()
 
     val replyBodyState by viewModel.replyBody.collectAsStateWithLifecycle()
@@ -63,7 +66,7 @@ fun CommunityReplyScreen(navController: NavHostController, comment: Comment) {
         },
         bottomBar = {
             CommentSubmit(replyBodyState, { viewModel.changeReplyBody(it) }) {
-
+                viewModel.createReply(comment.commentId)
             }
         }
     ) {
@@ -138,6 +141,7 @@ private fun ReplyComment(comment: Comment, user: User?) {
                 color = DarkGray,
                 fontSize = 11.sp
             )
+
         }
     }
 }
