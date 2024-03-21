@@ -3,7 +3,7 @@ package com.anshyeon.fashioncode.data.repository
 import com.anshyeon.fashioncode.data.PreferenceManager
 import com.anshyeon.fashioncode.data.dataSource.ImageDataSource
 import com.anshyeon.fashioncode.data.dataSource.UserDataSource
-import com.anshyeon.fashioncode.data.model.Comment
+import com.anshyeon.fashioncode.data.model.Reply
 import com.anshyeon.fashioncode.network.FireBaseApiClient
 import com.anshyeon.fashioncode.network.extentions.onError
 import com.anshyeon.fashioncode.network.extentions.onException
@@ -21,23 +21,23 @@ import kotlinx.coroutines.flow.onCompletion
 
 import javax.inject.Inject
 
-class CommentRepository @Inject constructor(
+class ReplyRepository @Inject constructor(
     private val fireBaseApiClient: FireBaseApiClient,
     private val userDataSource: UserDataSource,
     private val imageDataSource: ImageDataSource,
     private val preferenceManager: PreferenceManager,
 ) {
 
-    suspend fun createComment(
+    suspend fun createReply(
         body: String,
-        postId: String,
+        commentId: String,
         userId: String,
-    ): ApiResponse<Comment> {
+    ): ApiResponse<Reply> {
         val currentTime = System.currentTimeMillis()
-        val commentId = userId + currentTime
-        val comment = Comment(
+        val replyId = userId + currentTime
+        val reply = Reply(
+            replyId,
             commentId,
-            postId,
             body,
             userId,
             preferenceManager.getString(Constants.KEY_USER_NICKNAME, ""),
@@ -45,13 +45,13 @@ class CommentRepository @Inject constructor(
             preferenceManager.getString(Constants.KEY_USER_PROFILE_URI, ""),
         )
         return try {
-            fireBaseApiClient.createComment(
+            fireBaseApiClient.createReply(
                 userDataSource.getIdToken(),
-                comment
+                reply
             )
             ApiResultSuccess(
-                comment.copy(
-                    profileImageUrl = comment.profileImageUri
+                reply.copy(
+                    profileImageUrl = reply.profileImageUri
                         ?.let { imageDataSource.downloadImage(it) }
                 )
             )
@@ -60,15 +60,15 @@ class CommentRepository @Inject constructor(
         }
     }
 
-    fun getCommentList(
-        postId: String,
+    fun getReplyList(
+        commentId: String,
         onComplete: () -> Unit,
         onError: (message: String?) -> Unit
-    ): Flow<List<Comment>> = flow {
+    ): Flow<List<Reply>> = flow {
         try {
-            val response = fireBaseApiClient.getCommentList(
+            val response = fireBaseApiClient.getReplyList(
                 userDataSource.getIdToken(),
-                "\"${postId}\""
+                "\"${commentId}\""
             )
             response.onSuccess { data ->
                 emit(

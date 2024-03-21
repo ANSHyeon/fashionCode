@@ -3,7 +3,6 @@ package com.anshyeon.fashioncode.ui.screen.home.community.detail
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -15,17 +14,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Send
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
@@ -43,8 +36,10 @@ import com.anshyeon.fashioncode.data.model.Comment
 import com.anshyeon.fashioncode.data.model.Post
 import com.anshyeon.fashioncode.data.model.User
 import com.anshyeon.fashioncode.ui.component.appBar.BackButtonAppBar
+import com.anshyeon.fashioncode.ui.component.commentSubmit.CommentSubmit
 import com.anshyeon.fashioncode.ui.component.loadingView.LoadingView
 import com.anshyeon.fashioncode.ui.component.snackBar.TextSnackBarContainer
+import com.anshyeon.fashioncode.ui.screen.home.community.reply.Reply
 import com.anshyeon.fashioncode.ui.theme.DarkGray
 import com.anshyeon.fashioncode.ui.theme.Gray
 import com.anshyeon.fashioncode.util.DateFormatText
@@ -55,29 +50,37 @@ fun CommunityDetailScreen(navController: NavHostController, postId: String) {
 
     val viewModel: CommunityDetailViewModel = hiltViewModel()
 
-    viewModel.getPost(postId)
-    viewModel.getCommentList(postId)
-
     val scrollState = rememberScrollState()
 
     val postState by viewModel.post.collectAsStateWithLifecycle()
     val userState by viewModel.user.collectAsStateWithLifecycle()
     val commentBodyState by viewModel.commentBody.collectAsStateWithLifecycle()
     val commentListState by viewModel.commentList.collectAsStateWithLifecycle()
-    val isLoadingState by viewModel.isLoading.collectAsStateWithLifecycle()
-    val isGetCompleteState by viewModel.isGetComplete.collectAsStateWithLifecycle()
+    val addedCommentListState by viewModel.addedCommentList.collectAsStateWithLifecycle()
+    val isCreateCommentLoadingState by viewModel.isCreateCommentLoading.collectAsStateWithLifecycle()
+    val isGetUserLoadingState by viewModel.isGetUserLoading.collectAsStateWithLifecycle()
+    val isGetPostLoadingState by viewModel.isGetPostLoading.collectAsStateWithLifecycle()
+    val isGetCommentListLoadingState by viewModel.isGetCommentListLoading.collectAsStateWithLifecycle()
+    val isGetPostCompleteState by viewModel.isGetPostComplete.collectAsStateWithLifecycle()
+    val isGetUserCompleteState by viewModel.isGetUserComplete.collectAsStateWithLifecycle()
+    val isGetCommentListCompleteState by viewModel.isGetCommentListComplete.collectAsStateWithLifecycle()
     val snackBarTextState by viewModel.snackBarText.collectAsStateWithLifecycle()
     val showSnackBarState by viewModel.showSnackBar.collectAsStateWithLifecycle()
 
+    if (postState == null) {
+        viewModel.getPost(postId)
+        viewModel.getCommentList(postId)
+    }
+
     Scaffold(
         topBar = {
-            BackButtonAppBar {
+            BackButtonAppBar(stringResource(id = R.string.label_app_bar_community_detail)) {
                 viewModel.navigateBack(navController)
             }
         },
         bottomBar = {
             CommentSubmit(commentBodyState, { viewModel.changeCommentBody(it) }) {
-                viewModel.createComment(navController, postId)
+                viewModel.createComment(postId)
             }
         }
     ) {
@@ -93,9 +96,9 @@ fun CommunityDetailScreen(navController: NavHostController, postId: String) {
                     .padding(15.dp)
                     .verticalScroll(scrollState)
             ) {
-                if (isGetCompleteState) {
+                if (isGetPostCompleteState && isGetCommentListCompleteState && isGetUserCompleteState) {
                     DetailContent(postState, userState)
-                    if (commentListState.isNotEmpty()) {
+                    if (commentListState.isNotEmpty() || addedCommentListState.isNotEmpty()) {
                         Spacer(modifier = Modifier.size(10.dp))
                         Spacer(
                             modifier = Modifier
@@ -114,11 +117,16 @@ fun CommunityDetailScreen(navController: NavHostController, postId: String) {
                                 viewModel.navigateCommunityReply(navController, it)
                             }
                         }
+                        addedCommentListState.forEach { comment ->
+                            Comment(comment) {
+                                viewModel.navigateCommunityReply(navController, it)
+                            }
+                        }
                     }
                 }
             }
             LoadingView(
-                isLoading = isLoadingState
+                isLoading = isCreateCommentLoadingState || isGetUserLoadingState || isGetPostLoadingState || isGetCommentListLoadingState
             )
 
         }
@@ -248,53 +256,27 @@ private fun Comment(comment: Comment, onclick: (comment: Comment) -> Unit) {
                     fontSize = 11.sp
                 )
             }
-        }
-    }
-}
-
-@Composable
-private fun CommentSubmit(
-    text: String,
-    onTextChanged: (body: String) -> Unit,
-    onclick: () -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(50.dp)
-            .padding(8.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        BasicTextField(
-            modifier = Modifier
-                .height(30.dp)
-                .weight(1f),
-            value = text,
-            onValueChange = { onTextChanged(it) },
-            decorationBox = { innerTextField ->
-                Box(
-                    modifier = Modifier
-                        .padding(horizontal = 5.dp)
-                        .background(color = Gray, shape = RoundedCornerShape(size = 5.dp)),
-                    contentAlignment = Alignment.CenterStart
-
-                ) {
-                    innerTextField()
+            comment.replyList?.let { replyList ->
+                replyList.take(4).forEach { reply ->
+                    Reply(
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(top = 10.dp),
+                        reply
+                    )
                 }
-            },
-        )
-        IconButton(
-            modifier = Modifier
-                .size(24.dp),
-            onClick = {
-                if (text.isNotEmpty()) {
-                    onclick()
+                if (replyList.size > 4) {
+                    Text(
+                        modifier = Modifier
+                            .padding(5.dp)
+                            .clickable {
+                                onclick(comment)
+                            },
+                        text = "대댓글 ${replyList.size - 4}개 더 보기 >",
+                        fontWeight = FontWeight.Bold
+                    )
                 }
-            }) {
-            Icon(
-                imageVector = Icons.Default.Send,
-                contentDescription = null,
-            )
+            }
         }
     }
 }

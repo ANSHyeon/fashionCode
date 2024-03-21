@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -28,7 +29,10 @@ import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import com.anshyeon.fashioncode.R
 import com.anshyeon.fashioncode.data.model.Comment
+import com.anshyeon.fashioncode.data.model.Reply
+import com.anshyeon.fashioncode.data.model.User
 import com.anshyeon.fashioncode.ui.component.appBar.BackButtonAppBar
+import com.anshyeon.fashioncode.ui.component.commentSubmit.CommentSubmit
 import com.anshyeon.fashioncode.ui.component.loadingView.LoadingView
 import com.anshyeon.fashioncode.ui.component.snackBar.TextSnackBarContainer
 import com.anshyeon.fashioncode.ui.theme.DarkGray
@@ -39,53 +43,82 @@ fun CommunityReplyScreen(navController: NavHostController, comment: Comment) {
 
     val viewModel: CommunityReplyViewModel = hiltViewModel()
 
+    viewModel.getUser(comment.writer)
+    viewModel.getReplyList(comment.commentId)
+
     val scrollState = rememberScrollState()
 
-    val isLoadingState by viewModel.isLoading.collectAsStateWithLifecycle()
+    val replyBodyState by viewModel.replyBody.collectAsStateWithLifecycle()
+    val replyListState by viewModel.replyList.collectAsStateWithLifecycle()
+    val addedReplyListState by viewModel.addedReplyList.collectAsStateWithLifecycle()
+    val userState by viewModel.user.collectAsStateWithLifecycle()
+    val isCreateReplyLoadingState by viewModel.isCreateReplyLoading.collectAsStateWithLifecycle()
+    val isGetUserLoadingState by viewModel.isGetUserLoading.collectAsStateWithLifecycle()
+    val isGetReplyLoadingState by viewModel.isGetReplyLoading.collectAsStateWithLifecycle()
+    val isGetUserCompleteState by viewModel.isGetUserComplete.collectAsStateWithLifecycle()
+    val isGetReplyCompleteState by viewModel.isGetReplyComplete.collectAsStateWithLifecycle()
     val snackBarTextState by viewModel.snackBarText.collectAsStateWithLifecycle()
     val showSnackBarState by viewModel.showSnackBar.collectAsStateWithLifecycle()
 
     Scaffold(
         topBar = {
-            BackButtonAppBar {
+            BackButtonAppBar(stringResource(id = R.string.label_reply)) {
                 viewModel.navigateBack(navController)
             }
         },
         bottomBar = {
-
+            CommentSubmit(replyBodyState, { viewModel.changeReplyBody(it) }) {
+                viewModel.createReply(comment.commentId)
+            }
         }
     ) {
-        TextSnackBarContainer(
-            snackbarText = snackBarTextState,
-            showSnackbar = showSnackBarState,
-            onDismissSnackbar = { viewModel.dismissSnackBar() }
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(it)
-                    .padding(15.dp)
-                    .verticalScroll(scrollState)
+        if (isGetUserCompleteState && isGetReplyCompleteState) {
+            TextSnackBarContainer(
+                snackbarText = snackBarTextState,
+                showSnackbar = showSnackBarState,
+                onDismissSnackbar = { viewModel.dismissSnackBar() }
             ) {
-                Comment(comment)
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(it)
+                        .padding(15.dp)
+                        .verticalScroll(scrollState)
+                ) {
+                    ReplyComment(comment, userState)
+                    replyListState.forEach { reply ->
+                        Reply(
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(start = 45.dp, top = 10.dp),
+                            reply
+                        )
+                    }
+                    addedReplyListState.forEach { reply ->
+                        Reply(
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(start = 45.dp, top = 10.dp),
+                            reply
+                        )
+                    }
+                }
             }
-            LoadingView(
-                isLoading = isLoadingState
-            )
-
         }
-
+        LoadingView(
+            isLoading = isCreateReplyLoadingState || isGetReplyLoadingState || isGetUserLoadingState
+        )
     }
 }
 
 @Composable
-private fun Comment(comment: Comment) {
+private fun ReplyComment(comment: Comment, user: User?) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 5.dp)
     ) {
-        if (comment.profileImageUrl == null) {
+        if (user?.profileUrl == null) {
             Image(
                 modifier = Modifier.size(40.dp),
                 painter = painterResource(id = R.drawable.ic_profile),
@@ -96,7 +129,7 @@ private fun Comment(comment: Comment) {
                 modifier = Modifier
                     .size(40.dp)
                     .clip(CircleShape),
-                model = comment.profileImageUrl,
+                model = user.profileUrl,
                 contentDescription = null,
                 contentScale = ContentScale.Crop
             )
@@ -119,6 +152,48 @@ private fun Comment(comment: Comment) {
                 fontSize = 11.sp
             )
 
+        }
+    }
+}
+
+@Composable
+fun Reply(modifier: Modifier, reply: Reply) {
+    Row(
+        modifier = modifier
+    ) {
+        if (reply.profileImageUrl == null) {
+            Image(
+                modifier = Modifier.size(30.dp),
+                painter = painterResource(id = R.drawable.ic_profile),
+                contentDescription = null
+            )
+        } else {
+            AsyncImage(
+                modifier = Modifier
+                    .size(30.dp)
+                    .clip(CircleShape),
+                model = reply.profileImageUrl,
+                contentDescription = null,
+                contentScale = ContentScale.Crop
+            )
+        }
+        Spacer(modifier = Modifier.size(10.dp))
+        Column {
+            Text(
+                text = reply.nickName,
+                fontWeight = FontWeight.Bold
+            )
+            Spacer(modifier = Modifier.size(5.dp))
+            Text(
+                text = reply.body,
+            )
+            Spacer(modifier = Modifier.size(5.dp))
+
+            Text(
+                text = DateFormatText.getDefaultDatePattern(reply.createdDate),
+                color = DarkGray,
+                fontSize = 11.sp
+            )
         }
     }
 }
