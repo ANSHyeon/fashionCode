@@ -50,6 +50,9 @@ class CommunityDetailViewModel @Inject constructor(
     private val _commentList = MutableStateFlow<List<Comment>>(emptyList())
     var commentList: StateFlow<List<Comment>> = _commentList
 
+    private val _addedCommentList = MutableStateFlow<List<Comment>>(emptyList())
+    var addedCommentList: StateFlow<List<Comment>> = _addedCommentList
+
     private val _isGetPostLoading = MutableStateFlow(false)
     val isGetPostLoading: StateFlow<Boolean> = _isGetPostLoading
 
@@ -127,9 +130,11 @@ class CommunityDetailViewModel @Inject constructor(
                 postId,
                 authRepository.getUserId(),
             )
-            result.onSuccess {
+            result.onSuccess { savedComment ->
                 _isCreateCommentLoading.value = false
                 _commentBody.value = ""
+                _addedCommentList.value =
+                    _addedCommentList.value.toMutableList().apply { add(savedComment) }
             }.onError { _, _ ->
                 _isCreateCommentLoading.value = false
                 _showSnackBar.value = true

@@ -59,6 +59,7 @@ fun CommunityDetailScreen(navController: NavHostController, postId: String) {
     val userState by viewModel.user.collectAsStateWithLifecycle()
     val commentBodyState by viewModel.commentBody.collectAsStateWithLifecycle()
     val commentListState by viewModel.commentList.collectAsStateWithLifecycle()
+    val addedCommentListState by viewModel.addedCommentList.collectAsStateWithLifecycle()
     val isCreateCommentLoadingState by viewModel.isCreateCommentLoading.collectAsStateWithLifecycle()
     val isGetUserLoadingState by viewModel.isGetUserLoading.collectAsStateWithLifecycle()
     val isGetPostLoadingState by viewModel.isGetPostLoading.collectAsStateWithLifecycle()
@@ -110,6 +111,11 @@ fun CommunityDetailScreen(navController: NavHostController, postId: String) {
                         )
                         Spacer(modifier = Modifier.size(15.dp))
                         commentListState.forEach { comment ->
+                            Comment(comment) {
+                                viewModel.navigateCommunityReply(navController, it)
+                            }
+                        }
+                        addedCommentListState.forEach { comment ->
                             Comment(comment) {
                                 viewModel.navigateCommunityReply(navController, it)
                             }
@@ -259,9 +265,11 @@ private fun Comment(comment: Comment, onclick: (comment: Comment) -> Unit) {
                 }
                 if (replyList.size > 4) {
                     Text(
-                        modifier= Modifier.padding(5.dp).clickable {
-                            onclick(comment)
-                        },
+                        modifier = Modifier
+                            .padding(5.dp)
+                            .clickable {
+                                onclick(comment)
+                            },
                         text = "대댓글 ${replyList.size - 4}개 더 보기 >",
                         fontWeight = FontWeight.Bold
                     )

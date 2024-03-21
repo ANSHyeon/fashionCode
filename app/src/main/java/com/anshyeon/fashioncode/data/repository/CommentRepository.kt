@@ -10,6 +10,7 @@ import com.anshyeon.fashioncode.network.extentions.onException
 import com.anshyeon.fashioncode.network.extentions.onSuccess
 import com.anshyeon.fashioncode.network.model.ApiResponse
 import com.anshyeon.fashioncode.network.model.ApiResultException
+import com.anshyeon.fashioncode.network.model.ApiResultSuccess
 import com.anshyeon.fashioncode.util.Constants
 import com.anshyeon.fashioncode.util.DateFormatText
 import kotlinx.coroutines.Dispatchers
@@ -31,7 +32,7 @@ class CommentRepository @Inject constructor(
         body: String,
         postId: String,
         userId: String,
-    ): ApiResponse<Unit> {
+    ): ApiResponse<Comment> {
         val currentTime = System.currentTimeMillis()
         val commentId = userId + currentTime
         val comment = Comment(
@@ -47,6 +48,12 @@ class CommentRepository @Inject constructor(
             fireBaseApiClient.createComment(
                 userDataSource.getIdToken(),
                 comment
+            )
+            ApiResultSuccess(
+                comment.copy(
+                    profileImageUrl = comment.profileImageUri
+                        ?.let { imageDataSource.downloadImage(it) }
+                )
             )
         } catch (e: Exception) {
             ApiResultException(e)

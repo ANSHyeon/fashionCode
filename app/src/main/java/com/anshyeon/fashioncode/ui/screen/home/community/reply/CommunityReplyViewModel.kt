@@ -36,6 +36,9 @@ class CommunityReplyViewModel @Inject constructor(
     private val _replyList = MutableStateFlow<List<Reply>>(emptyList())
     var replyList: StateFlow<List<Reply>> = _replyList
 
+    private val _addedReplyList = MutableStateFlow<List<Reply>>(emptyList())
+    var addedReplyList: StateFlow<List<Reply>> = _addedReplyList
+
     private val _isCreateReplyLoading = MutableStateFlow(false)
     val isCreateReplyLoading: StateFlow<Boolean> = _isCreateReplyLoading
 
@@ -90,9 +93,11 @@ class CommunityReplyViewModel @Inject constructor(
                 commentId,
                 authRepository.getUserId(),
             )
-            result.onSuccess {
+            result.onSuccess { savedReply ->
                 _isCreateReplyLoading.value = false
                 _replyBody.value = ""
+                _addedReplyList.value =
+                    _addedReplyList.value.toMutableList().apply { add(savedReply) }
             }.onError { _, _ ->
                 _isCreateReplyLoading.value = false
                 _showSnackBar.value = true

@@ -10,6 +10,7 @@ import com.anshyeon.fashioncode.network.extentions.onException
 import com.anshyeon.fashioncode.network.extentions.onSuccess
 import com.anshyeon.fashioncode.network.model.ApiResponse
 import com.anshyeon.fashioncode.network.model.ApiResultException
+import com.anshyeon.fashioncode.network.model.ApiResultSuccess
 import com.anshyeon.fashioncode.util.Constants
 import com.anshyeon.fashioncode.util.DateFormatText
 import kotlinx.coroutines.Dispatchers
@@ -31,7 +32,7 @@ class ReplyRepository @Inject constructor(
         body: String,
         commentId: String,
         userId: String,
-    ): ApiResponse<Unit> {
+    ): ApiResponse<Reply> {
         val currentTime = System.currentTimeMillis()
         val replyId = userId + currentTime
         val reply = Reply(
@@ -47,6 +48,12 @@ class ReplyRepository @Inject constructor(
             fireBaseApiClient.createReply(
                 userDataSource.getIdToken(),
                 reply
+            )
+            ApiResultSuccess(
+                reply.copy(
+                    profileImageUrl = reply.profileImageUri
+                        ?.let { imageDataSource.downloadImage(it) }
+                )
             )
         } catch (e: Exception) {
             ApiResultException(e)

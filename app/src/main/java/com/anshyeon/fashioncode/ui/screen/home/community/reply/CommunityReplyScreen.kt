@@ -49,6 +49,7 @@ fun CommunityReplyScreen(navController: NavHostController, comment: Comment) {
 
     val replyBodyState by viewModel.replyBody.collectAsStateWithLifecycle()
     val replyListState by viewModel.replyList.collectAsStateWithLifecycle()
+    val addedReplyListState by viewModel.addedReplyList.collectAsStateWithLifecycle()
     val userState by viewModel.user.collectAsStateWithLifecycle()
     val isCreateReplyLoadingState by viewModel.isCreateReplyLoading.collectAsStateWithLifecycle()
     val isGetUserLoadingState by viewModel.isGetUserLoading.collectAsStateWithLifecycle()
@@ -85,6 +86,14 @@ fun CommunityReplyScreen(navController: NavHostController, comment: Comment) {
                 ) {
                     ReplyComment(comment, userState)
                     replyListState.forEach { reply ->
+                        Reply(
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(start = 45.dp, top = 10.dp),
+                            reply
+                        )
+                    }
+                    addedReplyListState.forEach { reply ->
                         Reply(
                             Modifier
                                 .fillMaxWidth()
