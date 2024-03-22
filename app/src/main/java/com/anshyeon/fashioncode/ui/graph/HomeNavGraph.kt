@@ -9,13 +9,14 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.anshyeon.fashioncode.R
 import com.anshyeon.fashioncode.data.model.Comment
-import com.anshyeon.fashioncode.ui.screen.home.style.StyleScreen
+import com.anshyeon.fashioncode.ui.screen.home.style.home.StyleScreen
 import com.anshyeon.fashioncode.ui.screen.home.community.home.CommunityScreen
 import com.anshyeon.fashioncode.ui.screen.home.bookmark.BookMarkScreen
 import com.anshyeon.fashioncode.ui.screen.home.community.detail.CommunityDetailScreen
 import com.anshyeon.fashioncode.ui.screen.home.community.reply.CommunityReplyScreen
 import com.anshyeon.fashioncode.ui.screen.home.community.write.CommunityWriteScreen
 import com.anshyeon.fashioncode.ui.screen.home.setting.SettingScreen
+import com.anshyeon.fashioncode.ui.screen.home.style.create.StyleCreateScreen
 import com.anshyeon.fashioncode.util.Constants
 import com.anshyeon.fashioncode.util.SerializationUtils
 import java.net.URLDecoder
@@ -60,6 +61,9 @@ fun HomeNavGraph(navController: NavHostController) {
 
             CommunityReplyScreen(navController, SerializationUtils.fromJson<Comment>(commentJson)!!)
         }
+        composable(route = DetailHomeScreen.StyleCreate.route) {
+            StyleCreateScreen(navController)
+        }
     }
 }
 
@@ -99,9 +103,10 @@ sealed class BottomNavItem(
 }
 
 sealed class DetailHomeScreen(val route: String, val argName: String) {
-    object CommunityWrite : DetailHomeScreen(route = "COMMUNITY_WRITE", argName = "post")
+    object CommunityWrite : DetailHomeScreen(route = "COMMUNITY_WRITE", argName = "")
     object CommunityDetail : DetailHomeScreen(route = "COMMUNITY_DETAIL", argName = "postId")
     object CommunityReply : DetailHomeScreen(route = "COMMUNITY_REPLY", argName = "comment")
+    object StyleCreate : DetailHomeScreen(route = "STYLE_CREATE", argName = "")
 
     val arguments: List<NamedNavArgument> = listOf(
         navArgument(argName) { type = NavType.StringType }

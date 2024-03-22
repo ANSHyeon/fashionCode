@@ -3,6 +3,7 @@
     <string name="label_app_bar_community">커뮤니티</string>
     <string name="label_app_bar_community_write">커뮤니티 글쓰기</string>
     <string name="label_app_bar_community_detail">커뮤니티 상세화면</string>
+    <string name="label_app_bar_style_create">코디 생성</string>
 
     <string name="error_message_sign_in">로그인에 실패했습니다. 잠시후 다시 시도해 주십시오.</string>
 
