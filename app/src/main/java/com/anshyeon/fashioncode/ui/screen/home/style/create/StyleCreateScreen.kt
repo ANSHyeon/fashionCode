@@ -1,14 +1,41 @@
 package com.anshyeon.fashioncode.ui.screen.home.style.create
 
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.Scaffold
+import androidx.compose.material.ScrollableTabRow
+import androidx.compose.material.Tab
+import androidx.compose.material.TabPosition
+import androidx.compose.material.TabRowDefaults
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.composed
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.debugInspectorInfo
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
@@ -16,6 +43,8 @@ import com.anshyeon.fashioncode.R
 import com.anshyeon.fashioncode.ui.component.appBar.BackButtonAppBar
 import com.anshyeon.fashioncode.ui.component.loadingView.LoadingView
 import com.anshyeon.fashioncode.ui.component.snackBar.TextSnackBarContainer
+import com.anshyeon.fashioncode.ui.theme.Gray
+import kotlinx.coroutines.launch
 
 @Composable
 fun StyleCreateScreen(navController: NavHostController) {
@@ -47,6 +76,7 @@ fun StyleCreateScreen(navController: NavHostController) {
                         Modifier
                             .weight(5f)
                             .fillMaxWidth()
+                            .background(Gray)
                     )
                     CodiItems(
                         Modifier
@@ -70,11 +100,93 @@ fun CodiCanvas(modifier: Modifier) {
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun CodiItems(modifier: Modifier) {
-    Box(
+    Column(
         modifier = modifier
     ) {
 
+        val tabs = listOf("아우터", "상의", "하의", "한벌옷", "신발", "가방", "모자")
+        val coroutineScope = rememberCoroutineScope()
+        val pagerState = rememberPagerState {
+            tabs.size
+        }
+        val density = LocalDensity.current
+        val tabWidths = remember {
+            val tabWidthStateList = mutableStateListOf<Dp>()
+            repeat(tabs.size) {
+                tabWidthStateList.add(0.dp)
+            }
+            tabWidthStateList
+        }
+
+        ScrollableTabRow(
+            selectedTabIndex = pagerState.currentPage,
+            contentColor = Color.Black,
+            edgePadding = 0.dp,
+            indicator = { tabPositions ->
+                TabRowDefaults.Indicator(
+                    modifier = Modifier.customTabIndicatorOffset(
+                        currentTabPosition = tabPositions[pagerState.currentPage],
+                        tabWidth = tabWidths[pagerState.currentPage]
+                    )
+                )
+            }
+        ) {
+            tabs.forEachIndexed { index, text ->
+                Tab(
+                    modifier = Modifier
+                        .background(Color.White),
+                    selected = pagerState.currentPage == index,
+                    onClick = {
+                        coroutineScope.launch {
+                            pagerState.scrollToPage(index)
+                        }
+                    },
+                    text = {
+                        Text(
+                            text = text,
+                            fontWeight = FontWeight.Bold,
+                            onTextLayout = { textLayoutResult ->
+                                tabWidths[index] =
+                                    with(density) { textLayoutResult.size.width.toDp() }
+                            }
+                        )
+                    },
+                )
+            }
+        }
+
+        HorizontalPager(
+            modifier = Modifier.fillMaxSize(),
+            state = pagerState
+        ) { index ->
+            Text(text = index.toString())
+        }
+
     }
+}
+
+fun Modifier.customTabIndicatorOffset(
+    currentTabPosition: TabPosition,
+    tabWidth: Dp
+): Modifier = composed(
+    inspectorInfo = debugInspectorInfo {
+        name = "customTabIndicatorOffset"
+        value = currentTabPosition
+    }
+) {
+    val currentTabWidth by animateDpAsState(
+        targetValue = tabWidth,
+        animationSpec = tween(durationMillis = 250, easing = FastOutSlowInEasing), label = ""
+    )
+    val indicatorOffset by animateDpAsState(
+        targetValue = ((currentTabPosition.left + currentTabPosition.right - tabWidth) / 2),
+        animationSpec = tween(durationMillis = 250, easing = FastOutSlowInEasing), label = ""
+    )
+    fillMaxWidth()
+        .wrapContentSize(Alignment.BottomStart)
+        .offset(x = indicatorOffset)
+        .width(currentTabWidth)
 }
