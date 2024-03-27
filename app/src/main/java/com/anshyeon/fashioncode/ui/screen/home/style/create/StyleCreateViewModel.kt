@@ -7,9 +7,9 @@ import androidx.navigation.NavHostController
 import com.anshyeon.fashioncode.data.model.Clothes
 import com.anshyeon.fashioncode.data.model.ClothesType
 import com.anshyeon.fashioncode.data.repository.StyleRepository
-import com.anshyeon.fashioncode.network.model.ApiResultSuccess
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -38,6 +38,26 @@ class StyleCreateViewModel @Inject constructor(
     private val _showSnackBar = MutableStateFlow(false)
     val showSnackBar: StateFlow<Boolean> = _showSnackBar
 
+    init {
+        viewModelScope.launch {
+            getLocalClothesList()
+        }
+    }
+
+    private suspend fun getLocalClothesList() {
+        transformLocalMessageList().collectLatest {
+            _clothesList.value = mutableListOf(Clothes()).apply {
+                addAll(it)
+            }.toList()
+        }
+    }
+
+    private fun transformLocalMessageList(): Flow<List<Clothes>> {
+        return styleRepository.getClothesListByRoom(
+            onComplete = { }
+        )
+    }
+
     fun cutoutImage(bitmap: Bitmap) {
         _isCutOutLoading.value = true
         viewModelScope.launch {
@@ -59,29 +79,16 @@ class StyleCreateViewModel @Inject constructor(
                 adobeToken,
                 dropboxToken,
                 dropBoxLink,
-                path,
-                {},
-                {
-                    _showSnackBar.value = true
-                    _snackBarText.value = "잠시 후 다시 시도해 주십시오"
-                }
-            ).collectLatest { response ->
-                if (response is ApiResultSuccess) {
-                    addClothes(response.data)
-                }
-                _isCutOutLoading.value = false
+                path
+            ) {
+                _showSnackBar.value = true
+                _snackBarText.value = "잠시 후 다시 시도해 주십시오"
             }
         }
     }
 
     fun changeClothesType(type: ClothesType) {
         currentClothesType = type
-    }
-
-    fun addClothes(clothes: Clothes) {
-        _clothesList.value = _clothesList.value.toMutableList().apply {
-            add(clothes)
-        }.toList()
     }
 
     fun dismissSnackBar() {

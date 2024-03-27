@@ -19,13 +19,8 @@ import com.anshyeon.fashioncode.network.DropboxApiClient
 import com.anshyeon.fashioncode.network.extentions.onError
 import com.anshyeon.fashioncode.network.extentions.onException
 import com.anshyeon.fashioncode.network.extentions.onSuccess
-import com.anshyeon.fashioncode.network.model.ApiResponse
-import com.anshyeon.fashioncode.network.model.ApiResultSuccess
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.onCompletion
 
 import javax.inject.Inject
@@ -38,7 +33,6 @@ class StyleRepository @Inject constructor(
     private val userDataSource: UserDataSource,
     private val clothesDao: ClothesDao,
 ) {
-
 
     suspend fun getDropBoxLink(token: String?, bitmap: Bitmap): List<String?> {
         val imageLocation = imageDataSource.uploadBitMap(bitmap)
@@ -69,15 +63,14 @@ class StyleRepository @Inject constructor(
         }
     }
 
-    fun createClothes(
+    suspend fun createClothes(
         currentClothesType: ClothesType,
         adobeToken: String?,
         dropBoxToken: String?,
         dropBoxLink: String?,
         path: String?,
-        onComplete: () -> Unit,
         onError: () -> Unit
-    ): Flow<ApiResponse<Clothes>> = flow {
+    ) {
         try {
             val inputHref = "${BuildConfig.FIREBASE_STORAGE_URL}${path}?alt=media"
             val adobeRequestBody = AdobeRequestBody(
@@ -102,7 +95,6 @@ class StyleRepository @Inject constructor(
                         imageUrl = it
                     )
                     insertClothes(clothes)
-                    emit(ApiResultSuccess(clothes))
                 } ?: throw Exception()
             }.onException {
                 onError()
@@ -112,9 +104,7 @@ class StyleRepository @Inject constructor(
         } catch (e: Exception) {
             onError()
         }
-    }.onCompletion {
-        onComplete()
-    }.flowOn(Dispatchers.Default)
+    }
 
     suspend fun getAdobeLoginToken(): String? {
         var result: String? = null
@@ -171,6 +161,13 @@ class StyleRepository @Inject constructor(
         } catch (e: Exception) {
             result
         }
+    }
+
+    fun getClothesListByRoom(
+        onComplete: () -> Unit
+    ): Flow<List<Clothes>> {
+        return clothesDao.getAllClothesList()
+            .onCompletion { onComplete() }
     }
 
     private suspend fun insertClothes(clothes: Clothes) {
