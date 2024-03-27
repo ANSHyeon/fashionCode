@@ -16,6 +16,15 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        try {
+            Class
+                .forName("androidx.compose.material.TabRowKt")
+                .getDeclaredField("ScrollableTabRowMinimumTabWidth").apply {
+                    isAccessible = true
+                }.set(this, 0f)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
 
         setContent {
             FashionCodeTheme {

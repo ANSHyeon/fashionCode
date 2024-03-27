@@ -130,9 +130,7 @@ fun CommunityDetailScreen(navController: NavHostController, postId: String) {
             )
 
         }
-
     }
-
 }
 
 @Composable

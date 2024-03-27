@@ -29,6 +29,52 @@ android {
             "FIREBASE_REALTIME_DB_URL",
             properties["firebase_realtime_db_url"] as String
         )
+        buildConfigField(
+            "String",
+            "FIREBASE_STORAGE_URL",
+            properties["firebase_storage_url"] as String
+        )
+        buildConfigField(
+            "String",
+            "ADOBE_PHOTOSHOP_URL",
+            properties["adobe_photoshop_url"] as String
+        )
+        buildConfigField(
+            "String",
+            "ADOBE_LOGIN_URL",
+            properties["adobe_login_url"] as String
+        )
+        buildConfigField(
+            "String",
+            "ADOBE_CLIENT_SECRET",
+            properties["adobe_client_secret"] as String
+        )
+        buildConfigField(
+            "String",
+            "ADOBE_CLIENT_ID",
+            properties["adobe_client_id"] as String
+        )
+        buildConfigField(
+            "String",
+            "DROPBOX_URL",
+            properties["dropbox_url"] as String
+        )
+        buildConfigField(
+            "String",
+            "DROPBOX_APP_KEY",
+            properties["dropbox_app_key"] as String
+        )
+        buildConfigField(
+            "String",
+            "DROPBOX_APP_SECRET",
+            properties["dropbox_app_secret"] as String
+        )
+        buildConfigField(
+            "String",
+            "DROPBOX_REFRESH_TOKEN",
+            properties["dropbox_refresh_token"] as String
+        )
+
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary = true
