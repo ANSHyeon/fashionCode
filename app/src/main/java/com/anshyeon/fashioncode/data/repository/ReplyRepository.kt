@@ -31,8 +31,8 @@ class ReplyRepository @Inject constructor(
     suspend fun createReply(
         body: String,
         commentId: String,
-        userId: String,
     ): ApiResponse<Reply> {
+        val userId = userDataSource.getUserId()
         val currentTime = System.currentTimeMillis()
         val replyId = userId + currentTime
         val reply = Reply(

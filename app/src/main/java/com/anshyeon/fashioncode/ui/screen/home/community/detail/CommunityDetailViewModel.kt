@@ -126,7 +126,6 @@ class CommunityDetailViewModel @Inject constructor(
             val result = commentRepository.createComment(
                 _commentBody.value,
                 postId,
-                authRepository.getUserId(),
             )
             result.onSuccess { savedComment ->
                 _isCreateCommentLoading.value = false

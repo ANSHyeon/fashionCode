@@ -3,9 +3,12 @@ package com.anshyeon.fashioncode.data.repository
 import android.graphics.Bitmap
 import com.anshyeon.fashioncode.BuildConfig
 import com.anshyeon.fashioncode.data.dataSource.ImageDataSource
+import com.anshyeon.fashioncode.data.dataSource.UserDataSource
 import com.anshyeon.fashioncode.data.model.AdobeInput
 import com.anshyeon.fashioncode.data.model.AdobeOutPut
 import com.anshyeon.fashioncode.data.model.AdobeRequestBody
+import com.anshyeon.fashioncode.data.model.Clothes
+import com.anshyeon.fashioncode.data.model.ClothesType
 import com.anshyeon.fashioncode.data.model.CommitInfo
 import com.anshyeon.fashioncode.data.model.DropBoxDownloadRequestBody
 import com.anshyeon.fashioncode.data.model.DropBoxRequestBody
@@ -31,6 +34,7 @@ class StyleRepository @Inject constructor(
     private val adobeLoginApiClient: AdobeLoginApiClient,
     private val dropBoxApiClient: DropboxApiClient,
     private val imageDataSource: ImageDataSource,
+    private val userDataSource: UserDataSource,
 ) {
 
 
@@ -64,13 +68,14 @@ class StyleRepository @Inject constructor(
     }
 
     fun createClothes(
+        currentClothesType: ClothesType,
         adobeToken: String?,
         dropBoxToken: String?,
         dropBoxLink: String?,
         path: String?,
         onComplete: () -> Unit,
         onError: () -> Unit
-    ): Flow<ApiResponse<String>> = flow {
+    ): Flow<ApiResponse<Clothes>> = flow {
         try {
             val inputHref = "${BuildConfig.FIREBASE_STORAGE_URL}${path}?alt=media"
             val adobeRequestBody = AdobeRequestBody(
@@ -87,7 +92,14 @@ class StyleRepository @Inject constructor(
                 delay(8000)
                 val result = getDropBoxImage(dropBoxToken, path)
                 result?.let {
-                    emit(ApiResultSuccess(result))
+                    val userId = userDataSource.getUserId()
+                    val clothes = Clothes(
+                        userId + path,
+                        userId,
+                        currentClothesType,
+                        imageUrl = it
+                    )
+                    emit(ApiResultSuccess(clothes))
                 } ?: throw Exception()
             }.onException {
                 onError()

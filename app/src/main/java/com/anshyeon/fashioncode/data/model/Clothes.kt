@@ -9,6 +9,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class Clothes(
     @PrimaryKey val clothesId: String = "",
+    val userId: String = "",
     @ColumnInfo(name = "type") val type: ClothesType = ClothesType.ADD,
     @ColumnInfo(name = "image_url") val imageUrl: String? = null
 )

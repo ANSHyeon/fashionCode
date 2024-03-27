@@ -90,7 +90,6 @@ class CommunityReplyViewModel @Inject constructor(
             val result = replyRepository.createReply(
                 _replyBody.value,
                 commentId,
-                authRepository.getUserId(),
             )
             result.onSuccess { savedReply ->
                 _isCreateReplyLoading.value = false
