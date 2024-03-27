@@ -1,5 +1,8 @@
 package com.anshyeon.fashioncode.ui.screen.home.style.create
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.result.launch
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
@@ -16,6 +19,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -55,6 +61,7 @@ import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import com.anshyeon.fashioncode.R
 import com.anshyeon.fashioncode.data.model.Clothes
+import com.anshyeon.fashioncode.data.model.ClothesType
 import com.anshyeon.fashioncode.ui.component.appBar.BackButtonAppBar
 import com.anshyeon.fashioncode.ui.component.loadingView.LoadingView
 import com.anshyeon.fashioncode.ui.component.snackBar.TextSnackBarContainer
@@ -67,9 +74,20 @@ fun StyleCreateScreen(navController: NavHostController) {
 
     val viewModel: StyleCreateViewModel = hiltViewModel()
 
+    val clothesListState by viewModel.clothesList.collectAsStateWithLifecycle()
     val isLoadingState by viewModel.isLoading.collectAsStateWithLifecycle()
+    val isCutOutLoadingState by viewModel.isCutOutLoading.collectAsStateWithLifecycle()
     val snackBarTextState by viewModel.snackBarText.collectAsStateWithLifecycle()
     val showSnackBarState by viewModel.showSnackBar.collectAsStateWithLifecycle()
+
+    val takePhotoFromCameraLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicturePreview(),
+        onResult = { takenPhoto ->
+            if (takenPhoto != null) {
+                viewModel.cutoutImage(takenPhoto)
+            }
+        }
+    )
 
     Scaffold(
         topBar = {
@@ -97,11 +115,15 @@ fun StyleCreateScreen(navController: NavHostController) {
                     CodiItems(
                         Modifier
                             .weight(4f)
-                            .fillMaxWidth()
-                    )
+                            .fillMaxWidth(),
+                        clothesListState
+                    ) {
+                        viewModel.changeClothesType(it)
+                        takePhotoFromCameraLauncher.launch()
+                    }
                 }
                 LoadingView(
-                    isLoading = isLoadingState
+                    isLoading = isLoadingState || isCutOutLoadingState
                 )
             }
         }
@@ -118,12 +140,16 @@ fun CodiCanvas(modifier: Modifier) {
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun CodiItems(modifier: Modifier) {
+fun CodiItems(
+    modifier: Modifier,
+    clothesListState: List<Clothes>,
+    onClick: (ClothesType) -> Unit
+) {
     Column(
         modifier = modifier
     ) {
 
-        val tabs = listOf("아우터", "상의", "하의", "한벌옷", "신발", "가방", "모자")
+        val tabs = ClothesType.values().takeLast(7)
         val coroutineScope = rememberCoroutineScope()
         val pagerState = rememberPagerState {
             tabs.size
@@ -162,7 +188,7 @@ fun CodiItems(modifier: Modifier) {
                     },
                     text = {
                         Text(
-                            text = text,
+                            text = text.name,
                             fontWeight = FontWeight.Bold,
                             onTextLayout = { textLayoutResult ->
                                 tabWidths[index] =
@@ -176,35 +202,28 @@ fun CodiItems(modifier: Modifier) {
 
         HorizontalPager(
             modifier = Modifier.fillMaxSize(),
-            state = pagerState
+            state = pagerState,
+            verticalAlignment = Alignment.Top
         ) { index ->
-            Text(text = index.toString())
+            val categoryClothesList = clothesListState.filter {
+                it.type == tabs[index] || it.type == ClothesType.ADD
+            }
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(4)
+            ) {
+                items(categoryClothesList) {
+                    if (it.type == ClothesType.ADD) {
+                        CodiItemAddButton {
+                            onClick(tabs[index])
+                        }
+                    } else {
+                        CodiItem(clothes = it) {
+                        }
+                    }
+                }
+            }
         }
-
     }
-}
-
-fun Modifier.customTabIndicatorOffset(
-    currentTabPosition: TabPosition,
-    tabWidth: Dp
-): Modifier = composed(
-    inspectorInfo = debugInspectorInfo {
-        name = "customTabIndicatorOffset"
-        value = currentTabPosition
-    }
-) {
-    val currentTabWidth by animateDpAsState(
-        targetValue = tabWidth,
-        animationSpec = tween(durationMillis = 250, easing = FastOutSlowInEasing), label = ""
-    )
-    val indicatorOffset by animateDpAsState(
-        targetValue = ((currentTabPosition.left + currentTabPosition.right - tabWidth) / 2),
-        animationSpec = tween(durationMillis = 250, easing = FastOutSlowInEasing), label = ""
-    )
-    fillMaxWidth()
-        .wrapContentSize(Alignment.BottomStart)
-        .offset(x = indicatorOffset)
-        .width(currentTabWidth)
 }
 
 @Composable
@@ -258,4 +277,27 @@ fun CodiItem(clothes: Clothes, onClick: () -> Unit) {
             placeholder = painterResource(id = R.drawable.ic_place_holder)
         )
     }
+}
+
+fun Modifier.customTabIndicatorOffset(
+    currentTabPosition: TabPosition,
+    tabWidth: Dp
+): Modifier = composed(
+    inspectorInfo = debugInspectorInfo {
+        name = "customTabIndicatorOffset"
+        value = currentTabPosition
+    }
+) {
+    val currentTabWidth by animateDpAsState(
+        targetValue = tabWidth,
+        animationSpec = tween(durationMillis = 250, easing = FastOutSlowInEasing), label = ""
+    )
+    val indicatorOffset by animateDpAsState(
+        targetValue = ((currentTabPosition.left + currentTabPosition.right - tabWidth) / 2),
+        animationSpec = tween(durationMillis = 250, easing = FastOutSlowInEasing), label = ""
+    )
+    fillMaxWidth()
+        .wrapContentSize(Alignment.BottomStart)
+        .offset(x = indicatorOffset)
+        .width(currentTabWidth)
 }
