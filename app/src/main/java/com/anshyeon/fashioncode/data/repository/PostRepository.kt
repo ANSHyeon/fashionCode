@@ -29,9 +29,9 @@ class PostRepository @Inject constructor(
     suspend fun createPost(
         title: String,
         body: String,
-        userId: String,
         imageList: List<Uri>
     ): ApiResponse<Unit> {
+        val userId = userDataSource.getUserId()
         val currentTime = System.currentTimeMillis()
         val postId = userId + currentTime
         val imageLocations = imageDataSource.uploadImages(imageList)

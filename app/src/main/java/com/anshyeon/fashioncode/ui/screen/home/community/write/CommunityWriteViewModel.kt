@@ -4,7 +4,6 @@ import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavHostController
-import com.anshyeon.fashioncode.data.repository.AuthRepository
 import com.anshyeon.fashioncode.data.repository.PostRepository
 import com.anshyeon.fashioncode.network.extentions.onError
 import com.anshyeon.fashioncode.network.extentions.onException
@@ -17,7 +16,6 @@ import javax.inject.Inject
 
 @HiltViewModel
 class CommunityWriteViewModel @Inject constructor(
-    private val authRepository: AuthRepository,
     private val postRepository: PostRepository
 ) : ViewModel() {
 
@@ -66,7 +64,6 @@ class CommunityWriteViewModel @Inject constructor(
             val result = postRepository.createPost(
                 postTitle.value,
                 postBody.value,
-                authRepository.getUserId(),
                 selectedImageList.value
             )
             result.onSuccess {

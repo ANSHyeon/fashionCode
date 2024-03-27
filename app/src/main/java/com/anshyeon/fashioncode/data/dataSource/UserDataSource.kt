@@ -18,4 +18,8 @@ class UserDataSource @Inject constructor() {
     fun getEmail(): String {
         return getCurrentUser()?.email ?: ""
     }
+
+    fun getUserId(): String {
+        return getEmail().replace('@', 'a').replace('.', 'a')
+    }
 }

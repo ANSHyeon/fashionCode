@@ -31,8 +31,8 @@ class CommentRepository @Inject constructor(
     suspend fun createComment(
         body: String,
         postId: String,
-        userId: String,
     ): ApiResponse<Comment> {
+        val userId = userDataSource.getUserId()
         val currentTime = System.currentTimeMillis()
         val commentId = userId + currentTime
         val comment = Comment(
