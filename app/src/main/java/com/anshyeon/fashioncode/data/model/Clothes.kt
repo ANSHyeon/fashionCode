@@ -1,13 +1,16 @@
 package com.anshyeon.fashioncode.data.model
 
+import androidx.room.ColumnInfo
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 import kotlinx.serialization.Serializable
 
+@Entity(tableName = "clothes")
 @Serializable
 data class Clothes(
-    val clothesId: String = "",
-    val type: ClothesType = ClothesType.ADD,
-    val imageUri: String? = null,
-    val imageUrl: String? = null
+    @PrimaryKey val clothesId: String = "",
+    @ColumnInfo(name = "type") val type: ClothesType = ClothesType.ADD,
+    @ColumnInfo(name = "image_url") val imageUrl: String? = null
 )
 
 enum class ClothesType(name: String) {
