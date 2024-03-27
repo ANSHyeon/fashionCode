@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import com.anshyeon.fashioncode.BuildConfig
 import com.anshyeon.fashioncode.data.dataSource.ImageDataSource
 import com.anshyeon.fashioncode.data.dataSource.UserDataSource
+import com.anshyeon.fashioncode.data.local.dao.ClothesDao
 import com.anshyeon.fashioncode.data.model.AdobeInput
 import com.anshyeon.fashioncode.data.model.AdobeOutPut
 import com.anshyeon.fashioncode.data.model.AdobeRequestBody
@@ -35,6 +36,7 @@ class StyleRepository @Inject constructor(
     private val dropBoxApiClient: DropboxApiClient,
     private val imageDataSource: ImageDataSource,
     private val userDataSource: UserDataSource,
+    private val clothesDao: ClothesDao,
 ) {
 
 
@@ -99,6 +101,7 @@ class StyleRepository @Inject constructor(
                         currentClothesType,
                         imageUrl = it
                     )
+                    insertClothes(clothes)
                     emit(ApiResultSuccess(clothes))
                 } ?: throw Exception()
             }.onException {
@@ -168,5 +171,9 @@ class StyleRepository @Inject constructor(
         } catch (e: Exception) {
             result
         }
+    }
+
+    private suspend fun insertClothes(clothes: Clothes) {
+        clothesDao.insert(clothes)
     }
 }

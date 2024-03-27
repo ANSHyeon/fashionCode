@@ -55,6 +55,7 @@ class StyleCreateViewModel @Inject constructor(
             val (dropBoxLink, path) = getDropBoxLinkJob.await()
 
             styleRepository.createClothes(
+                currentClothesType,
                 adobeToken,
                 dropboxToken,
                 dropBoxLink,
@@ -66,12 +67,7 @@ class StyleCreateViewModel @Inject constructor(
                 }
             ).collectLatest { response ->
                 if (response is ApiResultSuccess) {
-                    val clothes = Clothes(
-                        "",
-                        currentClothesType,
-                        imageUrl = response.data
-                    )
-                    addClothes(clothes)
+                    addClothes(response.data)
                 }
                 _isCutOutLoading.value = false
             }
