@@ -1,5 +1,6 @@
 package com.anshyeon.fashioncode.ui.screen.home.style.create
 
+import android.graphics.Picture
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.launch
@@ -47,12 +48,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.draw
+import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -75,6 +80,7 @@ import com.anshyeon.fashioncode.ui.component.loadingView.LoadingView
 import com.anshyeon.fashioncode.ui.component.snackBar.TextSnackBarContainer
 import com.anshyeon.fashioncode.ui.theme.DarkGray
 import com.anshyeon.fashioncode.ui.theme.Gray
+import com.anshyeon.fashioncode.util.ImageTypeConvertor
 import kotlinx.coroutines.launch
 
 @Composable
@@ -82,6 +88,7 @@ fun StyleCreateScreen(navController: NavHostController) {
 
     val viewModel: StyleCreateViewModel = hiltViewModel()
     val context = LocalContext.current
+    val picture = remember { Picture() }
 
     val clothesListState by viewModel.clothesList.collectAsStateWithLifecycle()
     val selectedClothesListState by viewModel.selectedClothesList.collectAsStateWithLifecycle()
@@ -121,6 +128,7 @@ fun StyleCreateScreen(navController: NavHostController) {
                             .weight(5f)
                             .fillMaxWidth()
                             .background(Gray),
+                        picture,
                         selectedClothesListState
                     )
                     CodiItems(
@@ -148,10 +156,30 @@ fun StyleCreateScreen(navController: NavHostController) {
 @Composable
 fun CodiCanvas(
     modifier: Modifier,
+    picture: Picture,
     clothesListState: List<Clothes>,
 ) {
     Box(
         modifier = modifier
+            .drawWithCache {
+                val width = this.size.width.toInt()
+                val height = this.size.height.toInt()
+                onDrawWithContent {
+                    val pictureCanvas =
+                        androidx.compose.ui.graphics.Canvas(
+                            picture.beginRecording(
+                                width,
+                                height
+                            )
+                        )
+                    draw(this, this.layoutDirection, pictureCanvas, this.size) {
+                        this@onDrawWithContent.drawContent()
+                    }
+                    picture.endRecording()
+
+                    drawIntoCanvas { canvas -> canvas.nativeCanvas.drawPicture(picture) }
+                }
+            }
     ) {
         var zIndexCount by remember { mutableStateOf(1) }
         clothesListState.forEachIndexed { index, clothes ->
@@ -164,6 +192,10 @@ fun CodiCanvas(
                 offset += offsetChange
             }
             var zIndex by remember { mutableStateOf(0f) }
+            var isAsyncImageLoaded by remember { mutableStateOf(false) }
+            if (isAsyncImageLoaded) {
+                Box {}
+            }
             AsyncImage(
                 modifier = Modifier
                     .graphicsLayer(
@@ -183,6 +215,9 @@ fun CodiCanvas(
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
                 placeholder = ColorPainter(Gray),
+                onSuccess = {
+                    isAsyncImageLoaded = true
+                }
             )
         }
     }

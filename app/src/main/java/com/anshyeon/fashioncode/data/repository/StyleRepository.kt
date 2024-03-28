@@ -22,6 +22,7 @@ import com.anshyeon.fashioncode.network.extentions.onException
 import com.anshyeon.fashioncode.network.extentions.onSuccess
 import com.anshyeon.fashioncode.util.uriToBitmap
 import kotlinx.coroutines.delay
+import com.anshyeon.fashioncode.util.ImageTypeConvertor
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.onCompletion
 
@@ -95,7 +96,7 @@ class StyleRepository @Inject constructor(
                         userId + path,
                         userId,
                         currentClothesType,
-                        uriToBitmap(context, imageUri),
+                        ImageTypeConvertor.uriToBitmap(context, imageUri),
                     )
                     insertClothes(clothes)
                 } ?: throw Exception()
