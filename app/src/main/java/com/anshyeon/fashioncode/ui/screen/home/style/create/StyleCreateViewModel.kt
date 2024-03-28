@@ -27,6 +27,9 @@ class StyleCreateViewModel @Inject constructor(
     private val _clothesList = MutableStateFlow(listOf(Clothes()))
     val clothesList: StateFlow<List<Clothes>> = _clothesList
 
+    private val _selectedClothesList = MutableStateFlow<List<Clothes>>(emptyList())
+    val selectedClothesList: StateFlow<List<Clothes>> = _selectedClothesList
+
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading
 
@@ -88,6 +91,11 @@ class StyleCreateViewModel @Inject constructor(
             }
             _isCutOutLoading.value = false
         }
+    }
+
+    fun addSelectedClothes(clothes: Clothes) {
+        _selectedClothesList.value =
+            _selectedClothesList.value.toMutableList().apply { add(clothes) }.toList()
     }
 
     fun changeClothesType(type: ClothesType) {

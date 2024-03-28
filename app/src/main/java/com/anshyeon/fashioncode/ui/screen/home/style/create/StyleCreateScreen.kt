@@ -77,6 +77,7 @@ fun StyleCreateScreen(navController: NavHostController) {
     val context = LocalContext.current
 
     val clothesListState by viewModel.clothesList.collectAsStateWithLifecycle()
+    val selectedClothesListState by viewModel.selectedClothesList.collectAsStateWithLifecycle()
     val isLoadingState by viewModel.isLoading.collectAsStateWithLifecycle()
     val isCutOutLoadingState by viewModel.isCutOutLoading.collectAsStateWithLifecycle()
     val snackBarTextState by viewModel.snackBarText.collectAsStateWithLifecycle()
@@ -112,17 +113,22 @@ fun StyleCreateScreen(navController: NavHostController) {
                         Modifier
                             .weight(5f)
                             .fillMaxWidth()
-                            .background(Gray)
+                            .background(Gray),
+                        selectedClothesListState
                     )
                     CodiItems(
                         Modifier
                             .weight(4f)
                             .fillMaxWidth(),
-                        clothesListState
-                    ) {
-                        viewModel.changeClothesType(it)
-                        takePhotoFromCameraLauncher.launch()
-                    }
+                        clothesListState,
+                        {
+                            viewModel.changeClothesType(it)
+                            takePhotoFromCameraLauncher.launch()
+                        },
+                        {
+                            viewModel.addSelectedClothes(it)
+                        }
+                    )
                 }
                 LoadingView(
                     isLoading = isLoadingState || isCutOutLoadingState
@@ -133,10 +139,23 @@ fun StyleCreateScreen(navController: NavHostController) {
 }
 
 @Composable
-fun CodiCanvas(modifier: Modifier) {
+fun CodiCanvas(
+    modifier: Modifier,
+    clothesListState: List<Clothes>,
+) {
     Box(
         modifier = modifier
     ) {
+        clothesListState.forEach { clothes ->
+            AsyncImage(
+                modifier = Modifier
+                    .size(200.dp ),
+                model = clothes.image,
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                placeholder = ColorPainter(Gray),
+            )
+        }
     }
 }
 
@@ -145,7 +164,8 @@ fun CodiCanvas(modifier: Modifier) {
 fun CodiItems(
     modifier: Modifier,
     clothesListState: List<Clothes>,
-    onClick: (ClothesType) -> Unit
+    onAddButtonClick: (ClothesType) -> Unit,
+    onCodiItemClick: (Clothes) -> Unit
 ) {
     Column(
         modifier = modifier
@@ -216,10 +236,11 @@ fun CodiItems(
                 items(categoryClothesList) {
                     if (it.type == ClothesType.ADD) {
                         CodiItemAddButton {
-                            onClick(tabs[index])
+                            onAddButtonClick(tabs[index])
                         }
                     } else {
                         CodiItem(clothes = it) {
+                            onCodiItemClick(it)
                         }
                     }
                 }
