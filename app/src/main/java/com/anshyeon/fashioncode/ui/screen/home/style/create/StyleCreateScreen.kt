@@ -63,7 +63,7 @@ import coil.compose.AsyncImage
 import com.anshyeon.fashioncode.R
 import com.anshyeon.fashioncode.data.model.Clothes
 import com.anshyeon.fashioncode.data.model.ClothesType
-import com.anshyeon.fashioncode.ui.component.appBar.BackButtonAppBar
+import com.anshyeon.fashioncode.ui.component.appBar.BackButtonWithActionAppBar
 import com.anshyeon.fashioncode.ui.component.loadingView.LoadingView
 import com.anshyeon.fashioncode.ui.component.snackBar.TextSnackBarContainer
 import com.anshyeon.fashioncode.ui.theme.DarkGray
@@ -93,8 +93,8 @@ fun StyleCreateScreen(navController: NavHostController) {
 
     Scaffold(
         topBar = {
-            BackButtonAppBar(stringResource(id = R.string.label_app_bar_style_create)) {
-                viewModel.navigateBack(navController)
+            BackButtonWithActionAppBar(stringResource(id = R.string.label_app_bar_style_create),
+                { viewModel.navigateBack(navController) }) {
             }
         }
     ) {
