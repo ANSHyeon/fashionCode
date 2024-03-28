@@ -8,6 +8,9 @@ import androidx.navigation.NavHostController
 import com.anshyeon.fashioncode.data.model.Clothes
 import com.anshyeon.fashioncode.data.model.ClothesType
 import com.anshyeon.fashioncode.data.repository.StyleRepository
+import com.anshyeon.fashioncode.network.extentions.onError
+import com.anshyeon.fashioncode.network.extentions.onException
+import com.anshyeon.fashioncode.network.extentions.onSuccess
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
@@ -30,11 +33,11 @@ class StyleCreateViewModel @Inject constructor(
     private val _selectedClothesList = MutableStateFlow<List<Clothes>>(emptyList())
     val selectedClothesList: StateFlow<List<Clothes>> = _selectedClothesList
 
-    private val _isLoading = MutableStateFlow(false)
-    val isLoading: StateFlow<Boolean> = _isLoading
-
     private val _isCutOutLoading = MutableStateFlow(false)
     val isCutOutLoading: StateFlow<Boolean> = _isCutOutLoading
+
+    private val _isCreateStyleLoading = MutableStateFlow(false)
+    val isCreateStyleLoading: StateFlow<Boolean> = _isCreateStyleLoading
 
     private val _snackBarText = MutableStateFlow("")
     val snackBarText: StateFlow<String> = _snackBarText
@@ -90,6 +93,27 @@ class StyleCreateViewModel @Inject constructor(
                 _snackBarText.value = "잠시 후 다시 시도해 주십시오"
             }
             _isCutOutLoading.value = false
+        }
+    }
+
+    fun createStyle(navController: NavHostController, bitmap: Bitmap) {
+        _isCreateStyleLoading.value = true
+        viewModelScope.launch {
+            val result = styleRepository.createStylePost(
+                bitmap
+            )
+            result.onSuccess {
+                _isCreateStyleLoading.value = false
+                navigateBack(navController)
+            }.onError { _, _ ->
+                _isCreateStyleLoading.value = false
+                _showSnackBar.value = true
+                _snackBarText.value = "잠시 후 다시 시도해 주십시오"
+            }.onException {
+                _isCreateStyleLoading.value = false
+                _showSnackBar.value = true
+                _snackBarText.value = "잠시 후 다시 시도해 주십시오"
+            }
         }
     }
 

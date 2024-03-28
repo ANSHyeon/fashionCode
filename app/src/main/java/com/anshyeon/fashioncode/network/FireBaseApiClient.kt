@@ -3,6 +3,7 @@ package com.anshyeon.fashioncode.network
 import com.anshyeon.fashioncode.data.model.Comment
 import com.anshyeon.fashioncode.data.model.Post
 import com.anshyeon.fashioncode.data.model.Reply
+import com.anshyeon.fashioncode.data.model.Style
 import com.anshyeon.fashioncode.data.model.User
 import com.anshyeon.fashioncode.network.model.ApiResponse
 import retrofit2.http.Body
@@ -67,4 +68,10 @@ interface FireBaseApiClient {
         @Query("auth") auth: String?,
         @Query("equalTo") commentId: String
     ): ApiResponse<Map<String, Reply>>
+
+    @POST("styles.json")
+    suspend fun createStyle(
+        @Query("auth") auth: String?,
+        @Body style: Style
+    ): ApiResponse<Unit>
 }
