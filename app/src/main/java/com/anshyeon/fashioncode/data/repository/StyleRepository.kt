@@ -1,5 +1,6 @@
 package com.anshyeon.fashioncode.data.repository
 
+import android.content.Context
 import android.graphics.Bitmap
 import com.anshyeon.fashioncode.BuildConfig
 import com.anshyeon.fashioncode.data.dataSource.ImageDataSource
@@ -19,6 +20,7 @@ import com.anshyeon.fashioncode.network.DropboxApiClient
 import com.anshyeon.fashioncode.network.extentions.onError
 import com.anshyeon.fashioncode.network.extentions.onException
 import com.anshyeon.fashioncode.network.extentions.onSuccess
+import com.anshyeon.fashioncode.util.uriToBitmap
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.onCompletion
@@ -69,6 +71,7 @@ class StyleRepository @Inject constructor(
         dropBoxToken: String?,
         dropBoxLink: String?,
         path: String?,
+        context: Context,
         onError: () -> Unit
     ) {
         try {
@@ -86,13 +89,13 @@ class StyleRepository @Inject constructor(
             response.onSuccess {
                 delay(8000)
                 val result = getDropBoxImage(dropBoxToken, path)
-                result?.let {
+                result?.let { imageUri ->
                     val userId = userDataSource.getUserId()
                     val clothes = Clothes(
                         userId + path,
                         userId,
                         currentClothesType,
-                        imageUrl = it
+                        uriToBitmap(context, imageUri),
                     )
                     insertClothes(clothes)
                 } ?: throw Exception()

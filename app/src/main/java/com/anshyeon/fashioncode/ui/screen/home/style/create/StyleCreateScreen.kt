@@ -47,10 +47,11 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.debugInspectorInfo
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
@@ -73,6 +74,7 @@ import kotlinx.coroutines.launch
 fun StyleCreateScreen(navController: NavHostController) {
 
     val viewModel: StyleCreateViewModel = hiltViewModel()
+    val context = LocalContext.current
 
     val clothesListState by viewModel.clothesList.collectAsStateWithLifecycle()
     val isLoadingState by viewModel.isLoading.collectAsStateWithLifecycle()
@@ -84,7 +86,7 @@ fun StyleCreateScreen(navController: NavHostController) {
         contract = ActivityResultContracts.TakePicturePreview(),
         onResult = { takenPhoto ->
             if (takenPhoto != null) {
-                viewModel.cutoutImage(takenPhoto)
+                viewModel.cutoutImage(context, takenPhoto)
             }
         }
     )
@@ -271,10 +273,10 @@ fun CodiItem(clothes: Clothes, onClick: () -> Unit) {
             modifier = Modifier
                 .fillMaxSize()
                 .clip(RoundedCornerShape(10.dp)),
-            model = clothes.imageUrl,
+            model = clothes.image,
             contentDescription = null,
             contentScale = ContentScale.Crop,
-            placeholder = painterResource(id = R.drawable.ic_place_holder)
+            placeholder = ColorPainter(Gray)
         )
     }
 }

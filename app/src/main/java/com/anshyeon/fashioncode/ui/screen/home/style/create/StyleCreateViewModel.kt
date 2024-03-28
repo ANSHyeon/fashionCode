@@ -1,5 +1,6 @@
 package com.anshyeon.fashioncode.ui.screen.home.style.create
 
+import android.content.Context
 import android.graphics.Bitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -58,7 +59,7 @@ class StyleCreateViewModel @Inject constructor(
         )
     }
 
-    fun cutoutImage(bitmap: Bitmap) {
+    fun cutoutImage(context: Context, bitmap: Bitmap) {
         _isCutOutLoading.value = true
         viewModelScope.launch {
             val getDropBoxTokenJob = viewModelScope.async {
@@ -79,11 +80,13 @@ class StyleCreateViewModel @Inject constructor(
                 adobeToken,
                 dropboxToken,
                 dropBoxLink,
-                path
+                path,
+                context
             ) {
                 _showSnackBar.value = true
                 _snackBarText.value = "잠시 후 다시 시도해 주십시오"
             }
+            _isCutOutLoading.value = false
         }
     }
 

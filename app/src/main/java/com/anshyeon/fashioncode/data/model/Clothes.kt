@@ -1,17 +1,16 @@
 package com.anshyeon.fashioncode.data.model
 
+import android.graphics.Bitmap
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import kotlinx.serialization.Serializable
 
 @Entity(tableName = "clothes")
-@Serializable
 data class Clothes(
     @PrimaryKey val clothesId: String = "",
     val userId: String = "",
     @ColumnInfo(name = "type") val type: ClothesType = ClothesType.ADD,
-    @ColumnInfo(name = "image_url") val imageUrl: String? = null
+    @ColumnInfo(name = "image") val image: Bitmap? = null,
 )
 
 enum class ClothesType(name: String) {
