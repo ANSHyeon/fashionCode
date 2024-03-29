@@ -11,4 +11,5 @@ data class Style(
     val profileImageUrl: String? = null,
     val imageLocation: String? = null,
     val imageUrl: String? = null,
+    val likeList: List<String> = emptyList()
 )

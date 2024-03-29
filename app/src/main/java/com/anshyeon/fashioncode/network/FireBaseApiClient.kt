@@ -7,6 +7,7 @@ import com.anshyeon.fashioncode.data.model.Style
 import com.anshyeon.fashioncode.data.model.User
 import com.anshyeon.fashioncode.network.model.ApiResponse
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.PUT
@@ -74,4 +75,30 @@ interface FireBaseApiClient {
         @Query("auth") auth: String?,
         @Body style: Style
     ): ApiResponse<Unit>
+
+    @GET("styles.json")
+    suspend fun getStyleList(
+        @Query("auth") auth: String?,
+    ): ApiResponse<Map<String, Style>>
+
+    @PUT("likes/{styleId}/{userId}.json")
+    suspend fun createStyleLike(
+        @Path("styleId") styleId: String,
+        @Path("userId") userId: String,
+        @Query("auth") auth: String?,
+        @Body body: String
+    ): ApiResponse<Unit>
+
+    @DELETE("likes/{styleId}/{userId}.json")
+    suspend fun deleteStyleLike(
+        @Path("styleId") styleId: String,
+        @Path("userId") userId: String,
+        @Query("auth") auth: String?,
+    ): ApiResponse<Unit>
+
+    @GET("likes/{styleId}.json")
+    suspend fun getStyleLikes(
+        @Path("styleId") styleId: String,
+        @Query("auth") auth: String?,
+    ): ApiResponse<Map<String, String>>
 }
