@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
@@ -52,7 +53,9 @@ fun StyleScreen(navController: NavHostController) {
 
     val viewModel: StyleViewModel = hiltViewModel()
 
-    val isLoadingState by viewModel.isLoading.collectAsStateWithLifecycle()
+    val styleListState by viewModel.styleList.collectAsStateWithLifecycle()
+    val userIdState by viewModel.userId.collectAsStateWithLifecycle()
+    val isGetStyleListLoadingState by viewModel.isGetStyleListLoading.collectAsStateWithLifecycle()
     val snackBarTextState by viewModel.snackBarText.collectAsStateWithLifecycle()
     val showSnackBarState by viewModel.showSnackBar.collectAsStateWithLifecycle()
 
@@ -86,10 +89,18 @@ fun StyleScreen(navController: NavHostController) {
                     .padding(8.dp),
                 columns = GridCells.Fixed(2)
             ) {
-
+                items(styleListState) { style ->
+                    StyleBox(
+                        modifier = Modifier,
+                        userIdState,
+                        style = style,
+                        { viewModel.createLike(it) },
+                        { viewModel.deleteLike(it) }
+                    )
+                }
             }
             LoadingView(
-                isLoading = isLoadingState
+                isLoading = isGetStyleListLoadingState
             )
         }
     }
@@ -114,7 +125,8 @@ fun StyleBox(
             AsyncImage(
                 modifier = Modifier.fillMaxWidth(),
                 model = style.imageUrl,
-                contentDescription = null
+                contentDescription = null,
+                placeholder = painterResource(id = R.drawable.ic_place_holder)
             )
             likeArea(userIdState, style, { createLike(it) }, { deleteLike(it) })
         }
