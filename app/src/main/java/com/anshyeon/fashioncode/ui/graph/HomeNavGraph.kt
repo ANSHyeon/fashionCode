@@ -9,6 +9,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.anshyeon.fashioncode.R
 import com.anshyeon.fashioncode.data.model.Comment
+import com.anshyeon.fashioncode.data.model.Style
 import com.anshyeon.fashioncode.ui.screen.home.style.home.StyleScreen
 import com.anshyeon.fashioncode.ui.screen.home.community.home.CommunityScreen
 import com.anshyeon.fashioncode.ui.screen.home.bookmark.BookMarkScreen
@@ -17,6 +18,7 @@ import com.anshyeon.fashioncode.ui.screen.home.community.reply.CommunityReplyScr
 import com.anshyeon.fashioncode.ui.screen.home.community.write.CommunityWriteScreen
 import com.anshyeon.fashioncode.ui.screen.home.setting.SettingScreen
 import com.anshyeon.fashioncode.ui.screen.home.style.create.StyleCreateScreen
+import com.anshyeon.fashioncode.ui.screen.home.style.detail.StyleDetailScreen
 import com.anshyeon.fashioncode.util.Constants
 import com.anshyeon.fashioncode.util.SerializationUtils
 import java.net.URLDecoder
@@ -64,6 +66,19 @@ fun HomeNavGraph(navController: NavHostController) {
         composable(route = DetailHomeScreen.StyleCreate.route) {
             StyleCreateScreen(navController)
         }
+        composable(
+            route = DetailHomeScreen.StyleDetail.routeWithArgName(),
+            arguments = DetailHomeScreen.StyleDetail.arguments
+        ) { navBackStackEntry ->
+            val encodedStyleJson = navBackStackEntry.arguments?.getString("style").toString()
+            val styleJson =
+                URLDecoder.decode(encodedStyleJson, StandardCharsets.UTF_8.toString())
+
+            StyleDetailScreen(
+                navController,
+                SerializationUtils.fromJson<Style>(styleJson)!!,
+            )
+        }
     }
 }
 
@@ -107,6 +122,7 @@ sealed class DetailHomeScreen(val route: String, val argName: String) {
     object CommunityDetail : DetailHomeScreen(route = "COMMUNITY_DETAIL", argName = "postId")
     object CommunityReply : DetailHomeScreen(route = "COMMUNITY_REPLY", argName = "comment")
     object StyleCreate : DetailHomeScreen(route = "STYLE_CREATE", argName = "")
+    object StyleDetail : DetailHomeScreen(route = "STYLE_DETAIL", argName = "style")
 
     val arguments: List<NamedNavArgument> = listOf(
         navArgument(argName) { type = NavType.StringType }

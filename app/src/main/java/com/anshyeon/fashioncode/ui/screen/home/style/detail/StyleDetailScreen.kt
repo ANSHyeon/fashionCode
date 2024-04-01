@@ -20,7 +20,7 @@ import com.anshyeon.fashioncode.ui.component.loadingView.LoadingView
 import com.anshyeon.fashioncode.ui.component.snackBar.TextSnackBarContainer
 
 @Composable
-fun CommunityDetailScreen(navController: NavHostController) {
+fun StyleDetailScreen(navController: NavHostController, style: Style) {
 
     val viewModel: StyleDetailViewModel = hiltViewModel()
 
