@@ -16,6 +16,7 @@ import com.anshyeon.fashioncode.ui.screen.home.bookmark.BookMarkScreen
 import com.anshyeon.fashioncode.ui.screen.home.community.detail.CommunityDetailScreen
 import com.anshyeon.fashioncode.ui.screen.home.community.reply.CommunityReplyScreen
 import com.anshyeon.fashioncode.ui.screen.home.community.write.CommunityWriteScreen
+import com.anshyeon.fashioncode.ui.screen.home.profile.other.OtherProfileScreen
 import com.anshyeon.fashioncode.ui.screen.home.setting.SettingScreen
 import com.anshyeon.fashioncode.ui.screen.home.style.create.StyleCreateScreen
 import com.anshyeon.fashioncode.ui.screen.home.style.detail.StyleDetailScreen
@@ -79,6 +80,13 @@ fun HomeNavGraph(navController: NavHostController) {
                 SerializationUtils.fromJson<Style>(styleJson)!!,
             )
         }
+        composable(
+            route = DetailHomeScreen.OtherProfile.routeWithArgName(),
+            arguments = DetailHomeScreen.OtherProfile.arguments
+        ) { navBackStackEntry ->
+            val styleId = navBackStackEntry.arguments?.getString("styleId").toString()
+            OtherProfileScreen(navController, styleId)
+        }
     }
 }
 
@@ -123,6 +131,7 @@ sealed class DetailHomeScreen(val route: String, val argName: String) {
     object CommunityReply : DetailHomeScreen(route = "COMMUNITY_REPLY", argName = "comment")
     object StyleCreate : DetailHomeScreen(route = "STYLE_CREATE", argName = "")
     object StyleDetail : DetailHomeScreen(route = "STYLE_DETAIL", argName = "style")
+    object OtherProfile : DetailHomeScreen(route = "OTHER_PROFILE", argName = "styleId")
 
     val arguments: List<NamedNavArgument> = listOf(
         navArgument(argName) { type = NavType.StringType }
