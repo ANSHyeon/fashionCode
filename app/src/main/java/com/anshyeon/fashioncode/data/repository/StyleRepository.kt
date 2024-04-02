@@ -29,7 +29,10 @@ import com.anshyeon.fashioncode.util.Constants
 import com.anshyeon.fashioncode.util.DateFormatText
 import kotlinx.coroutines.delay
 import com.anshyeon.fashioncode.util.ImageTypeConvertor
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.onCompletion
 
 import javax.inject.Inject
@@ -194,6 +197,94 @@ class StyleRepository @Inject constructor(
             fireBaseApiClient.createStyle(
                 userDataSource.getIdToken(),
                 style
+            )
+        } catch (e: Exception) {
+            ApiResultException(e)
+        }
+    }
+
+    fun getStyleList(
+        onComplete: () -> Unit,
+        onError: () -> Unit
+    ): Flow<List<Style>> = flow {
+        try {
+            val response = fireBaseApiClient.getStyleList(
+                userDataSource.getIdToken()
+            )
+            response.onSuccess { data ->
+                emit(data.map { entry ->
+                    entry.value.run {
+                        copy(
+                            profileImageUrl = profileImageUrl?.let {
+                                imageDataSource.downloadImage(it)
+                            },
+                            imageUrl = imageLocation?.let {
+                                imageDataSource.downloadImage(it)
+                            }
+                        )
+                    }
+                })
+            }.onError { _, _ ->
+                onError()
+            }.onException {
+                onError()
+            }
+        } catch (e: Exception) {
+            onError()
+        }
+    }.onCompletion {
+        onComplete()
+    }.flowOn(Dispatchers.Default)
+
+    fun getStyleLikeList(
+        styleId: String,
+        onComplete: () -> Unit,
+        onError: () -> Unit
+    ): Flow<List<String>> = flow {
+        try {
+            val response = fireBaseApiClient.getStyleLikes(
+                styleId,
+                userDataSource.getIdToken()
+            )
+            response.onSuccess { data ->
+                emit(data.map {
+                    it.value
+                })
+            }.onError { _, _ ->
+                onError()
+            }.onException {
+                onError()
+            }
+        } catch (e: Exception) {
+            onError()
+        }
+    }.onCompletion {
+        onComplete()
+    }.flowOn(Dispatchers.Default)
+
+    suspend fun createLike(
+        styleId: String
+    ): ApiResponse<Unit> {
+        return try {
+            fireBaseApiClient.createStyleLike(
+                styleId,
+                userDataSource.getUserId(),
+                userDataSource.getIdToken(),
+                userDataSource.getUserId()
+            )
+        } catch (e: Exception) {
+            ApiResultException(e)
+        }
+    }
+
+    suspend fun deleteLike(
+        styleId: String
+    ): ApiResponse<Unit> {
+        return try {
+            fireBaseApiClient.deleteStyleLike(
+                styleId,
+                userDataSource.getUserId(),
+                userDataSource.getIdToken(),
             )
         } catch (e: Exception) {
             ApiResultException(e)
