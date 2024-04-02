@@ -2,6 +2,7 @@ package com.anshyeon.fashioncode.ui.screen.home.style.home
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -95,7 +96,10 @@ fun StyleScreen(navController: NavHostController) {
                         userIdState,
                         style = style,
                         { viewModel.createLike(it) },
-                        { viewModel.deleteLike(it) }
+                        { viewModel.deleteLike(it) },
+                        {
+                            viewModel.navigateStyleDetail(navController, style)
+                        }
                     )
                 }
             }
@@ -112,13 +116,15 @@ fun StyleBox(
     userIdState: String,
     style: Style,
     createLike: (String) -> Unit,
-    deleteLike: (String) -> Unit
+    deleteLike: (String) -> Unit,
+    onClick: () -> Unit
 ) {
     Box(
         modifier = modifier
             .padding(8.dp)
             .border(1.dp, Gray, RoundedCornerShape(10.dp))
             .padding(8.dp)
+            .clickable { onClick() }
     ) {
         Column {
             UserProfileDefault(style.profileImageUrl, style.nickName)

@@ -6,10 +6,8 @@ import androidx.navigation.NavHostController
 import com.anshyeon.fashioncode.data.model.Style
 import com.anshyeon.fashioncode.data.repository.AuthRepository
 import com.anshyeon.fashioncode.data.repository.StyleRepository
-import com.anshyeon.fashioncode.network.extentions.onError
-import com.anshyeon.fashioncode.network.extentions.onException
-import com.anshyeon.fashioncode.network.extentions.onSuccess
 import com.anshyeon.fashioncode.ui.graph.DetailHomeScreen
+import com.anshyeon.fashioncode.util.SerializationUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,6 +18,8 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
 import javax.inject.Inject
 
 @HiltViewModel
@@ -82,27 +82,13 @@ class StyleViewModel @Inject constructor(
 
     fun createLike(styleId: String) {
         viewModelScope.launch {
-            val result = styleRepository.createLike(
-                styleId
-            )
-            result.onSuccess { savedComment ->
-
-            }.onError { _, _ ->
-            }.onException {
-            }
+            styleRepository.createLike(styleId)
         }
     }
 
     fun deleteLike(styleId: String) {
         viewModelScope.launch {
-            val result = styleRepository.deleteLike(
-                styleId
-            )
-            result.onSuccess { savedComment ->
-
-            }.onError { _, _ ->
-            }.onException {
-            }
+            styleRepository.deleteLike(styleId)
         }
     }
 
@@ -112,5 +98,14 @@ class StyleViewModel @Inject constructor(
 
     fun navigateStyleCreate(navController: NavHostController) {
         navController.navigate(DetailHomeScreen.StyleCreate.route)
+    }
+
+    fun navigateStyleDetail(
+        navController: NavHostController,
+        style: Style,
+    ) {
+        val styleJson = SerializationUtils.toJson(style)
+        val encodedStyleUrl = URLEncoder.encode(styleJson, StandardCharsets.UTF_8.toString())
+        navController.navigate("${DetailHomeScreen.StyleDetail.route}/${encodedStyleUrl}")
     }
 }

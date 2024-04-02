@@ -236,6 +236,41 @@ class StyleRepository @Inject constructor(
         onComplete()
     }.flowOn(Dispatchers.Default)
 
+    fun getStyleListWithWriter(
+        userId: String,
+        onComplete: () -> Unit,
+        onError: () -> Unit
+    ): Flow<List<Style>> = flow {
+        try {
+            val response = fireBaseApiClient.getStyleListWithWriter(
+                userDataSource.getIdToken(),
+                "\"${userId}\""
+            )
+            response.onSuccess { data ->
+                emit(data.map { entry ->
+                    entry.value.run {
+                        copy(
+                            profileImageUrl = profileImageUrl?.let {
+                                imageDataSource.downloadImage(it)
+                            },
+                            imageUrl = imageLocation?.let {
+                                imageDataSource.downloadImage(it)
+                            }
+                        )
+                    }
+                })
+            }.onError { _, _ ->
+                onError()
+            }.onException {
+                onError()
+            }
+        } catch (e: Exception) {
+            onError()
+        }
+    }.onCompletion {
+        onComplete()
+    }.flowOn(Dispatchers.Default)
+
     fun getStyleLikeList(
         styleId: String,
         onComplete: () -> Unit,

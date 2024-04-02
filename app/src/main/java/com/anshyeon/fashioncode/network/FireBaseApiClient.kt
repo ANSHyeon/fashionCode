@@ -81,6 +81,12 @@ interface FireBaseApiClient {
         @Query("auth") auth: String?,
     ): ApiResponse<Map<String, Style>>
 
+    @GET("styles.json?orderBy=\"writer\"")
+    suspend fun getStyleListWithWriter(
+        @Query("auth") auth: String?,
+        @Query("equalTo") writer: String
+    ): ApiResponse<Map<String, Style>>
+
     @PUT("likes/{styleId}/{userId}.json")
     suspend fun createStyleLike(
         @Path("styleId") styleId: String,
