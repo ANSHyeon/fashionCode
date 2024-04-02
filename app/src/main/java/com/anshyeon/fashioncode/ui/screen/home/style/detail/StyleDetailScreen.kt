@@ -93,7 +93,7 @@ fun StyleDetailScreen(navController: NavHostController, style: Style) {
                             )
                         }
                     }
-                    items(styleListState) { style ->
+                    items(styleListState.filter { it.styleId != style.styleId }) { style ->
                         StyleBox(
                             modifier = Modifier,
                             userIdState,
