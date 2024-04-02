@@ -6,6 +6,7 @@ import androidx.compose.material.IconButton
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
@@ -58,6 +59,47 @@ fun BackButtonAppBar(title: String = "", onclick: () -> Unit) {
                 Icon(
                     imageVector = Icons.Filled.ArrowBack,
                     contentDescription = "Navigate Back Icon",
+                    tint = Color.Black
+                )
+            }
+        }
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun BackButtonWithActionAppBar(title: String = "", onclick: () -> Unit, onAction: () -> Unit) {
+    CenterAlignedTopAppBar(
+        title = {
+            Text(
+                text = title,
+                style = TextStyle(
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            )
+        },
+        colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+            containerColor = Color.White
+        ),
+        navigationIcon = {
+            IconButton(
+                onClick = { onclick() }
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.ArrowBack,
+                    contentDescription = "Navigate Back Icon",
+                    tint = Color.Black
+                )
+            }
+        },
+        actions = {
+            IconButton(
+                onClick = { onAction() }
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Check,
+                    contentDescription = "Action save Icon",
                     tint = Color.Black
                 )
             }

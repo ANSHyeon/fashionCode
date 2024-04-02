@@ -1,5 +1,6 @@
 package com.anshyeon.fashioncode.ui.screen.home.style.create
 
+import android.content.Context
 import android.graphics.Bitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -7,6 +8,9 @@ import androidx.navigation.NavHostController
 import com.anshyeon.fashioncode.data.model.Clothes
 import com.anshyeon.fashioncode.data.model.ClothesType
 import com.anshyeon.fashioncode.data.repository.StyleRepository
+import com.anshyeon.fashioncode.network.extentions.onError
+import com.anshyeon.fashioncode.network.extentions.onException
+import com.anshyeon.fashioncode.network.extentions.onSuccess
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
@@ -26,11 +30,14 @@ class StyleCreateViewModel @Inject constructor(
     private val _clothesList = MutableStateFlow(listOf(Clothes()))
     val clothesList: StateFlow<List<Clothes>> = _clothesList
 
-    private val _isLoading = MutableStateFlow(false)
-    val isLoading: StateFlow<Boolean> = _isLoading
+    private val _selectedClothesList = MutableStateFlow<List<Clothes>>(emptyList())
+    val selectedClothesList: StateFlow<List<Clothes>> = _selectedClothesList
 
     private val _isCutOutLoading = MutableStateFlow(false)
     val isCutOutLoading: StateFlow<Boolean> = _isCutOutLoading
+
+    private val _isCreateStyleLoading = MutableStateFlow(false)
+    val isCreateStyleLoading: StateFlow<Boolean> = _isCreateStyleLoading
 
     private val _snackBarText = MutableStateFlow("")
     val snackBarText: StateFlow<String> = _snackBarText
@@ -58,7 +65,7 @@ class StyleCreateViewModel @Inject constructor(
         )
     }
 
-    fun cutoutImage(bitmap: Bitmap) {
+    fun cutoutImage(context: Context, bitmap: Bitmap) {
         _isCutOutLoading.value = true
         viewModelScope.launch {
             val getDropBoxTokenJob = viewModelScope.async {
@@ -79,12 +86,40 @@ class StyleCreateViewModel @Inject constructor(
                 adobeToken,
                 dropboxToken,
                 dropBoxLink,
-                path
+                path,
+                context
             ) {
                 _showSnackBar.value = true
                 _snackBarText.value = "잠시 후 다시 시도해 주십시오"
             }
+            _isCutOutLoading.value = false
         }
+    }
+
+    fun createStyle(navController: NavHostController, bitmap: Bitmap) {
+        _isCreateStyleLoading.value = true
+        viewModelScope.launch {
+            val result = styleRepository.createStylePost(
+                bitmap
+            )
+            result.onSuccess {
+                _isCreateStyleLoading.value = false
+                navigateBack(navController)
+            }.onError { _, _ ->
+                _isCreateStyleLoading.value = false
+                _showSnackBar.value = true
+                _snackBarText.value = "잠시 후 다시 시도해 주십시오"
+            }.onException {
+                _isCreateStyleLoading.value = false
+                _showSnackBar.value = true
+                _snackBarText.value = "잠시 후 다시 시도해 주십시오"
+            }
+        }
+    }
+
+    fun addSelectedClothes(clothes: Clothes) {
+        _selectedClothesList.value =
+            _selectedClothesList.value.toMutableList().apply { add(clothes) }.toList()
     }
 
     fun changeClothesType(type: ClothesType) {

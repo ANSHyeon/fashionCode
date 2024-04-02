@@ -1,7 +1,9 @@
 package com.anshyeon.fashioncode.data.repository
 
+import android.content.Context
 import android.graphics.Bitmap
 import com.anshyeon.fashioncode.BuildConfig
+import com.anshyeon.fashioncode.data.PreferenceManager
 import com.anshyeon.fashioncode.data.dataSource.ImageDataSource
 import com.anshyeon.fashioncode.data.dataSource.UserDataSource
 import com.anshyeon.fashioncode.data.local.dao.ClothesDao
@@ -13,13 +15,20 @@ import com.anshyeon.fashioncode.data.model.ClothesType
 import com.anshyeon.fashioncode.data.model.CommitInfo
 import com.anshyeon.fashioncode.data.model.DropBoxDownloadRequestBody
 import com.anshyeon.fashioncode.data.model.DropBoxRequestBody
+import com.anshyeon.fashioncode.data.model.Style
 import com.anshyeon.fashioncode.network.AdobeApiClient
 import com.anshyeon.fashioncode.network.AdobeLoginApiClient
 import com.anshyeon.fashioncode.network.DropboxApiClient
+import com.anshyeon.fashioncode.network.FireBaseApiClient
 import com.anshyeon.fashioncode.network.extentions.onError
 import com.anshyeon.fashioncode.network.extentions.onException
 import com.anshyeon.fashioncode.network.extentions.onSuccess
+import com.anshyeon.fashioncode.network.model.ApiResponse
+import com.anshyeon.fashioncode.network.model.ApiResultException
+import com.anshyeon.fashioncode.util.Constants
+import com.anshyeon.fashioncode.util.DateFormatText
 import kotlinx.coroutines.delay
+import com.anshyeon.fashioncode.util.ImageTypeConvertor
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.onCompletion
 
@@ -29,9 +38,11 @@ class StyleRepository @Inject constructor(
     private val adobeApiClient: AdobeApiClient,
     private val adobeLoginApiClient: AdobeLoginApiClient,
     private val dropBoxApiClient: DropboxApiClient,
+    private val fireBaseApiClient: FireBaseApiClient,
     private val imageDataSource: ImageDataSource,
     private val userDataSource: UserDataSource,
     private val clothesDao: ClothesDao,
+    private val preferenceManager: PreferenceManager,
 ) {
 
     suspend fun getDropBoxLink(token: String?, bitmap: Bitmap): List<String?> {
@@ -69,6 +80,7 @@ class StyleRepository @Inject constructor(
         dropBoxToken: String?,
         dropBoxLink: String?,
         path: String?,
+        context: Context,
         onError: () -> Unit
     ) {
         try {
@@ -86,13 +98,13 @@ class StyleRepository @Inject constructor(
             response.onSuccess {
                 delay(8000)
                 val result = getDropBoxImage(dropBoxToken, path)
-                result?.let {
+                result?.let { imageUri ->
                     val userId = userDataSource.getUserId()
                     val clothes = Clothes(
                         userId + path,
                         userId,
                         currentClothesType,
-                        imageUrl = it
+                        ImageTypeConvertor.uriToBitmap(context, imageUri),
                     )
                     insertClothes(clothes)
                 } ?: throw Exception()
@@ -160,6 +172,31 @@ class StyleRepository @Inject constructor(
             result
         } catch (e: Exception) {
             result
+        }
+    }
+
+    suspend fun createStylePost(
+        bitmap: Bitmap
+    ): ApiResponse<Unit> {
+        val userId = userDataSource.getUserId()
+        val currentTime = System.currentTimeMillis()
+        val styleId = userId + currentTime
+        val imageLocation = imageDataSource.uploadBitMap(bitmap)
+        val style = Style(
+            styleId,
+            userId,
+            DateFormatText.getCurrentTime(),
+            preferenceManager.getString(Constants.KEY_USER_NICKNAME, ""),
+            preferenceManager.getString(Constants.KEY_USER_PROFILE_URI, ""),
+            imageLocation
+        )
+        return try {
+            fireBaseApiClient.createStyle(
+                userDataSource.getIdToken(),
+                style
+            )
+        } catch (e: Exception) {
+            ApiResultException(e)
         }
     }
 
