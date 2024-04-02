@@ -17,7 +17,15 @@ import com.anshyeon.fashioncode.ui.component.snackBar.TextSnackBarContainer
 fun OtherProfileScreen(navController: NavHostController, userId: String) {
 
     val viewModel: OtherProfileViewModel = hiltViewModel()
+    viewModel.getUser(userId)
+    viewModel.getStyleList(userId)
 
+    val userState by viewModel.user.collectAsStateWithLifecycle()
+    val styleListState by viewModel.styleList.collectAsStateWithLifecycle()
+    val isGetStyleListLoadingState by viewModel.isGetStyleListLoading.collectAsStateWithLifecycle()
+    val isGetUserLoadingState by viewModel.isGetUserLoading.collectAsStateWithLifecycle()
+    val isGetStyleListCompleteState by viewModel.isGetStyleListComplete.collectAsStateWithLifecycle()
+    val isGetUserCompleteState by viewModel.isGetUserComplete.collectAsStateWithLifecycle()
     val isLoadingState by viewModel.isLoading.collectAsStateWithLifecycle()
     val snackBarTextState by viewModel.snackBarText.collectAsStateWithLifecycle()
     val showSnackBarState by viewModel.showSnackBar.collectAsStateWithLifecycle()
@@ -38,7 +46,7 @@ fun OtherProfileScreen(navController: NavHostController, userId: String) {
             Box(modifier = Modifier.padding(it))
 
             LoadingView(
-                isLoading = isLoadingState
+                isLoading = isLoadingState || isGetUserLoadingState || isGetStyleListLoadingState
             )
         }
     }
