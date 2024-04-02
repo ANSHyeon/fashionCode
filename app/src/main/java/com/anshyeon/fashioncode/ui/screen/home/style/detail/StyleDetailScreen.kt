@@ -101,6 +101,7 @@ fun StyleDetailScreen(navController: NavHostController, style: Style) {
                             { viewModel.createLike(it) },
                             { viewModel.deleteLike(it) },
                             {
+                                viewModel.navigateOtherStyleDetail(navController, style)
                             }
                         )
                     }

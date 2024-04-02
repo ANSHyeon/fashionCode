@@ -8,6 +8,9 @@ import com.anshyeon.fashioncode.data.model.User
 import com.anshyeon.fashioncode.data.repository.AuthRepository
 import com.anshyeon.fashioncode.data.repository.StyleRepository
 import com.anshyeon.fashioncode.network.extentions.onSuccess
+import com.anshyeon.fashioncode.ui.graph.BottomNavItem
+import com.anshyeon.fashioncode.ui.graph.DetailHomeScreen
+import com.anshyeon.fashioncode.util.SerializationUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,6 +19,8 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.launch
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
 import javax.inject.Inject
 
 @HiltViewModel
@@ -145,5 +150,16 @@ class StyleDetailViewModel @Inject constructor(
 
     fun navigateBack(navController: NavHostController) {
         navController.popBackStack()
+    }
+
+    fun navigateOtherStyleDetail(
+        navController: NavHostController,
+        style: Style,
+    ) {
+        val styleJson = SerializationUtils.toJson(style)
+        val encodedStyleUrl = URLEncoder.encode(styleJson, StandardCharsets.UTF_8.toString())
+        navController.navigate("${DetailHomeScreen.StyleDetail.route}/${encodedStyleUrl}") {
+            popUpTo(BottomNavItem.Style.route)
+        }
     }
 }
