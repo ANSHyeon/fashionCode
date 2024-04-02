@@ -84,8 +84,8 @@ fun HomeNavGraph(navController: NavHostController) {
             route = DetailHomeScreen.OtherProfile.routeWithArgName(),
             arguments = DetailHomeScreen.OtherProfile.arguments
         ) { navBackStackEntry ->
-            val styleId = navBackStackEntry.arguments?.getString("styleId").toString()
-            OtherProfileScreen(navController, styleId)
+            val userId = navBackStackEntry.arguments?.getString("userId").toString()
+            OtherProfileScreen(navController, userId)
         }
     }
 }
@@ -131,7 +131,7 @@ sealed class DetailHomeScreen(val route: String, val argName: String) {
     object CommunityReply : DetailHomeScreen(route = "COMMUNITY_REPLY", argName = "comment")
     object StyleCreate : DetailHomeScreen(route = "STYLE_CREATE", argName = "")
     object StyleDetail : DetailHomeScreen(route = "STYLE_DETAIL", argName = "style")
-    object OtherProfile : DetailHomeScreen(route = "OTHER_PROFILE", argName = "styleId")
+    object OtherProfile : DetailHomeScreen(route = "OTHER_PROFILE", argName = "userId")
 
     val arguments: List<NamedNavArgument> = listOf(
         navArgument(argName) { type = NavType.StringType }
