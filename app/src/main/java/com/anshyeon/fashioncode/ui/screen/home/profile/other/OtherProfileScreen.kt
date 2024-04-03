@@ -82,7 +82,7 @@ fun OtherProfileScreen(navController: NavHostController, userId: String) {
                     item(span = { GridItemSpan(2) }) {
                         Column {
                             OtherUserProfile(
-                                modifier = Modifier.size(40.dp),
+                                modifier = Modifier.size(72.dp),
                                 textUnit = 14.sp,
                                 profileUrl = userState?.profileUrl,
                                 nickName = userState?.nickName,

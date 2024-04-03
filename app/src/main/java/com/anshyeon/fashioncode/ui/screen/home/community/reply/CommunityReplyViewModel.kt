@@ -10,6 +10,7 @@ import com.anshyeon.fashioncode.data.repository.ReplyRepository
 import com.anshyeon.fashioncode.network.extentions.onError
 import com.anshyeon.fashioncode.network.extentions.onException
 import com.anshyeon.fashioncode.network.extentions.onSuccess
+import com.anshyeon.fashioncode.ui.graph.DetailHomeScreen
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -136,6 +137,10 @@ class CommunityReplyViewModel @Inject constructor(
 
     fun dismissSnackBar() {
         _showSnackBar.value = false
+    }
+
+    fun navigateOtherUserProfile(navController: NavHostController, userId: String?) {
+        navController.navigate("${DetailHomeScreen.OtherProfile.route}/${userId}")
     }
 
     fun navigateBack(navController: NavHostController) {

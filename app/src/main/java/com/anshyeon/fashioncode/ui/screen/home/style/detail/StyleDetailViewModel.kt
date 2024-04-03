@@ -162,4 +162,8 @@ class StyleDetailViewModel @Inject constructor(
             popUpTo(BottomNavItem.Style.route)
         }
     }
+
+    fun navigateOtherUserProfile(navController: NavHostController, userId: String) {
+        navController.navigate("${DetailHomeScreen.OtherProfile.route}/${userId}")
+    }
 }

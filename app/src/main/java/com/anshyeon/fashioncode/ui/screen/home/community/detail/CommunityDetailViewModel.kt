@@ -206,6 +206,10 @@ class CommunityDetailViewModel @Inject constructor(
         navController.navigate("${DetailHomeScreen.CommunityReply.route}/${encodedUrl}")
     }
 
+    fun navigateOtherUserProfile(navController: NavHostController, userId: String?) {
+        navController.navigate("${DetailHomeScreen.OtherProfile.route}/${userId}")
+    }
+
     fun navigateBack(navController: NavHostController) {
         navController.popBackStack()
     }

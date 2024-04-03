@@ -1,5 +1,6 @@
 package com.anshyeon.fashioncode.ui.screen.home.style.detail
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -83,6 +84,7 @@ fun StyleDetailScreen(navController: NavHostController, style: Style) {
                             styleListState,
                             { viewModel.createLike(it) },
                             { viewModel.deleteLike(it) },
+                            { viewModel.navigateOtherUserProfile(navController, userIdState) }
                         )
                     }
                     if (styleListState.isNotEmpty()) {
@@ -125,6 +127,7 @@ fun StyleDetail(
     styleList: List<Style>,
     createLike: (String) -> Unit,
     deleteLike: (String) -> Unit,
+    onNavigateOtherUserProfile: () -> Unit
 ) {
     val currentStyle =
         if (styleList.isEmpty()) null else styleList.first { it.styleId == style.styleId }
@@ -133,7 +136,11 @@ fun StyleDetail(
         modifier = modifier
     ) {
         Column {
-            UserProfileDefault(Modifier.size(32.dp), 10.sp, user?.profileUrl, style.nickName)
+            Box(modifier = Modifier.clickable {
+                onNavigateOtherUserProfile()
+            }) {
+                UserProfileDefault(Modifier.size(32.dp), 10.sp, user?.profileUrl, style.nickName)
+            }
             AsyncImage(
                 modifier = Modifier.fillMaxWidth(),
                 model = currentStyle?.imageUrl,
