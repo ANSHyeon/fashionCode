@@ -77,6 +77,7 @@ class AuthRepository @Inject constructor(
                     emit(
                         ApiResultSuccess(
                             user.copy(
+                                key = data.keys.first(),
                                 profileUrl = user.profileUri?.let { imageDataSource.downloadImage(it) }
                             )
                         )
@@ -104,7 +105,6 @@ class AuthRepository @Inject constructor(
             val user = User(
                 userId = userId,
                 nickName = nickname,
-                email = userDataSource.getEmail(),
                 profileUri = uriLocation,
             )
             preferenceManager.setUserImage(Constants.KEY_USER_PROFILE_URI, uriLocation)
