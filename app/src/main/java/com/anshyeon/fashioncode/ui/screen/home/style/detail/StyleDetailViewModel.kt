@@ -163,7 +163,7 @@ class StyleDetailViewModel @Inject constructor(
         }
     }
 
-    fun navigateOtherUserProfile(navController: NavHostController, userId: String) {
+    fun navigateOtherUserProfile(navController: NavHostController, userId: String?) {
         navController.navigate("${DetailHomeScreen.OtherProfile.route}/${userId}")
     }
 }

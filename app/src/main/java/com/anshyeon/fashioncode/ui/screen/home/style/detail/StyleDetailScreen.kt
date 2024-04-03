@@ -84,7 +84,7 @@ fun StyleDetailScreen(navController: NavHostController, style: Style) {
                             styleListState,
                             { viewModel.createLike(it) },
                             { viewModel.deleteLike(it) },
-                            { viewModel.navigateOtherUserProfile(navController, userIdState) }
+                            { viewModel.navigateOtherUserProfile(navController, userState?.userId) }
                         )
                     }
                     if (styleListState.isNotEmpty()) {
