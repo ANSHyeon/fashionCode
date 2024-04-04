@@ -19,6 +19,7 @@ import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -39,21 +40,32 @@ import com.anshyeon.fashioncode.ui.component.appBar.BackButtonAppBar
 import com.anshyeon.fashioncode.ui.component.loadingView.LoadingView
 import com.anshyeon.fashioncode.ui.component.snackBar.TextSnackBarContainer
 import com.anshyeon.fashioncode.ui.screen.home.style.home.StyleBox
+import com.anshyeon.fashioncode.ui.theme.Gray
 import com.anshyeon.fashioncode.ui.theme.SkyBlue
 
 @Composable
 fun OtherProfileScreen(navController: NavHostController, userId: String) {
 
     val viewModel: OtherProfileViewModel = hiltViewModel()
-    viewModel.getUser(userId)
-    viewModel.getStyleList(userId)
+    LaunchedEffect(true) {
+        viewModel.getUser(userId)
+        viewModel.getFollower(userId)
+        viewModel.getFollowing(userId)
+        viewModel.getStyleList(userId)
+    }
 
     val userState by viewModel.user.collectAsStateWithLifecycle()
     val styleListState by viewModel.styleList.collectAsStateWithLifecycle()
+    val followerListState by viewModel.followerList.collectAsStateWithLifecycle()
+    val followingListState by viewModel.followingList.collectAsStateWithLifecycle()
     val isGetStyleListLoadingState by viewModel.isGetStyleListLoading.collectAsStateWithLifecycle()
     val isGetUserLoadingState by viewModel.isGetUserLoading.collectAsStateWithLifecycle()
+    val isGetFollowerLoadingState by viewModel.isGetFollowerLoading.collectAsStateWithLifecycle()
+    val isGetFollowingLoadingState by viewModel.isGetFollowingLoading.collectAsStateWithLifecycle()
     val isGetStyleListCompleteState by viewModel.isGetStyleListComplete.collectAsStateWithLifecycle()
     val isGetUserCompleteState by viewModel.isGetUserComplete.collectAsStateWithLifecycle()
+    val isGetFollowerCompleteState by viewModel.isGetFollowerComplete.collectAsStateWithLifecycle()
+    val isGetFollowingCompleteState by viewModel.isGetFollowingComplete.collectAsStateWithLifecycle()
     val isLoadingState by viewModel.isLoading.collectAsStateWithLifecycle()
     val snackBarTextState by viewModel.snackBarText.collectAsStateWithLifecycle()
     val showSnackBarState by viewModel.showSnackBar.collectAsStateWithLifecycle()
@@ -71,7 +83,8 @@ fun OtherProfileScreen(navController: NavHostController, userId: String) {
             onDismissSnackbar = { viewModel.dismissSnackBar() }
         ) {
 
-            if (isGetStyleListCompleteState && isGetUserCompleteState) {
+            if (isGetStyleListCompleteState && isGetUserCompleteState &&
+                isGetFollowerCompleteState && isGetFollowingCompleteState) {
                 LazyVerticalGrid(
                     modifier = Modifier
                         .fillMaxSize()
@@ -87,23 +100,31 @@ fun OtherProfileScreen(navController: NavHostController, userId: String) {
                                 profileUrl = userState?.profileUrl,
                                 nickName = userState?.nickName,
                                 codiCount = styleListState.size,
-                                followerCount = null,
-                                followingCount = null,
+                                followerCount = followerListState.size,
+                                followingCount = followingListState.size,
                             )
                             if (viewModel.myUserId != userState?.userId) {
+                                val isFollow =
+                                    followerListState.any { it.follower == viewModel.myUserId }
                                 Button(
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .padding(top = 5.dp),
                                     shape = RoundedCornerShape(10.dp),
                                     colors = ButtonDefaults.buttonColors(
-                                        backgroundColor = SkyBlue,
-                                        contentColor = Color.White,
-                                        disabledBackgroundColor = Color.Gray,
-                                        disabledContentColor = Color.Black
+                                        backgroundColor = if (isFollow) Gray else SkyBlue,
+                                        contentColor = if (isFollow) Color.Black else Color.White,
                                     ),
                                     enabled = true,
-                                    onClick = { }
+                                    onClick = {
+                                        if (isFollow) {
+                                            viewModel.deleteFollow(userState?.userId)
+                                            viewModel.removeFollower()
+                                        } else {
+                                            viewModel.createFollow(userState?.userId)
+                                            viewModel.addFollower(userState?.userId)
+                                        }
+                                    }
                                 ) {
                                     Text(
                                         text = if (true) "팔로우" else "팔로잉",
@@ -146,7 +167,8 @@ fun OtherProfileScreen(navController: NavHostController, userId: String) {
             }
 
             LoadingView(
-                isLoading = isLoadingState || isGetUserLoadingState || isGetStyleListLoadingState
+                isLoading = isLoadingState || isGetUserLoadingState || isGetStyleListLoadingState ||
+                        isGetFollowerLoadingState || isGetFollowingLoadingState
             )
         }
     }

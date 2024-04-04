@@ -3,6 +3,7 @@ package com.anshyeon.fashioncode.ui.screen.home.profile.other
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavHostController
+import com.anshyeon.fashioncode.data.model.Follow
 import com.anshyeon.fashioncode.data.model.Style
 import com.anshyeon.fashioncode.data.model.User
 import com.anshyeon.fashioncode.data.repository.AuthRepository
@@ -37,6 +38,12 @@ class OtherProfileViewModel @Inject constructor(
     private val _styleList = MutableStateFlow<List<Style>>(emptyList())
     var styleList: StateFlow<List<Style>> = _styleList
 
+    private val _followerList = MutableStateFlow<List<Follow>>(emptyList())
+    var followerList: StateFlow<List<Follow>> = _followerList
+
+    private val _followingList = MutableStateFlow<List<Follow>>(emptyList())
+    var followingList: StateFlow<List<Follow>> = _followingList
+
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading
 
@@ -46,11 +53,23 @@ class OtherProfileViewModel @Inject constructor(
     private val _isGetUserLoading = MutableStateFlow(false)
     val isGetUserLoading: StateFlow<Boolean> = _isGetUserLoading
 
+    private val _isGetFollowerLoading = MutableStateFlow(false)
+    val isGetFollowerLoading: StateFlow<Boolean> = _isGetFollowerLoading
+
+    private val _isGetFollowingLoading = MutableStateFlow(false)
+    val isGetFollowingLoading: StateFlow<Boolean> = _isGetFollowingLoading
+
     private val _isGetStyleListComplete = MutableStateFlow(false)
     val isGetStyleListComplete: StateFlow<Boolean> = _isGetStyleListComplete
 
     private val _isGetUserComplete = MutableStateFlow(false)
     val isGetUserComplete: StateFlow<Boolean> = _isGetUserComplete
+
+    private val _isGetFollowerComplete = MutableStateFlow(false)
+    val isGetFollowerComplete: StateFlow<Boolean> = _isGetFollowerComplete
+
+    private val _isGetFollowingComplete = MutableStateFlow(false)
+    val isGetFollowingComplete: StateFlow<Boolean> = _isGetFollowingComplete
 
     private val _snackBarText = MutableStateFlow("")
     val snackBarText: StateFlow<String> = _snackBarText
@@ -129,6 +148,46 @@ class OtherProfileViewModel @Inject constructor(
         }
     }
 
+    fun getFollower(userId: String) {
+        _isGetFollowerLoading.value = true
+        viewModelScope.launch {
+            val response = authRepository.getFollowerList(
+                userId,
+                onComplete = {
+                    _isGetFollowerLoading.value = false
+                    _isGetFollowerComplete.value = true
+                },
+                onError = {
+                    _showSnackBar.value = true
+                    _snackBarText.value = "잠시 후 다시 시도해 주십시오"
+                }
+            )
+            response.collectLatest {
+                _followerList.value = it
+            }
+        }
+    }
+
+    fun getFollowing(userId: String) {
+        _isGetFollowingLoading.value = true
+        viewModelScope.launch {
+            val response = authRepository.getFollowingList(
+                userId,
+                onComplete = {
+                    _isGetFollowingLoading.value = false
+                    _isGetFollowingComplete.value = true
+                },
+                onError = {
+                    _showSnackBar.value = true
+                    _snackBarText.value = "잠시 후 다시 시도해 주십시오"
+                }
+            )
+            response.collectLatest {
+                _followingList.value = it
+            }
+        }
+    }
+
     fun createLike(styleId: String) {
         viewModelScope.launch {
             styleRepository.createLike(
@@ -152,6 +211,36 @@ class OtherProfileViewModel @Inject constructor(
             likeCount = count
         )
         _styleList.value = tempList.toList()
+    }
+
+    fun createFollow(followingUserId: String?) {
+        viewModelScope.launch {
+            authRepository.createFollow(
+                followingUserId ?: ""
+            )
+        }
+    }
+
+    fun deleteFollow(followingUserId: String?) {
+        viewModelScope.launch {
+            authRepository.deleteFollow(
+                followingUserId ?: ""
+            )
+        }
+    }
+
+    fun addFollower(followingUserId: String?) {
+        _followerList.value = _followerList.value.toMutableList().apply {
+            add(Follow("", myUserId, followingUserId ?: ""))
+        }
+    }
+
+    fun removeFollower() {
+        _followerList.value = _followerList.value.toMutableList().apply {
+            removeIf {
+                it.follower == myUserId
+            }
+        }
     }
 
     fun dismissSnackBar() {
