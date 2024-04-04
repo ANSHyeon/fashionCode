@@ -10,6 +10,5 @@ data class Reply(
     val writer: String,
     val nickName: String,
     val createdDate: String,
-    val profileImageUri: String? = null,
     val profileImageUrl: String? = null,
 )

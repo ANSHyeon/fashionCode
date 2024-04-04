@@ -34,7 +34,6 @@ import coil.compose.AsyncImage
 import com.anshyeon.fashioncode.R
 import com.anshyeon.fashioncode.data.model.Comment
 import com.anshyeon.fashioncode.data.model.Post
-import com.anshyeon.fashioncode.data.model.User
 import com.anshyeon.fashioncode.ui.component.appBar.BackButtonAppBar
 import com.anshyeon.fashioncode.ui.component.commentSubmit.CommentSubmit
 import com.anshyeon.fashioncode.ui.component.loadingView.LoadingView
@@ -54,16 +53,13 @@ fun CommunityDetailScreen(navController: NavHostController, postId: String) {
     val scrollState = rememberScrollState()
 
     val postState by viewModel.post.collectAsStateWithLifecycle()
-    val userState by viewModel.user.collectAsStateWithLifecycle()
     val commentBodyState by viewModel.commentBody.collectAsStateWithLifecycle()
     val commentListState by viewModel.commentList.collectAsStateWithLifecycle()
     val addedCommentListState by viewModel.addedCommentList.collectAsStateWithLifecycle()
     val isCreateCommentLoadingState by viewModel.isCreateCommentLoading.collectAsStateWithLifecycle()
-    val isGetUserLoadingState by viewModel.isGetUserLoading.collectAsStateWithLifecycle()
     val isGetPostLoadingState by viewModel.isGetPostLoading.collectAsStateWithLifecycle()
     val isGetCommentListLoadingState by viewModel.isGetCommentListLoading.collectAsStateWithLifecycle()
     val isGetPostCompleteState by viewModel.isGetPostComplete.collectAsStateWithLifecycle()
-    val isGetUserCompleteState by viewModel.isGetUserComplete.collectAsStateWithLifecycle()
     val isGetCommentListCompleteState by viewModel.isGetCommentListComplete.collectAsStateWithLifecycle()
     val snackBarTextState by viewModel.snackBarText.collectAsStateWithLifecycle()
     val showSnackBarState by viewModel.showSnackBar.collectAsStateWithLifecycle()
@@ -93,9 +89,9 @@ fun CommunityDetailScreen(navController: NavHostController, postId: String) {
                     .padding(15.dp)
                     .verticalScroll(scrollState)
             ) {
-                if (isGetPostCompleteState && isGetCommentListCompleteState && isGetUserCompleteState) {
-                    DetailContent(postState, userState) {
-                        viewModel.navigateOtherUserProfile(navController, userState?.userId)
+                if (isGetPostCompleteState && isGetCommentListCompleteState) {
+                    DetailContent(postState) {
+                        viewModel.navigateOtherUserProfile(navController, postState?.writer)
                     }
                     if (commentListState.isNotEmpty() || addedCommentListState.isNotEmpty()) {
                         Spacer(modifier = Modifier.size(10.dp))
@@ -139,7 +135,7 @@ fun CommunityDetailScreen(navController: NavHostController, postId: String) {
                 }
             }
             LoadingView(
-                isLoading = isCreateCommentLoadingState || isGetUserLoadingState || isGetPostLoadingState || isGetCommentListLoadingState
+                isLoading = isCreateCommentLoadingState || isGetPostLoadingState || isGetCommentListLoadingState
             )
 
         }
@@ -147,8 +143,9 @@ fun CommunityDetailScreen(navController: NavHostController, postId: String) {
 }
 
 @Composable
-fun DetailContent(post: Post?, user: User?, onNavigateOtherProfile: () -> Unit) {
-    UserProfileDefault(post?.createdDate, user) {
+fun DetailContent(post: Post?, onNavigateOtherProfile: () -> Unit
+) {
+    UserProfileDefault(post?.createdDate, post?.writerNickName, post?.writerProfileImageUrl) {
         onNavigateOtherProfile()
     }
     Spacer(modifier = Modifier.size(20.dp))
@@ -167,12 +164,17 @@ fun DetailContent(post: Post?, user: User?, onNavigateOtherProfile: () -> Unit) 
 }
 
 @Composable
-fun UserProfileDefault(createDate: String?, user: User?, onNavigateOtherProfile: () -> Unit) {
+fun UserProfileDefault(
+    createDate: String?,
+    userNickName: String?,
+    userProfileUrl: String?,
+    onNavigateOtherProfile: () -> Unit
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
     ) {
-        if (user?.profileUrl == null) {
+        if (userProfileUrl == null) {
             Image(
                 modifier = Modifier
                     .size(40.dp)
@@ -186,7 +188,7 @@ fun UserProfileDefault(createDate: String?, user: User?, onNavigateOtherProfile:
                     .size(40.dp)
                     .clip(CircleShape)
                     .clickable { onNavigateOtherProfile() },
-                model = user.profileUrl,
+                model = userProfileUrl,
                 contentDescription = null,
                 contentScale = ContentScale.Crop
             )
@@ -196,7 +198,7 @@ fun UserProfileDefault(createDate: String?, user: User?, onNavigateOtherProfile:
             Text(
                 modifier = Modifier
                     .clickable { onNavigateOtherProfile() },
-                text = user?.nickName ?: "닉네임을 불러올 수 없습니다.",
+                text = userNickName ?: "닉네임을 불러올 수 없습니다.",
                 fontWeight = FontWeight.Bold
             )
             Text(

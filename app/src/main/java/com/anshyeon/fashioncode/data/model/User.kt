@@ -7,6 +7,5 @@ data class User(
     val userId: String = "",
     val key: String? = null,
     val nickName: String = "",
-    val profileUri: String? = null,
     val profileUrl: String? = null
 )

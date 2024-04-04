@@ -184,14 +184,14 @@ class StyleRepository @Inject constructor(
         val userId = userDataSource.getUserId()
         val currentTime = System.currentTimeMillis()
         val styleId = userId + currentTime
-        val imageLocation = imageDataSource.uploadBitMap(bitmap)
+        val imageUrl = imageDataSource.downloadImage(imageDataSource.uploadBitMap(bitmap))
         val style = Style(
             styleId,
             userId,
             DateFormatText.getCurrentTime(),
             preferenceManager.getString(Constants.KEY_USER_NICKNAME, ""),
-            preferenceManager.getString(Constants.KEY_USER_PROFILE_URI, ""),
-            imageLocation
+            preferenceManager.getString(Constants.KEY_USER_PROFILE_URL, ""),
+            imageUrl
         )
         return try {
             fireBaseApiClient.createStyle(
@@ -213,16 +213,7 @@ class StyleRepository @Inject constructor(
             )
             response.onSuccess { data ->
                 emit(data.map { entry ->
-                    entry.value.run {
-                        copy(
-                            profileImageUrl = profileImageUrl?.let {
-                                imageDataSource.downloadImage(it)
-                            },
-                            imageUrl = imageLocation?.let {
-                                imageDataSource.downloadImage(it)
-                            }
-                        )
-                    }
+                    entry.value
                 })
             }.onError { _, _ ->
                 onError()
@@ -248,16 +239,7 @@ class StyleRepository @Inject constructor(
             )
             response.onSuccess { data ->
                 emit(data.map { entry ->
-                    entry.value.run {
-                        copy(
-                            profileImageUrl = profileImageUrl?.let {
-                                imageDataSource.downloadImage(it)
-                            },
-                            imageUrl = imageLocation?.let {
-                                imageDataSource.downloadImage(it)
-                            }
-                        )
-                    }
+                    entry.value
                 })
             }.onError { _, _ ->
                 onError()

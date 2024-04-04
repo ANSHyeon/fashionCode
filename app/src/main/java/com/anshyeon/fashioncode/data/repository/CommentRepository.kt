@@ -1,7 +1,6 @@
 package com.anshyeon.fashioncode.data.repository
 
 import com.anshyeon.fashioncode.data.PreferenceManager
-import com.anshyeon.fashioncode.data.dataSource.ImageDataSource
 import com.anshyeon.fashioncode.data.dataSource.UserDataSource
 import com.anshyeon.fashioncode.data.model.Comment
 import com.anshyeon.fashioncode.network.FireBaseApiClient
@@ -26,7 +25,6 @@ import javax.inject.Inject
 class CommentRepository @Inject constructor(
     private val fireBaseApiClient: FireBaseApiClient,
     private val userDataSource: UserDataSource,
-    private val imageDataSource: ImageDataSource,
     private val preferenceManager: PreferenceManager,
 ) {
 
@@ -44,7 +42,7 @@ class CommentRepository @Inject constructor(
             userId,
             preferenceManager.getString(Constants.KEY_USER_NICKNAME, ""),
             DateFormatText.getCurrentTime(),
-            preferenceManager.getString(Constants.KEY_USER_PROFILE_URI, ""),
+            preferenceManager.getString(Constants.KEY_USER_PROFILE_URL, ""),
         )
         return try {
             fireBaseApiClient.createComment(
@@ -52,10 +50,7 @@ class CommentRepository @Inject constructor(
                 comment
             )
             ApiResultSuccess(
-                comment.copy(
-                    profileImageUrl = comment.profileImageUri
-                        ?.let { imageDataSource.downloadImage(it) }
-                )
+                comment
             )
         } catch (e: Exception) {
             ApiResultException(e)
@@ -74,20 +69,13 @@ class CommentRepository @Inject constructor(
                 "\"${postId}\""
             )
             response.onSuccess { data ->
-                val commentListWithProfile = viewModelScope.async {
+                val commentList = viewModelScope.async {
                     data.map { entry ->
-                        viewModelScope.async {
-                            entry.value.run {
-                                copy(
-                                    profileImageUrl = profileImageUri
-                                        ?.let { imageDataSource.downloadImage(it) }
-                                )
-                            }
-                        }
+                        entry.value
                     }
                 }
                 emit(
-                    commentListWithProfile.await().map { it.await() }
+                    commentList.await()
                 )
             }.onError { _, message ->
                 onError(message)

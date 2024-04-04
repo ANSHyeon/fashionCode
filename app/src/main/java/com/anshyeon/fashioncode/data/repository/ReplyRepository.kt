@@ -1,7 +1,6 @@
 package com.anshyeon.fashioncode.data.repository
 
 import com.anshyeon.fashioncode.data.PreferenceManager
-import com.anshyeon.fashioncode.data.dataSource.ImageDataSource
 import com.anshyeon.fashioncode.data.dataSource.UserDataSource
 import com.anshyeon.fashioncode.data.model.Reply
 import com.anshyeon.fashioncode.network.FireBaseApiClient
@@ -26,7 +25,6 @@ import javax.inject.Inject
 class ReplyRepository @Inject constructor(
     private val fireBaseApiClient: FireBaseApiClient,
     private val userDataSource: UserDataSource,
-    private val imageDataSource: ImageDataSource,
     private val preferenceManager: PreferenceManager,
 ) {
 
@@ -44,19 +42,14 @@ class ReplyRepository @Inject constructor(
             userId,
             preferenceManager.getString(Constants.KEY_USER_NICKNAME, ""),
             DateFormatText.getCurrentTime(),
-            preferenceManager.getString(Constants.KEY_USER_PROFILE_URI, ""),
+            preferenceManager.getString(Constants.KEY_USER_PROFILE_URL, ""),
         )
         return try {
             fireBaseApiClient.createReply(
                 userDataSource.getIdToken(),
                 reply
             )
-            ApiResultSuccess(
-                reply.copy(
-                    profileImageUrl = reply.profileImageUri
-                        ?.let { imageDataSource.downloadImage(it) }
-                )
-            )
+            ApiResultSuccess(reply)
         } catch (e: Exception) {
             ApiResultException(e)
         }
@@ -76,19 +69,12 @@ class ReplyRepository @Inject constructor(
             response.onSuccess { data ->
                 val replyListWithProfileUrl = viewModelScope.async {
                     data.map { entry ->
-                        viewModelScope.async {
-                            entry.value.run {
-                                copy(
-                                    profileImageUrl = profileImageUri
-                                        ?.let { imageDataSource.downloadImage(it) }
-                                )
-                            }
-                        }
+                        entry.value
                     }
                 }
 
                 emit(
-                    replyListWithProfileUrl.await().map { it.await() }
+                    replyListWithProfileUrl.await()
                 )
             }.onError { _, message ->
                 onError(message)

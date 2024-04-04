@@ -31,7 +31,7 @@ class AuthRepository @Inject constructor(
         return preferenceManager.getString(Constants.KEY_GOOGLE_ID_TOKEN, "")
     }
 
-    suspend fun saveUserInfo(nickname: String, uri: String?) {
+    suspend fun saveUserInfo(nickname: String, url: String?) {
         with(preferenceManager) {
             setGoogleIdToken(
                 Constants.KEY_GOOGLE_ID_TOKEN,
@@ -41,9 +41,9 @@ class AuthRepository @Inject constructor(
                 Constants.KEY_USER_NICKNAME,
                 nickname
             )
-            uri?.let {
+            url?.let {
                 setUserImage(
-                    Constants.KEY_USER_PROFILE_URI,
+                    Constants.KEY_USER_PROFILE_URL,
                     it
                 )
             }
@@ -78,7 +78,6 @@ class AuthRepository @Inject constructor(
                         ApiResultSuccess(
                             user.copy(
                                 key = data.keys.first(),
-                                profileUrl = user.profileUri?.let { imageDataSource.downloadImage(it) }
                             )
                         )
                     )
@@ -100,14 +99,15 @@ class AuthRepository @Inject constructor(
         uri: Uri?
     ): ApiResponse<Unit> {
         return try {
-            val uriLocation = uri?.let { imageDataSource.uploadImage(it) }
+            val imageUrl =
+                uri?.let { imageDataSource.downloadImage(imageDataSource.uploadImage(it)) }
             val userId = userDataSource.getUserId()
             val user = User(
                 userId = userId,
                 nickName = nickname,
-                profileUri = uriLocation,
+                profileUrl = imageUrl,
             )
-            preferenceManager.setUserImage(Constants.KEY_USER_PROFILE_URI, uriLocation)
+            preferenceManager.setUserImage(Constants.KEY_USER_PROFILE_URL, imageUrl)
             fireBaseApiClient.createUser(
                 userDataSource.getIdToken(),
                 user

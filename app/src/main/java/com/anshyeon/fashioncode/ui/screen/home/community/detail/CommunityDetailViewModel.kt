@@ -1,14 +1,11 @@
 package com.anshyeon.fashioncode.ui.screen.home.community.detail
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavHostController
 import com.anshyeon.fashioncode.data.model.Comment
 import com.anshyeon.fashioncode.data.model.Post
 import com.anshyeon.fashioncode.data.model.Reply
-import com.anshyeon.fashioncode.data.model.User
-import com.anshyeon.fashioncode.data.repository.AuthRepository
 import com.anshyeon.fashioncode.data.repository.CommentRepository
 import com.anshyeon.fashioncode.data.repository.PostRepository
 import com.anshyeon.fashioncode.data.repository.ReplyRepository
@@ -33,7 +30,6 @@ import javax.inject.Inject
 @HiltViewModel
 class CommunityDetailViewModel @Inject constructor(
     private val postRepository: PostRepository,
-    private val authRepository: AuthRepository,
     private val commentRepository: CommentRepository,
     private val replyRepository: ReplyRepository,
 ) : ViewModel() {
@@ -42,9 +38,6 @@ class CommunityDetailViewModel @Inject constructor(
 
     private val _post = MutableStateFlow<Post?>(null)
     var post: StateFlow<Post?> = _post
-
-    private val _user = MutableStateFlow<User?>(null)
-    var user: StateFlow<User?> = _user
 
     private val _commentBody = MutableStateFlow("")
     var commentBody: StateFlow<String> = _commentBody
@@ -58,17 +51,11 @@ class CommunityDetailViewModel @Inject constructor(
     private val _isGetPostLoading = MutableStateFlow(false)
     val isGetPostLoading: StateFlow<Boolean> = _isGetPostLoading
 
-    private val _isGetUserLoading = MutableStateFlow(false)
-    val isGetUserLoading: StateFlow<Boolean> = _isGetUserLoading
-
     private val _isCreateCommentLoading = MutableStateFlow(false)
     val isCreateCommentLoading: StateFlow<Boolean> = _isCreateCommentLoading
 
     private val _isGetCommentListLoading = MutableStateFlow(false)
     val isGetCommentListLoading: StateFlow<Boolean> = _isGetCommentListLoading
-
-    private val _isGetUserComplete = MutableStateFlow(false)
-    val isGetUserComplete: StateFlow<Boolean> = _isGetUserComplete
 
     private val _isGetPostComplete = MutableStateFlow(false)
     val isGetPostComplete: StateFlow<Boolean> = _isGetPostComplete
@@ -157,10 +144,8 @@ class CommunityDetailViewModel @Inject constructor(
 
     private fun getPost(postId: String) {
         _isGetPostLoading.value = true
-        val time = System.currentTimeMillis()
         viewModelScope.launch {
             val response = postRepository.getPost(
-                viewModelScope,
                 postId,
                 onComplete = {
                     _isGetPostLoading.value = false
@@ -175,33 +160,9 @@ class CommunityDetailViewModel @Inject constructor(
             response.collectLatest {
                 it.onSuccess { post ->
                     _post.value = post
-                    Log.d("test", "종료 - > ${System.currentTimeMillis() - time}")
-                    getUser(post.writer)
                     if (post.commentList.isNotEmpty()) {
                         getCommentList(post.postId)
                     }
-                }
-            }
-        }
-    }
-
-    private fun getUser(userId: String) {
-        _isGetUserLoading.value = true
-        viewModelScope.launch {
-            val response = authRepository.getUserInfo(
-                userId,
-                onComplete = {
-                    _isGetUserLoading.value = false
-                    _isGetUserComplete.value = true
-                },
-                onError = {
-                    _showSnackBar.value = true
-                    _snackBarText.value = "잠시 후 다시 시도해 주십시오"
-                }
-            )
-            response.collectLatest {
-                it.onSuccess { user ->
-                    _user.value = user
                 }
             }
         }
