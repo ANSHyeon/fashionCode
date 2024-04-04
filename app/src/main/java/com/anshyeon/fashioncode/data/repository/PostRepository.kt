@@ -12,7 +12,9 @@ import com.anshyeon.fashioncode.network.model.ApiResponse
 import com.anshyeon.fashioncode.network.model.ApiResultException
 import com.anshyeon.fashioncode.network.model.ApiResultSuccess
 import com.anshyeon.fashioncode.util.DateFormatText
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
@@ -55,6 +57,7 @@ class PostRepository @Inject constructor(
     }
 
     fun getPost(
+        viewModelScope: CoroutineScope,
         postId: String,
         onComplete: () -> Unit,
         onError: () -> Unit
@@ -65,10 +68,15 @@ class PostRepository @Inject constructor(
                 userDataSource.getIdToken()
             )
             response.onSuccess { data ->
+                val imageList = viewModelScope.async {
+                    data.imageLocations?.map { location ->
+                        viewModelScope.async {
+                            imageDataSource.downloadImage(location)
+                        }
+                    }
+                }
                 val post = data.copy(
-                    imageUrlList = data.imageLocations?.map { location ->
-                        imageDataSource.downloadImage(location)
-                    } ?: emptyList()
+                    imageUrlList = imageList.await()?.map { it.await() } ?: emptyList()
                 )
                 emit(
                     ApiResultSuccess(post)

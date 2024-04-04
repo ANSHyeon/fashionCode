@@ -1,5 +1,6 @@
 package com.anshyeon.fashioncode.ui.screen.home.community.detail
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavHostController
@@ -17,6 +18,7 @@ import com.anshyeon.fashioncode.network.extentions.onSuccess
 import com.anshyeon.fashioncode.ui.graph.DetailHomeScreen
 import com.anshyeon.fashioncode.util.SerializationUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -35,6 +37,8 @@ class CommunityDetailViewModel @Inject constructor(
     private val commentRepository: CommentRepository,
     private val replyRepository: ReplyRepository,
 ) : ViewModel() {
+
+    private var postId: String? = null
 
     private val _post = MutableStateFlow<Post?>(null)
     var post: StateFlow<Post?> = _post
@@ -78,26 +82,32 @@ class CommunityDetailViewModel @Inject constructor(
     private val _showSnackBar = MutableStateFlow(false)
     val showSnackBar: StateFlow<Boolean> = _showSnackBar
 
-    fun getCommentList(postId: String) {
+    private fun getCommentList(postId: String) {
         val tempReplyList = MutableStateFlow<List<Reply>>(emptyList())
 
         _isGetCommentListLoading.value = true
         viewModelScope.launch {
             transformCommentList(postId).map {
-                it.map { comment ->
-                    tempReplyList.value = emptyList()
-                    val response = replyRepository.getReplyList(
-                        comment.commentId,
-                        {},
-                        {}
-                    )
-                    response.collectLatest { replys ->
-                        tempReplyList.value = replys
+                val commentListWithReply = viewModelScope.async {
+                    it.map { comment ->
+                        viewModelScope.async {
+                            tempReplyList.value = emptyList()
+                            val response = replyRepository.getReplyList(
+                                viewModelScope,
+                                comment.commentId,
+                                {},
+                                {}
+                            )
+                            response.collectLatest { replys ->
+                                tempReplyList.value = replys
+                            }
+                            comment.copy(
+                                replyList = tempReplyList.value.sortedBy { reply -> reply.createdDate }
+                            )
+                        }
                     }
-                    comment.copy(
-                        replyList = tempReplyList.value.sortedBy { reply -> reply.createdDate }
-                    )
                 }
+                commentListWithReply.await().map { it.await() }
             }.onCompletion {
                 _isGetCommentListLoading.value = false
                 _isGetCommentListComplete.value = true
@@ -109,6 +119,7 @@ class CommunityDetailViewModel @Inject constructor(
 
     private fun transformCommentList(postId: String): Flow<List<Comment>> {
         return commentRepository.getCommentList(
+            viewModelScope,
             postId,
             onComplete = {},
             onError = {
@@ -144,14 +155,17 @@ class CommunityDetailViewModel @Inject constructor(
         }
     }
 
-    fun getPost(postId: String) {
+    private fun getPost(postId: String) {
         _isGetPostLoading.value = true
+        val time = System.currentTimeMillis()
         viewModelScope.launch {
             val response = postRepository.getPost(
+                viewModelScope,
                 postId,
                 onComplete = {
                     _isGetPostLoading.value = false
                     _isGetPostComplete.value = true
+
                 },
                 onError = {
                     _showSnackBar.value = true
@@ -161,6 +175,7 @@ class CommunityDetailViewModel @Inject constructor(
             response.collectLatest {
                 it.onSuccess { post ->
                     _post.value = post
+                    Log.d("test", "종료 - > ${System.currentTimeMillis() - time}")
                     getUser(post.writer)
                     if (post.commentList.isNotEmpty()) {
                         getCommentList(post.postId)
@@ -198,6 +213,15 @@ class CommunityDetailViewModel @Inject constructor(
 
     fun dismissSnackBar() {
         _showSnackBar.value = false
+    }
+
+    fun setPostId(newPostId: String) {
+        val isFirst = postId == null
+        postId = newPostId
+        if (isFirst) {
+            getPost(postId!!)
+            getCommentList(postId!!)
+        }
     }
 
     fun navigateCommunityReply(navController: NavHostController, comment: Comment) {

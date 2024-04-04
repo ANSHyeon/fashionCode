@@ -49,6 +49,7 @@ import com.anshyeon.fashioncode.util.DateFormatText.getDefaultDatePattern
 fun CommunityDetailScreen(navController: NavHostController, postId: String) {
 
     val viewModel: CommunityDetailViewModel = hiltViewModel()
+    viewModel.setPostId(postId)
 
     val scrollState = rememberScrollState()
 
@@ -67,10 +68,6 @@ fun CommunityDetailScreen(navController: NavHostController, postId: String) {
     val snackBarTextState by viewModel.snackBarText.collectAsStateWithLifecycle()
     val showSnackBarState by viewModel.showSnackBar.collectAsStateWithLifecycle()
 
-    if (postState == null) {
-        viewModel.getPost(postId)
-        viewModel.getCommentList(postId)
-    }
 
     Scaffold(
         topBar = {

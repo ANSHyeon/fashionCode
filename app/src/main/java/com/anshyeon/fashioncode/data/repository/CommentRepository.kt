@@ -13,7 +13,9 @@ import com.anshyeon.fashioncode.network.model.ApiResultException
 import com.anshyeon.fashioncode.network.model.ApiResultSuccess
 import com.anshyeon.fashioncode.util.Constants
 import com.anshyeon.fashioncode.util.DateFormatText
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
@@ -61,6 +63,7 @@ class CommentRepository @Inject constructor(
     }
 
     fun getCommentList(
+        viewModelScope: CoroutineScope,
         postId: String,
         onComplete: () -> Unit,
         onError: (message: String?) -> Unit
@@ -71,15 +74,20 @@ class CommentRepository @Inject constructor(
                 "\"${postId}\""
             )
             response.onSuccess { data ->
-                emit(
+                val commentListWithProfile = viewModelScope.async {
                     data.map { entry ->
-                        entry.value.run {
-                            copy(
-                                profileImageUrl = profileImageUri
-                                    ?.let { imageDataSource.downloadImage(it) }
-                            )
+                        viewModelScope.async {
+                            entry.value.run {
+                                copy(
+                                    profileImageUrl = profileImageUri
+                                        ?.let { imageDataSource.downloadImage(it) }
+                                )
+                            }
                         }
                     }
+                }
+                emit(
+                    commentListWithProfile.await().map { it.await() }
                 )
             }.onError { _, message ->
                 onError(message)
