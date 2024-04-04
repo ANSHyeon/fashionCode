@@ -90,24 +90,26 @@ fun OtherProfileScreen(navController: NavHostController, userId: String) {
                                 followerCount = null,
                                 followingCount = null,
                             )
-                            Button(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(top = 5.dp),
-                                shape = RoundedCornerShape(10.dp),
-                                colors = ButtonDefaults.buttonColors(
-                                    backgroundColor = SkyBlue,
-                                    contentColor = Color.White,
-                                    disabledBackgroundColor = Color.Gray,
-                                    disabledContentColor = Color.Black
-                                ),
-                                enabled = true,
-                                onClick = { }
-                            ) {
-                                Text(
-                                    text = if (true) "팔로우" else "팔로잉",
-                                    fontWeight = FontWeight.Bold
-                                )
+                            if (viewModel.myUserId != userState?.userId) {
+                                Button(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(top = 5.dp),
+                                    shape = RoundedCornerShape(10.dp),
+                                    colors = ButtonDefaults.buttonColors(
+                                        backgroundColor = SkyBlue,
+                                        contentColor = Color.White,
+                                        disabledBackgroundColor = Color.Gray,
+                                        disabledContentColor = Color.Black
+                                    ),
+                                    enabled = true,
+                                    onClick = { }
+                                ) {
+                                    Text(
+                                        text = if (true) "팔로우" else "팔로잉",
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
                             }
                         }
                     }
@@ -116,8 +118,9 @@ fun OtherProfileScreen(navController: NavHostController, userId: String) {
                             Text(
                                 modifier = Modifier
                                     .padding(8.dp)
+                                    .padding(top = 8.dp)
                                     .height(20.dp),
-                                text = "${userState?.nickName}님 코디"
+                                text = "${userState?.nickName}님의 코디"
                             )
                         }
                     }

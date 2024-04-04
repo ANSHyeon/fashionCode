@@ -29,7 +29,7 @@ class OtherProfileViewModel @Inject constructor(
     private val styleRepository: StyleRepository
 ) : ViewModel() {
 
-    private val myUserId: String = authRepository.getUserId()
+    val myUserId: String = authRepository.getUserId()
 
     private val _user = MutableStateFlow<User?>(null)
     var user: StateFlow<User?> = _user
