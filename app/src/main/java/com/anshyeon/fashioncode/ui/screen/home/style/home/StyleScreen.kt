@@ -37,7 +37,9 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
@@ -127,7 +129,12 @@ fun StyleBox(
             .clickable { onClick() }
     ) {
         Column {
-            UserProfileDefault(style.profileImageUrl, style.nickName)
+            UserProfileDefault(
+                Modifier.size(32.dp),
+                10.sp,
+                style.profileImageUrl,
+                style.nickName
+            )
             AsyncImage(
                 modifier = Modifier.fillMaxWidth(),
                 model = style.imageUrl,
@@ -185,21 +192,25 @@ fun likeArea(
 }
 
 @Composable
-fun UserProfileDefault(profileUrl: String?, nickName: String) {
+fun UserProfileDefault(
+    modifier: Modifier,
+    textUnit: TextUnit,
+    profileUrl: String?,
+    nickName: String?,
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
     ) {
         if (profileUrl == null) {
             Image(
-                modifier = Modifier.size(32.dp),
+                modifier = modifier,
                 painter = painterResource(id = R.drawable.ic_profile),
                 contentDescription = null
             )
         } else {
             AsyncImage(
-                modifier = Modifier
-                    .size(32.dp)
+                modifier = modifier
                     .clip(CircleShape),
                 model = profileUrl,
                 contentDescription = null,
@@ -209,7 +220,8 @@ fun UserProfileDefault(profileUrl: String?, nickName: String) {
         Spacer(modifier = Modifier.size(10.dp))
         Text(
             modifier = Modifier.align(Alignment.CenterVertically),
-            text = nickName,
+            text = nickName ?: "닉네임을 불러올 수 없습니다.",
+            fontSize = textUnit,
             fontWeight = FontWeight.Bold
         )
     }

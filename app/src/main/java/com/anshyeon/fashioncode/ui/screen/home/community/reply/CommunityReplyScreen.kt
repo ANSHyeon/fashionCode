@@ -1,6 +1,7 @@
 package com.anshyeon.fashioncode.ui.screen.home.community.reply
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -85,14 +86,18 @@ fun CommunityReplyScreen(navController: NavHostController, comment: Comment) {
                         .padding(15.dp)
                         .verticalScroll(scrollState)
                 ) {
-                    ReplyComment(comment, userState)
+                    ReplyComment(comment, userState) {
+                        viewModel.navigateOtherUserProfile(navController, userState?.userId)
+                    }
                     replyListState.forEach { reply ->
                         Reply(
                             Modifier
                                 .fillMaxWidth()
                                 .padding(start = 45.dp, top = 10.dp),
                             reply
-                        )
+                        ) {
+                            viewModel.navigateOtherUserProfile(navController, it)
+                        }
                     }
                     addedReplyListState.forEach { reply ->
                         Reply(
@@ -100,7 +105,9 @@ fun CommunityReplyScreen(navController: NavHostController, comment: Comment) {
                                 .fillMaxWidth()
                                 .padding(start = 45.dp, top = 10.dp),
                             reply
-                        )
+                        ) {
+                            viewModel.navigateOtherUserProfile(navController, it)
+                        }
                     }
                 }
             }
@@ -112,7 +119,7 @@ fun CommunityReplyScreen(navController: NavHostController, comment: Comment) {
 }
 
 @Composable
-private fun ReplyComment(comment: Comment, user: User?) {
+private fun ReplyComment(comment: Comment, user: User?, onNavigateOtherProfile: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -120,7 +127,9 @@ private fun ReplyComment(comment: Comment, user: User?) {
     ) {
         if (user?.profileUrl == null) {
             Image(
-                modifier = Modifier.size(40.dp),
+                modifier = Modifier
+                    .size(40.dp)
+                    .clickable { onNavigateOtherProfile() },
                 painter = painterResource(id = R.drawable.ic_profile),
                 contentDescription = null
             )
@@ -128,7 +137,8 @@ private fun ReplyComment(comment: Comment, user: User?) {
             AsyncImage(
                 modifier = Modifier
                     .size(40.dp)
-                    .clip(CircleShape),
+                    .clip(CircleShape)
+                    .clickable { onNavigateOtherProfile() },
                 model = user.profileUrl,
                 contentDescription = null,
                 contentScale = ContentScale.Crop
@@ -137,6 +147,7 @@ private fun ReplyComment(comment: Comment, user: User?) {
         Spacer(modifier = Modifier.size(10.dp))
         Column {
             Text(
+                modifier = Modifier.clickable { onNavigateOtherProfile() },
                 text = comment.nickName,
                 fontWeight = FontWeight.Bold
             )
@@ -157,13 +168,15 @@ private fun ReplyComment(comment: Comment, user: User?) {
 }
 
 @Composable
-fun Reply(modifier: Modifier, reply: Reply) {
+fun Reply(modifier: Modifier, reply: Reply, onNavigateOtherProfile: (String) -> Unit) {
     Row(
         modifier = modifier
     ) {
         if (reply.profileImageUrl == null) {
             Image(
-                modifier = Modifier.size(30.dp),
+                modifier = Modifier
+                    .size(30.dp)
+                    .clickable { onNavigateOtherProfile(reply.writer) },
                 painter = painterResource(id = R.drawable.ic_profile),
                 contentDescription = null
             )
@@ -171,7 +184,8 @@ fun Reply(modifier: Modifier, reply: Reply) {
             AsyncImage(
                 modifier = Modifier
                     .size(30.dp)
-                    .clip(CircleShape),
+                    .clip(CircleShape)
+                    .clickable { onNavigateOtherProfile(reply.writer) },
                 model = reply.profileImageUrl,
                 contentDescription = null,
                 contentScale = ContentScale.Crop
@@ -180,6 +194,7 @@ fun Reply(modifier: Modifier, reply: Reply) {
         Spacer(modifier = Modifier.size(10.dp))
         Column {
             Text(
+                modifier = Modifier.clickable { onNavigateOtherProfile(reply.writer) },
                 text = reply.nickName,
                 fontWeight = FontWeight.Bold
             )

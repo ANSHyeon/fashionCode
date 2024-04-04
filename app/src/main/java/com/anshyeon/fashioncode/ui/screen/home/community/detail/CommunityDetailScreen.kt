@@ -97,7 +97,9 @@ fun CommunityDetailScreen(navController: NavHostController, postId: String) {
                     .verticalScroll(scrollState)
             ) {
                 if (isGetPostCompleteState && isGetCommentListCompleteState && isGetUserCompleteState) {
-                    DetailContent(postState, userState)
+                    DetailContent(postState, userState) {
+                        viewModel.navigateOtherUserProfile(navController, userState?.userId)
+                    }
                     if (commentListState.isNotEmpty() || addedCommentListState.isNotEmpty()) {
                         Spacer(modifier = Modifier.size(10.dp))
                         Spacer(
@@ -113,12 +115,26 @@ fun CommunityDetailScreen(navController: NavHostController, postId: String) {
                         )
                         Spacer(modifier = Modifier.size(15.dp))
                         commentListState.forEach { comment ->
-                            Comment(comment) {
+                            Comment(
+                                comment,
+                                {
+                                    viewModel.navigateOtherUserProfile(
+                                        navController,
+                                        it
+                                    )
+                                }) {
                                 viewModel.navigateCommunityReply(navController, it)
                             }
                         }
                         addedCommentListState.forEach { comment ->
-                            Comment(comment) {
+                            Comment(
+                                comment,
+                                {
+                                    viewModel.navigateOtherUserProfile(
+                                        navController,
+                                        it
+                                    )
+                                }) {
                                 viewModel.navigateCommunityReply(navController, it)
                             }
                         }
@@ -134,8 +150,10 @@ fun CommunityDetailScreen(navController: NavHostController, postId: String) {
 }
 
 @Composable
-fun DetailContent(post: Post?, user: User?) {
-    UserProfileDefault(post?.createdDate, user)
+fun DetailContent(post: Post?, user: User?, onNavigateOtherProfile: () -> Unit) {
+    UserProfileDefault(post?.createdDate, user) {
+        onNavigateOtherProfile()
+    }
     Spacer(modifier = Modifier.size(20.dp))
     Text(
         text = post?.title ?: "제목을 불러올 수 없습니다.",
@@ -152,14 +170,16 @@ fun DetailContent(post: Post?, user: User?) {
 }
 
 @Composable
-fun UserProfileDefault(createDate: String?, user: User?) {
+fun UserProfileDefault(createDate: String?, user: User?, onNavigateOtherProfile: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
     ) {
         if (user?.profileUrl == null) {
             Image(
-                modifier = Modifier.size(40.dp),
+                modifier = Modifier
+                    .size(40.dp)
+                    .clickable { onNavigateOtherProfile() },
                 painter = painterResource(id = R.drawable.ic_profile),
                 contentDescription = null
             )
@@ -167,7 +187,8 @@ fun UserProfileDefault(createDate: String?, user: User?) {
             AsyncImage(
                 modifier = Modifier
                     .size(40.dp)
-                    .clip(CircleShape),
+                    .clip(CircleShape)
+                    .clickable { onNavigateOtherProfile() },
                 model = user.profileUrl,
                 contentDescription = null,
                 contentScale = ContentScale.Crop
@@ -176,6 +197,8 @@ fun UserProfileDefault(createDate: String?, user: User?) {
         Spacer(modifier = Modifier.size(10.dp))
         Column {
             Text(
+                modifier = Modifier
+                    .clickable { onNavigateOtherProfile() },
                 text = user?.nickName ?: "닉네임을 불러올 수 없습니다.",
                 fontWeight = FontWeight.Bold
             )
@@ -204,7 +227,11 @@ private fun ImageList(post: Post?) {
 }
 
 @Composable
-private fun Comment(comment: Comment, onclick: (comment: Comment) -> Unit) {
+private fun Comment(
+    comment: Comment,
+    onNavigateOtherProfile: (String) -> Unit,
+    onclick: (comment: Comment) -> Unit
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -212,7 +239,9 @@ private fun Comment(comment: Comment, onclick: (comment: Comment) -> Unit) {
     ) {
         if (comment.profileImageUrl == null) {
             Image(
-                modifier = Modifier.size(40.dp),
+                modifier = Modifier
+                    .size(40.dp)
+                    .clickable { onNavigateOtherProfile(comment.writer) },
                 painter = painterResource(id = R.drawable.ic_profile),
                 contentDescription = null
             )
@@ -220,7 +249,8 @@ private fun Comment(comment: Comment, onclick: (comment: Comment) -> Unit) {
             AsyncImage(
                 modifier = Modifier
                     .size(40.dp)
-                    .clip(CircleShape),
+                    .clip(CircleShape)
+                    .clickable { onNavigateOtherProfile(comment.writer) },
                 model = comment.profileImageUrl,
                 contentDescription = null,
                 contentScale = ContentScale.Crop
@@ -229,6 +259,7 @@ private fun Comment(comment: Comment, onclick: (comment: Comment) -> Unit) {
         Spacer(modifier = Modifier.size(10.dp))
         Column {
             Text(
+                modifier = Modifier.clickable { onNavigateOtherProfile(comment.writer) },
                 text = comment.nickName,
                 fontWeight = FontWeight.Bold
             )
@@ -261,7 +292,9 @@ private fun Comment(comment: Comment, onclick: (comment: Comment) -> Unit) {
                             .fillMaxWidth()
                             .padding(top = 10.dp),
                         reply
-                    )
+                    ) {
+                        onNavigateOtherProfile(reply.writer)
+                    }
                 }
                 if (replyList.size > 4) {
                     Text(

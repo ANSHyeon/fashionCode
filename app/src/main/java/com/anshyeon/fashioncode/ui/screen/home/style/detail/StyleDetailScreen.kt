@@ -1,11 +1,13 @@
 package com.anshyeon.fashioncode.ui.screen.home.style.detail
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -17,6 +19,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
@@ -81,6 +84,7 @@ fun StyleDetailScreen(navController: NavHostController, style: Style) {
                             styleListState,
                             { viewModel.createLike(it) },
                             { viewModel.deleteLike(it) },
+                            { viewModel.navigateOtherUserProfile(navController, userState?.userId) }
                         )
                     }
                     if (styleListState.isNotEmpty()) {
@@ -123,6 +127,7 @@ fun StyleDetail(
     styleList: List<Style>,
     createLike: (String) -> Unit,
     deleteLike: (String) -> Unit,
+    onNavigateOtherUserProfile: () -> Unit
 ) {
     val currentStyle =
         if (styleList.isEmpty()) null else styleList.first { it.styleId == style.styleId }
@@ -131,7 +136,11 @@ fun StyleDetail(
         modifier = modifier
     ) {
         Column {
-            UserProfileDefault(user?.profileUrl, style.nickName)
+            Box(modifier = Modifier.clickable {
+                onNavigateOtherUserProfile()
+            }) {
+                UserProfileDefault(Modifier.size(32.dp), 10.sp, user?.profileUrl, style.nickName)
+            }
             AsyncImage(
                 modifier = Modifier.fillMaxWidth(),
                 model = currentStyle?.imageUrl,

@@ -1,4 +1,4 @@
-package com.anshyeon.fashioncode.ui.screen.home.style.detail
+package com.anshyeon.fashioncode.ui.screen.home.profile.other
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -8,7 +8,6 @@ import com.anshyeon.fashioncode.data.model.User
 import com.anshyeon.fashioncode.data.repository.AuthRepository
 import com.anshyeon.fashioncode.data.repository.StyleRepository
 import com.anshyeon.fashioncode.network.extentions.onSuccess
-import com.anshyeon.fashioncode.ui.graph.BottomNavItem
 import com.anshyeon.fashioncode.ui.graph.DetailHomeScreen
 import com.anshyeon.fashioncode.util.SerializationUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -24,13 +23,10 @@ import java.nio.charset.StandardCharsets
 import javax.inject.Inject
 
 @HiltViewModel
-class StyleDetailViewModel @Inject constructor(
+class OtherProfileViewModel @Inject constructor(
     private val authRepository: AuthRepository,
     private val styleRepository: StyleRepository
 ) : ViewModel() {
-
-    private val _userId = MutableStateFlow("")
-    val userId: StateFlow<String> = _userId
 
     private val _user = MutableStateFlow<User?>(null)
     var user: StateFlow<User?> = _user
@@ -58,10 +54,6 @@ class StyleDetailViewModel @Inject constructor(
 
     private val _showSnackBar = MutableStateFlow(false)
     val showSnackBar: StateFlow<Boolean> = _showSnackBar
-
-    init {
-        _userId.value = authRepository.getUserId()
-    }
 
     fun getStyleList(userId: String) {
         _isGetStyleListLoading.value = true
@@ -152,18 +144,12 @@ class StyleDetailViewModel @Inject constructor(
         navController.popBackStack()
     }
 
-    fun navigateOtherStyleDetail(
+    fun navigateStyleDetail(
         navController: NavHostController,
         style: Style,
     ) {
         val styleJson = SerializationUtils.toJson(style)
         val encodedStyleUrl = URLEncoder.encode(styleJson, StandardCharsets.UTF_8.toString())
-        navController.navigate("${DetailHomeScreen.StyleDetail.route}/${encodedStyleUrl}") {
-            popUpTo(BottomNavItem.Style.route)
-        }
-    }
-
-    fun navigateOtherUserProfile(navController: NavHostController, userId: String?) {
-        navController.navigate("${DetailHomeScreen.OtherProfile.route}/${userId}")
+        navController.navigate("${DetailHomeScreen.StyleDetail.route}/${encodedStyleUrl}")
     }
 }
