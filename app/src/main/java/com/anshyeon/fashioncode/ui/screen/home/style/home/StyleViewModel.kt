@@ -9,6 +9,7 @@ import com.anshyeon.fashioncode.data.repository.StyleRepository
 import com.anshyeon.fashioncode.ui.graph.DetailHomeScreen
 import com.anshyeon.fashioncode.util.SerializationUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -46,20 +47,25 @@ class StyleViewModel @Inject constructor(
 
     val styleList = transformStyleList().map {
         val tempLikeList = MutableStateFlow<List<String>>(emptyList())
-        it.map { style ->
-            tempLikeList.value = emptyList()
-            val response = styleRepository.getStyleLikeList(
-                style.styleId,
-                {},
-                {}
-            )
-            response.collectLatest { likeList ->
-                tempLikeList.value = likeList
+        val styleListWithLikes = viewModelScope.async {
+            it.map { style ->
+                viewModelScope.async {
+                    tempLikeList.value = emptyList()
+                    val response = styleRepository.getStyleLikeList(
+                        style.styleId,
+                        {},
+                        {}
+                    )
+                    response.collectLatest { likeList ->
+                        tempLikeList.value = likeList
+                    }
+                    style.copy(
+                        likeList = tempLikeList.value
+                    )
+                }
             }
-            style.copy(
-                likeList = tempLikeList.value
-            )
         }
+        styleListWithLikes.await().map { it.await() }
     }.onCompletion {
         _isGetStyleListLoading.value = false
     }.stateIn(

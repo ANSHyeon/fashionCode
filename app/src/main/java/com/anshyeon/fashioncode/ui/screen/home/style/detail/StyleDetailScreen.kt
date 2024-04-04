@@ -26,7 +26,6 @@ import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import com.anshyeon.fashioncode.R
 import com.anshyeon.fashioncode.data.model.Style
-import com.anshyeon.fashioncode.data.model.User
 import com.anshyeon.fashioncode.ui.component.appBar.BackButtonAppBar
 import com.anshyeon.fashioncode.ui.component.loadingView.LoadingView
 import com.anshyeon.fashioncode.ui.component.snackBar.TextSnackBarContainer
@@ -39,16 +38,12 @@ fun StyleDetailScreen(navController: NavHostController, style: Style) {
 
     val viewModel: StyleDetailViewModel = hiltViewModel()
 
-    viewModel.getUser(style.writer)
     viewModel.getStyleList(style.writer)
 
-    val userState by viewModel.user.collectAsStateWithLifecycle()
     val styleListState by viewModel.styleList.collectAsStateWithLifecycle()
     val userIdState by viewModel.userId.collectAsStateWithLifecycle()
     val isGetStyleListLoadingState by viewModel.isGetStyleListLoading.collectAsStateWithLifecycle()
-    val isGetUserLoadingState by viewModel.isGetUserLoading.collectAsStateWithLifecycle()
     val isGetStyleListCompleteState by viewModel.isGetStyleListComplete.collectAsStateWithLifecycle()
-    val isGetUserCompleteState by viewModel.isGetUserComplete.collectAsStateWithLifecycle()
     val isLoadingState by viewModel.isLoading.collectAsStateWithLifecycle()
     val snackBarTextState by viewModel.snackBarText.collectAsStateWithLifecycle()
     val showSnackBarState by viewModel.showSnackBar.collectAsStateWithLifecycle()
@@ -65,7 +60,7 @@ fun StyleDetailScreen(navController: NavHostController, style: Style) {
             showSnackbar = showSnackBarState,
             onDismissSnackbar = { viewModel.dismissSnackBar() }
         ) {
-            if (isGetStyleListCompleteState && isGetUserCompleteState) {
+            if (isGetStyleListCompleteState) {
 
                 LazyVerticalGrid(
                     modifier = Modifier
@@ -79,12 +74,11 @@ fun StyleDetailScreen(navController: NavHostController, style: Style) {
                             modifier = Modifier
                                 .padding(8.dp),
                             userIdState,
-                            userState,
                             style = style,
                             styleListState,
                             { viewModel.createLike(it) },
                             { viewModel.deleteLike(it) },
-                            { viewModel.navigateOtherUserProfile(navController, userState?.userId) }
+                            { viewModel.navigateOtherUserProfile(navController, style.writer) }
                         )
                     }
                     if (styleListState.isNotEmpty()) {
@@ -112,7 +106,7 @@ fun StyleDetailScreen(navController: NavHostController, style: Style) {
                 }
             }
             LoadingView(
-                isLoading = isLoadingState || isGetStyleListLoadingState || isGetUserLoadingState
+                isLoading = isLoadingState || isGetStyleListLoadingState
             )
         }
     }
@@ -122,7 +116,6 @@ fun StyleDetailScreen(navController: NavHostController, style: Style) {
 fun StyleDetail(
     modifier: Modifier,
     userIdState: String,
-    user: User?,
     style: Style,
     styleList: List<Style>,
     createLike: (String) -> Unit,
@@ -139,7 +132,12 @@ fun StyleDetail(
             Box(modifier = Modifier.clickable {
                 onNavigateOtherUserProfile()
             }) {
-                UserProfileDefault(Modifier.size(32.dp), 10.sp, user?.profileUrl, style.nickName)
+                UserProfileDefault(
+                    Modifier.size(32.dp),
+                    10.sp,
+                    currentStyle?.profileImageUrl,
+                    style.nickName
+                )
             }
             AsyncImage(
                 modifier = Modifier.fillMaxWidth(),
