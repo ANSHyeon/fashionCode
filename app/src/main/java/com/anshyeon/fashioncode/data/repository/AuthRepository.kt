@@ -4,6 +4,7 @@ import android.net.Uri
 import com.anshyeon.fashioncode.data.PreferenceManager
 import com.anshyeon.fashioncode.data.dataSource.ImageDataSource
 import com.anshyeon.fashioncode.data.dataSource.UserDataSource
+import com.anshyeon.fashioncode.data.model.Follow
 import com.anshyeon.fashioncode.data.model.User
 import com.anshyeon.fashioncode.network.FireBaseApiClient
 import com.anshyeon.fashioncode.network.extentions.onError
@@ -116,6 +117,91 @@ class AuthRepository @Inject constructor(
             ApiResultException(e)
         }
     }
+
+    suspend fun createFollow(
+        following: String,
+    ): ApiResponse<Unit> {
+        val myUserId = getUserId()
+        val follow = Follow(
+            myUserId + following,
+            follower = myUserId,
+            following = following
+        )
+        return try {
+            fireBaseApiClient.createFollow(
+                myUserId + following,
+                userDataSource.getIdToken(),
+                follow
+            )
+        } catch (e: Exception) {
+            ApiResultException(e)
+        }
+    }
+
+    suspend fun deleteFollow(
+        following: String
+    ): ApiResponse<Unit> {
+        return try {
+            fireBaseApiClient.deleteFollow(
+                getUserId() + following,
+                userDataSource.getIdToken(),
+            )
+        } catch (e: Exception) {
+            ApiResultException(e)
+        }
+    }
+
+    fun getFollowerList(
+        userId: String,
+        onComplete: () -> Unit,
+        onError: () -> Unit
+    ): Flow<List<Follow>> = flow {
+        try {
+            val response = fireBaseApiClient.getFollower(
+                userDataSource.getIdToken(),
+                "\"${userId}\""
+            )
+            response.onSuccess { data ->
+                emit(data.map { entry ->
+                    entry.value
+                })
+            }.onError { _, _ ->
+                onError()
+            }.onException {
+                onError()
+            }
+        } catch (e: Exception) {
+            onError()
+        }
+    }.onCompletion {
+        onComplete()
+    }.flowOn(Dispatchers.Default)
+
+    fun getFollowingList(
+        userId: String,
+        onComplete: () -> Unit,
+        onError: () -> Unit
+    ): Flow<List<Follow>> = flow {
+        try {
+            val response = fireBaseApiClient.getFollowing(
+                userDataSource.getIdToken(),
+                "\"${userId}\""
+            )
+            response.onSuccess { data ->
+                emit(data.map { entry ->
+                    entry.value
+                })
+            }.onError { _, _ ->
+                onError()
+            }.onException {
+                onError()
+            }
+        } catch (e: Exception) {
+            onError()
+        }
+    }.onCompletion {
+        onComplete()
+    }.flowOn(Dispatchers.Default)
 
     fun getUserId(): String = userDataSource.getUserId()
 }
