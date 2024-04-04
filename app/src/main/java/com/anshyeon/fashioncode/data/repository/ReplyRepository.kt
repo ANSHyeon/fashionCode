@@ -1,7 +1,6 @@
 package com.anshyeon.fashioncode.data.repository
 
 import com.anshyeon.fashioncode.data.PreferenceManager
-import com.anshyeon.fashioncode.data.dataSource.ImageDataSource
 import com.anshyeon.fashioncode.data.dataSource.UserDataSource
 import com.anshyeon.fashioncode.data.model.Reply
 import com.anshyeon.fashioncode.network.FireBaseApiClient
@@ -13,7 +12,9 @@ import com.anshyeon.fashioncode.network.model.ApiResultException
 import com.anshyeon.fashioncode.network.model.ApiResultSuccess
 import com.anshyeon.fashioncode.util.Constants
 import com.anshyeon.fashioncode.util.DateFormatText
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
@@ -24,7 +25,6 @@ import javax.inject.Inject
 class ReplyRepository @Inject constructor(
     private val fireBaseApiClient: FireBaseApiClient,
     private val userDataSource: UserDataSource,
-    private val imageDataSource: ImageDataSource,
     private val preferenceManager: PreferenceManager,
 ) {
 
@@ -42,25 +42,21 @@ class ReplyRepository @Inject constructor(
             userId,
             preferenceManager.getString(Constants.KEY_USER_NICKNAME, ""),
             DateFormatText.getCurrentTime(),
-            preferenceManager.getString(Constants.KEY_USER_PROFILE_URI, ""),
+            preferenceManager.getString(Constants.KEY_USER_PROFILE_URL, ""),
         )
         return try {
             fireBaseApiClient.createReply(
                 userDataSource.getIdToken(),
                 reply
             )
-            ApiResultSuccess(
-                reply.copy(
-                    profileImageUrl = reply.profileImageUri
-                        ?.let { imageDataSource.downloadImage(it) }
-                )
-            )
+            ApiResultSuccess(reply)
         } catch (e: Exception) {
             ApiResultException(e)
         }
     }
 
     fun getReplyList(
+        viewModelScope: CoroutineScope,
         commentId: String,
         onComplete: () -> Unit,
         onError: (message: String?) -> Unit
@@ -71,15 +67,14 @@ class ReplyRepository @Inject constructor(
                 "\"${commentId}\""
             )
             response.onSuccess { data ->
-                emit(
+                val replyListWithProfileUrl = viewModelScope.async {
                     data.map { entry ->
-                        entry.value.run {
-                            copy(
-                                profileImageUrl = profileImageUri
-                                    ?.let { imageDataSource.downloadImage(it) }
-                            )
-                        }
+                        entry.value
                     }
+                }
+
+                emit(
+                    replyListWithProfileUrl.await()
                 )
             }.onError { _, message ->
                 onError(message)

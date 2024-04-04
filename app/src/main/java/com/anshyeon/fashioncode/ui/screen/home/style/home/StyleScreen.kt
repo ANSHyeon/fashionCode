@@ -13,7 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
@@ -26,9 +26,6 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -57,12 +54,15 @@ fun StyleScreen(navController: NavHostController) {
     val viewModel: StyleViewModel = hiltViewModel()
 
     val styleListState by viewModel.styleList.collectAsStateWithLifecycle()
-    val userIdState by viewModel.userId.collectAsStateWithLifecycle()
     val isGetStyleListLoadingState by viewModel.isGetStyleListLoading.collectAsStateWithLifecycle()
+    val isNavigateState by viewModel.isNavigate.collectAsStateWithLifecycle()
     val snackBarTextState by viewModel.snackBarText.collectAsStateWithLifecycle()
     val showSnackBarState by viewModel.showSnackBar.collectAsStateWithLifecycle()
 
-
+    if (isNavigateState) {
+        viewModel.getStyleList()
+        viewModel.clearIsNavigate()
+    }
     Scaffold(
         topBar = {
             DefaultAppBar(stringResource(id = R.string.app_name)) {
@@ -92,11 +92,11 @@ fun StyleScreen(navController: NavHostController) {
                     .padding(8.dp),
                 columns = GridCells.Fixed(2)
             ) {
-                items(styleListState) { style ->
+                itemsIndexed(styleListState) { index, style ->
                     StyleBox(
                         modifier = Modifier,
-                        userIdState,
                         style = style,
+                        { isCheck, count -> viewModel.setStyleLike(index, isCheck, count) },
                         { viewModel.createLike(it) },
                         { viewModel.deleteLike(it) },
                         {
@@ -115,8 +115,8 @@ fun StyleScreen(navController: NavHostController) {
 @Composable
 fun StyleBox(
     modifier: Modifier,
-    userIdState: String,
     style: Style,
+    setLike: (Boolean, Int) -> Unit,
     createLike: (String) -> Unit,
     deleteLike: (String) -> Unit,
     onClick: () -> Unit
@@ -141,35 +141,35 @@ fun StyleBox(
                 contentDescription = null,
                 placeholder = painterResource(id = R.drawable.ic_place_holder)
             )
-            likeArea(userIdState, style, { createLike(it) }, { deleteLike(it) })
+            likeArea(
+                style,
+                { isCheck, count -> setLike(isCheck, count) },
+                { createLike(it) },
+                { deleteLike(it) })
         }
     }
 }
 
 @Composable
 fun likeArea(
-    userIdState: String,
     style: Style,
+    setLike: (Boolean, Int) -> Unit,
     createLike: (String) -> Unit,
     deleteLike: (String) -> Unit
 ) {
     Row {
-        var isCheck by remember { mutableStateOf(style.likeList.any { it == userIdState }) }
-        var likeCount by remember { mutableStateOf(style.likeList.size) }
-
         IconButton(
             onClick = {
-                if (isCheck) {
+                if (style.isLike!!) {
                     deleteLike(style.styleId)
-                    likeCount--
+                    setLike(false, style.likeCount!! - 1)
                 } else {
                     createLike(style.styleId)
-                    likeCount++
+                    setLike(true, style.likeCount!! + 1)
                 }
-                isCheck = !isCheck
             }
         ) {
-            if (isCheck) {
+            if (style.isLike!!) {
                 Icon(
                     imageVector = Icons.Filled.Favorite,
                     contentDescription = null,
@@ -186,7 +186,7 @@ fun likeArea(
 
         Text(
             modifier = Modifier.align(Alignment.CenterVertically),
-            text = "${likeCount} likes"
+            text = "${style.likeCount} likes"
         )
     }
 }

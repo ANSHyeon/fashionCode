@@ -10,7 +10,6 @@ data class Comment(
     val writer: String,
     val nickName: String,
     val createdDate: String,
-    val profileImageUri: String? = null,
     val profileImageUrl: String? = null,
     val replyList: List<Reply>? = null,
 )

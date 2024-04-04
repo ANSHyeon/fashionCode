@@ -6,8 +6,6 @@ import androidx.navigation.NavHostController
 import com.anshyeon.fashioncode.data.model.Comment
 import com.anshyeon.fashioncode.data.model.Post
 import com.anshyeon.fashioncode.data.model.Reply
-import com.anshyeon.fashioncode.data.model.User
-import com.anshyeon.fashioncode.data.repository.AuthRepository
 import com.anshyeon.fashioncode.data.repository.CommentRepository
 import com.anshyeon.fashioncode.data.repository.PostRepository
 import com.anshyeon.fashioncode.data.repository.ReplyRepository
@@ -17,6 +15,7 @@ import com.anshyeon.fashioncode.network.extentions.onSuccess
 import com.anshyeon.fashioncode.ui.graph.DetailHomeScreen
 import com.anshyeon.fashioncode.util.SerializationUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -31,16 +30,14 @@ import javax.inject.Inject
 @HiltViewModel
 class CommunityDetailViewModel @Inject constructor(
     private val postRepository: PostRepository,
-    private val authRepository: AuthRepository,
     private val commentRepository: CommentRepository,
     private val replyRepository: ReplyRepository,
 ) : ViewModel() {
 
+    private var postId: String? = null
+
     private val _post = MutableStateFlow<Post?>(null)
     var post: StateFlow<Post?> = _post
-
-    private val _user = MutableStateFlow<User?>(null)
-    var user: StateFlow<User?> = _user
 
     private val _commentBody = MutableStateFlow("")
     var commentBody: StateFlow<String> = _commentBody
@@ -54,17 +51,11 @@ class CommunityDetailViewModel @Inject constructor(
     private val _isGetPostLoading = MutableStateFlow(false)
     val isGetPostLoading: StateFlow<Boolean> = _isGetPostLoading
 
-    private val _isGetUserLoading = MutableStateFlow(false)
-    val isGetUserLoading: StateFlow<Boolean> = _isGetUserLoading
-
     private val _isCreateCommentLoading = MutableStateFlow(false)
     val isCreateCommentLoading: StateFlow<Boolean> = _isCreateCommentLoading
 
     private val _isGetCommentListLoading = MutableStateFlow(false)
     val isGetCommentListLoading: StateFlow<Boolean> = _isGetCommentListLoading
-
-    private val _isGetUserComplete = MutableStateFlow(false)
-    val isGetUserComplete: StateFlow<Boolean> = _isGetUserComplete
 
     private val _isGetPostComplete = MutableStateFlow(false)
     val isGetPostComplete: StateFlow<Boolean> = _isGetPostComplete
@@ -78,26 +69,31 @@ class CommunityDetailViewModel @Inject constructor(
     private val _showSnackBar = MutableStateFlow(false)
     val showSnackBar: StateFlow<Boolean> = _showSnackBar
 
-    fun getCommentList(postId: String) {
-        val tempReplyList = MutableStateFlow<List<Reply>>(emptyList())
-
+    private fun getCommentList(postId: String) {
         _isGetCommentListLoading.value = true
         viewModelScope.launch {
             transformCommentList(postId).map {
-                it.map { comment ->
-                    tempReplyList.value = emptyList()
-                    val response = replyRepository.getReplyList(
-                        comment.commentId,
-                        {},
-                        {}
-                    )
-                    response.collectLatest { replys ->
-                        tempReplyList.value = replys
+                val commentListWithReply = viewModelScope.async {
+                    it.map { comment ->
+                        viewModelScope.async {
+                            val tempReplyList = mutableListOf<Reply>()
+                            val response = replyRepository.getReplyList(
+                                viewModelScope,
+                                comment.commentId,
+                                {},
+                                {}
+                            )
+                            response.collectLatest { replys ->
+                                tempReplyList.addAll(replys)
+                            }
+                            comment.copy(
+                                replyList = tempReplyList.sortedBy { reply -> reply.createdDate }
+                                    .toList()
+                            )
+                        }
                     }
-                    comment.copy(
-                        replyList = tempReplyList.value.sortedBy { reply -> reply.createdDate }
-                    )
                 }
+                commentListWithReply.await().map { it.await() }
             }.onCompletion {
                 _isGetCommentListLoading.value = false
                 _isGetCommentListComplete.value = true
@@ -109,6 +105,7 @@ class CommunityDetailViewModel @Inject constructor(
 
     private fun transformCommentList(postId: String): Flow<List<Comment>> {
         return commentRepository.getCommentList(
+            viewModelScope,
             postId,
             onComplete = {},
             onError = {
@@ -144,7 +141,7 @@ class CommunityDetailViewModel @Inject constructor(
         }
     }
 
-    fun getPost(postId: String) {
+    private fun getPost(postId: String) {
         _isGetPostLoading.value = true
         viewModelScope.launch {
             val response = postRepository.getPost(
@@ -152,6 +149,7 @@ class CommunityDetailViewModel @Inject constructor(
                 onComplete = {
                     _isGetPostLoading.value = false
                     _isGetPostComplete.value = true
+
                 },
                 onError = {
                     _showSnackBar.value = true
@@ -161,32 +159,9 @@ class CommunityDetailViewModel @Inject constructor(
             response.collectLatest {
                 it.onSuccess { post ->
                     _post.value = post
-                    getUser(post.writer)
                     if (post.commentList.isNotEmpty()) {
                         getCommentList(post.postId)
                     }
-                }
-            }
-        }
-    }
-
-    private fun getUser(userId: String) {
-        _isGetUserLoading.value = true
-        viewModelScope.launch {
-            val response = authRepository.getUserInfo(
-                userId,
-                onComplete = {
-                    _isGetUserLoading.value = false
-                    _isGetUserComplete.value = true
-                },
-                onError = {
-                    _showSnackBar.value = true
-                    _snackBarText.value = "잠시 후 다시 시도해 주십시오"
-                }
-            )
-            response.collectLatest {
-                it.onSuccess { user ->
-                    _user.value = user
                 }
             }
         }
@@ -198,6 +173,15 @@ class CommunityDetailViewModel @Inject constructor(
 
     fun dismissSnackBar() {
         _showSnackBar.value = false
+    }
+
+    fun setPostId(newPostId: String) {
+        val isFirst = postId == null
+        postId = newPostId
+        if (isFirst) {
+            getPost(postId!!)
+            getCommentList(postId!!)
+        }
     }
 
     fun navigateCommunityReply(navController: NavHostController, comment: Comment) {

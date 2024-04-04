@@ -33,12 +33,12 @@ class ImageDataSource @Inject constructor() {
     }
 
     suspend fun uploadImages(imageList: List<Uri>): List<String> = coroutineScope {
-        val uploadImagesJob = imageList.map { imageUri ->
+        val uploadAndDownloadJob = imageList.map { imageUri ->
             async {
-                uploadImage(imageUri)
+                downloadImage(uploadImage(imageUri))
             }
         }
-        uploadImagesJob.awaitAll()
+        uploadAndDownloadJob.awaitAll()
     }
 
     suspend fun downloadImage(location: String): String {

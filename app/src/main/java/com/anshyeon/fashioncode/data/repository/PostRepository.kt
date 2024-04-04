@@ -1,6 +1,7 @@
 package com.anshyeon.fashioncode.data.repository
 
 import android.net.Uri
+import com.anshyeon.fashioncode.data.PreferenceManager
 import com.anshyeon.fashioncode.data.dataSource.ImageDataSource
 import com.anshyeon.fashioncode.data.dataSource.UserDataSource
 import com.anshyeon.fashioncode.data.model.Post
@@ -11,6 +12,7 @@ import com.anshyeon.fashioncode.network.extentions.onSuccess
 import com.anshyeon.fashioncode.network.model.ApiResponse
 import com.anshyeon.fashioncode.network.model.ApiResultException
 import com.anshyeon.fashioncode.network.model.ApiResultSuccess
+import com.anshyeon.fashioncode.util.Constants
 import com.anshyeon.fashioncode.util.DateFormatText
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -24,6 +26,7 @@ class PostRepository @Inject constructor(
     private val fireBaseApiClient: FireBaseApiClient,
     private val userDataSource: UserDataSource,
     private val imageDataSource: ImageDataSource,
+    private val preferenceManager: PreferenceManager,
 ) {
 
     suspend fun createPost(
@@ -34,14 +37,16 @@ class PostRepository @Inject constructor(
         val userId = userDataSource.getUserId()
         val currentTime = System.currentTimeMillis()
         val postId = userId + currentTime
-        val imageLocations = imageDataSource.uploadImages(imageList)
+        val imageUrlList = imageDataSource.uploadImages(imageList)
         val post = Post(
             postId,
             title,
             body,
             userId,
+            preferenceManager.getString(Constants.KEY_USER_NICKNAME, ""),
+            preferenceManager.getString(Constants.KEY_USER_PROFILE_URL, ""),
             DateFormatText.getCurrentTime(),
-            imageLocations
+            imageUrlList
         )
         return try {
             fireBaseApiClient.createPost(
@@ -65,13 +70,8 @@ class PostRepository @Inject constructor(
                 userDataSource.getIdToken()
             )
             response.onSuccess { data ->
-                val post = data.copy(
-                    imageUrlList = data.imageLocations?.map { location ->
-                        imageDataSource.downloadImage(location)
-                    } ?: emptyList()
-                )
                 emit(
-                    ApiResultSuccess(post)
+                    ApiResultSuccess(data)
                 )
             }.onError { _, _ ->
                 onError()
@@ -97,8 +97,7 @@ class PostRepository @Inject constructor(
                 emit(data.map { entry ->
                     entry.value.run {
                         copy(
-                            profileImageUrl = imageLocations?.first()
-                                ?.let { imageDataSource.downloadImage(it) }
+                            profileImageUrl = if (imageUrlList.isNotEmpty()) imageUrlList.first() else null
                         )
                     }
                 })

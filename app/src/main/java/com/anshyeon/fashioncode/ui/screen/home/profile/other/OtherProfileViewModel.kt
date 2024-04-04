@@ -11,6 +11,7 @@ import com.anshyeon.fashioncode.network.extentions.onSuccess
 import com.anshyeon.fashioncode.ui.graph.DetailHomeScreen
 import com.anshyeon.fashioncode.util.SerializationUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -27,6 +28,8 @@ class OtherProfileViewModel @Inject constructor(
     private val authRepository: AuthRepository,
     private val styleRepository: StyleRepository
 ) : ViewModel() {
+
+    private val myUserId: String = authRepository.getUserId()
 
     private val _user = MutableStateFlow<User?>(null)
     var user: StateFlow<User?> = _user
@@ -60,21 +63,27 @@ class OtherProfileViewModel @Inject constructor(
         viewModelScope.launch {
             transformReplyList(userId)
                 .map {
-                    val tempLikeList = MutableStateFlow<List<String>>(emptyList())
-                    it.map { style ->
-                        tempLikeList.value = emptyList()
-                        val response = styleRepository.getStyleLikeList(
-                            style.styleId,
-                            {},
-                            {}
-                        )
-                        response.collectLatest { likeList ->
-                            tempLikeList.value = likeList
+                    val styleListWithLikes = viewModelScope.async {
+                        it.map { style ->
+                            viewModelScope.async {
+                                val tempLikeList = mutableListOf<String>()
+                                val response = styleRepository.getStyleLikeList(
+                                    style.styleId,
+                                    {},
+                                    {}
+                                )
+                                response.collectLatest { likeList ->
+                                    tempLikeList.addAll(likeList)
+                                }
+                                style.copy(
+                                    isLike = tempLikeList.any { it == myUserId },
+                                    likeCount = tempLikeList.size,
+                                    likeList = tempLikeList.toList()
+                                )
+                            }
                         }
-                        style.copy(
-                            likeList = tempLikeList.value
-                        )
                     }
+                    styleListWithLikes.await().map { it.await() }
                 }
                 .onCompletion {
                     _isGetStyleListLoading.value = false
@@ -134,6 +143,15 @@ class OtherProfileViewModel @Inject constructor(
                 styleId
             )
         }
+    }
+
+    fun setStyleLike(index: Int, isCheck: Boolean, count: Int) {
+        val tempList = _styleList.value.toMutableList()
+        tempList[index] = tempList[index].copy(
+            isLike = isCheck,
+            likeCount = count
+        )
+        _styleList.value = tempList.toList()
     }
 
     fun dismissSnackBar() {

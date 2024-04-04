@@ -9,14 +9,13 @@ import com.anshyeon.fashioncode.data.repository.StyleRepository
 import com.anshyeon.fashioncode.ui.graph.DetailHomeScreen
 import com.anshyeon.fashioncode.util.SerializationUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onCompletion
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
@@ -31,8 +30,14 @@ class StyleViewModel @Inject constructor(
     private val _userId = MutableStateFlow("")
     val userId: StateFlow<String> = _userId
 
+    private val _styleList = MutableStateFlow<List<Style>>(emptyList())
+    val styleList: StateFlow<List<Style>> = _styleList
+
     private val _isGetStyleListLoading = MutableStateFlow(true)
     val isGetStyleListLoading: StateFlow<Boolean> = _isGetStyleListLoading
+
+    private val _isNavigate = MutableStateFlow(false)
+    val isNavigate: StateFlow<Boolean> = _isNavigate
 
     private val _snackBarText = MutableStateFlow("")
     val snackBarText: StateFlow<String> = _snackBarText
@@ -42,31 +47,42 @@ class StyleViewModel @Inject constructor(
 
     init {
         _userId.value = authRepository.getUserId()
+        getStyleList()
     }
 
-    val styleList = transformStyleList().map {
-        val tempLikeList = MutableStateFlow<List<String>>(emptyList())
-        it.map { style ->
-            tempLikeList.value = emptyList()
-            val response = styleRepository.getStyleLikeList(
-                style.styleId,
-                {},
-                {}
-            )
-            response.collectLatest { likeList ->
-                tempLikeList.value = likeList
+    fun getStyleList() {
+        viewModelScope.launch {
+            transformStyleList().map {
+                _isGetStyleListLoading.value = true
+                val styleListWithLikes = viewModelScope.async {
+                    it.map { style ->
+                        viewModelScope.async {
+                            val tempLikeList = mutableListOf<String>()
+                            val response = styleRepository.getStyleLikeList(
+                                style.styleId,
+                                {},
+                                {}
+                            )
+                            response.collectLatest { likeList ->
+                                tempLikeList.addAll(likeList)
+                            }
+                            style.copy(
+                                isLike = tempLikeList.any { it == _userId.value },
+                                likeCount = tempLikeList.size,
+                                likeList = tempLikeList.toList()
+                            )
+                        }
+                    }
+                }
+                styleListWithLikes.await().map { it.await() }
+            }.onCompletion {
+                _isGetStyleListLoading.value = false
+            }.collectLatest {
+                _styleList.value = it
             }
-            style.copy(
-                likeList = tempLikeList.value
-            )
         }
-    }.onCompletion {
-        _isGetStyleListLoading.value = false
-    }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(500),
-        initialValue = emptyList()
-    )
+    }
+
 
     private fun transformStyleList(): Flow<List<Style>> {
         return styleRepository.getStyleList(
@@ -92,11 +108,25 @@ class StyleViewModel @Inject constructor(
         }
     }
 
+    fun setStyleLike(index: Int, isCheck: Boolean, count: Int) {
+        val tempList = _styleList.value.toMutableList()
+        tempList[index] = tempList[index].copy(
+            isLike = isCheck,
+            likeCount = count
+        )
+        _styleList.value = tempList.toList()
+    }
+
     fun dismissSnackBar() {
         _showSnackBar.value = false
     }
 
+    fun clearIsNavigate() {
+        _isNavigate.value = false
+    }
+
     fun navigateStyleCreate(navController: NavHostController) {
+        _isNavigate.value = true
         navController.navigate(DetailHomeScreen.StyleCreate.route)
     }
 
@@ -106,6 +136,7 @@ class StyleViewModel @Inject constructor(
     ) {
         val styleJson = SerializationUtils.toJson(style)
         val encodedStyleUrl = URLEncoder.encode(styleJson, StandardCharsets.UTF_8.toString())
+        _isNavigate.value = true
         navController.navigate("${DetailHomeScreen.StyleDetail.route}/${encodedStyleUrl}")
     }
 }

@@ -9,7 +9,8 @@ data class Style(
     val createdDate: String,
     val nickName: String,
     val profileImageUrl: String? = null,
-    val imageLocation: String? = null,
     val imageUrl: String? = null,
+    val isLike: Boolean? = null,
+    val likeCount: Int? = null,
     val likeList: List<String> = emptyList()
 )

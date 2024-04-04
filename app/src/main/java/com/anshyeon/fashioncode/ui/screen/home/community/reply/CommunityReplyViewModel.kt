@@ -74,6 +74,7 @@ class CommunityReplyViewModel @Inject constructor(
 
     private fun transformReplyList(commentId: String): Flow<List<Reply>> {
         return replyRepository.getReplyList(
+            viewModelScope,
             commentId,
             onComplete = { },
             onError = {
