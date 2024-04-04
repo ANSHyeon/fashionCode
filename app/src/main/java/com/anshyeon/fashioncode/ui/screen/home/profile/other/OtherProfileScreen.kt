@@ -124,8 +124,8 @@ fun OtherProfileScreen(navController: NavHostController, userId: String) {
                     items(styleListState) { style ->
                         StyleBox(
                             modifier = Modifier,
-                            userId,
                             style = style,
+                            { isCheck, count -> },
                             { viewModel.createLike(it) },
                             { viewModel.deleteLike(it) },
                             {

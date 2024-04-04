@@ -41,7 +41,6 @@ fun StyleDetailScreen(navController: NavHostController, style: Style) {
     viewModel.getStyleList(style.writer)
 
     val styleListState by viewModel.styleList.collectAsStateWithLifecycle()
-    val userIdState by viewModel.userId.collectAsStateWithLifecycle()
     val isGetStyleListLoadingState by viewModel.isGetStyleListLoading.collectAsStateWithLifecycle()
     val isGetStyleListCompleteState by viewModel.isGetStyleListComplete.collectAsStateWithLifecycle()
     val isLoadingState by viewModel.isLoading.collectAsStateWithLifecycle()
@@ -73,8 +72,14 @@ fun StyleDetailScreen(navController: NavHostController, style: Style) {
                         StyleDetail(
                             modifier = Modifier
                                 .padding(8.dp),
-                            userIdState,
                             style = style,
+                            { isCheck, count ->
+                                viewModel.setStyleLike(
+                                    style.styleId,
+                                    isCheck,
+                                    count
+                                )
+                            },
                             styleListState,
                             { viewModel.createLike(it) },
                             { viewModel.deleteLike(it) },
@@ -94,8 +99,14 @@ fun StyleDetailScreen(navController: NavHostController, style: Style) {
                     items(styleListState.filter { it.styleId != style.styleId }) { style ->
                         StyleBox(
                             modifier = Modifier,
-                            userIdState,
                             style = style,
+                            { isCheck, count ->
+                                viewModel.setStyleLike(
+                                    style.styleId,
+                                    isCheck,
+                                    count
+                                )
+                            },
                             { viewModel.createLike(it) },
                             { viewModel.deleteLike(it) },
                             {
@@ -115,8 +126,8 @@ fun StyleDetailScreen(navController: NavHostController, style: Style) {
 @Composable
 fun StyleDetail(
     modifier: Modifier,
-    userIdState: String,
     style: Style,
+    setLike: (Boolean, Int) -> Unit,
     styleList: List<Style>,
     createLike: (String) -> Unit,
     deleteLike: (String) -> Unit,
@@ -145,7 +156,11 @@ fun StyleDetail(
                 contentDescription = null,
                 placeholder = painterResource(id = R.drawable.ic_place_holder)
             )
-            likeArea(userIdState, style, { createLike(it) }, { deleteLike(it) })
+            likeArea(
+                currentStyle ?: style,
+                { isCheck, count -> setLike(isCheck, count) },
+                { createLike(it) },
+                { deleteLike(it) })
         }
     }
 }

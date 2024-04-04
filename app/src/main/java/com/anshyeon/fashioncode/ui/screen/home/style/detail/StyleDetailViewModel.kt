@@ -71,6 +71,8 @@ class StyleDetailViewModel @Inject constructor(
                                     tempLikeList.addAll(likeList)
                                 }
                                 style.copy(
+                                    isLike = tempLikeList.any { it == _userId.value },
+                                    likeCount = tempLikeList.size,
                                     likeList = tempLikeList.toList()
                                 )
                             }
@@ -113,6 +115,19 @@ class StyleDetailViewModel @Inject constructor(
             styleRepository.deleteLike(
                 styleId
             )
+        }
+    }
+
+    fun setStyleLike(styleId: String, isCheck: Boolean, count: Int) {
+        val tempList = _styleList.value.toMutableList()
+        tempList.forEachIndexed { index, style ->
+            if (style.styleId == styleId) {
+                tempList[index] = tempList[index].copy(
+                    isLike = isCheck,
+                    likeCount = count
+                )
+                _styleList.value = tempList.toList()
+            }
         }
     }
 
