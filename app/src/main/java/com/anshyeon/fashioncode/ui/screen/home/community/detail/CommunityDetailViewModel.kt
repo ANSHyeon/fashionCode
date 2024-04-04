@@ -70,15 +70,13 @@ class CommunityDetailViewModel @Inject constructor(
     val showSnackBar: StateFlow<Boolean> = _showSnackBar
 
     private fun getCommentList(postId: String) {
-        val tempReplyList = MutableStateFlow<List<Reply>>(emptyList())
-
         _isGetCommentListLoading.value = true
         viewModelScope.launch {
             transformCommentList(postId).map {
                 val commentListWithReply = viewModelScope.async {
                     it.map { comment ->
                         viewModelScope.async {
-                            tempReplyList.value = emptyList()
+                            val tempReplyList = mutableListOf<Reply>()
                             val response = replyRepository.getReplyList(
                                 viewModelScope,
                                 comment.commentId,
@@ -86,10 +84,11 @@ class CommunityDetailViewModel @Inject constructor(
                                 {}
                             )
                             response.collectLatest { replys ->
-                                tempReplyList.value = replys
+                                tempReplyList.addAll(replys)
                             }
                             comment.copy(
-                                replyList = tempReplyList.value.sortedBy { reply -> reply.createdDate }
+                                replyList = tempReplyList.sortedBy { reply -> reply.createdDate }
+                                    .toList()
                             )
                         }
                     }

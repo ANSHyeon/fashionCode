@@ -58,21 +58,20 @@ class StyleDetailViewModel @Inject constructor(
         viewModelScope.launch {
             transformReplyList(userId)
                 .map {
-                    val tempLikeList = MutableStateFlow<List<String>>(emptyList())
                     val styleListWithLikes = viewModelScope.async {
                         it.map { style ->
                             viewModelScope.async {
-                                tempLikeList.value = emptyList()
+                                val tempLikeList = mutableListOf<String>()
                                 val response = styleRepository.getStyleLikeList(
                                     style.styleId,
                                     {},
                                     {}
                                 )
                                 response.collectLatest { likeList ->
-                                    tempLikeList.value = likeList
+                                    tempLikeList.addAll(likeList)
                                 }
                                 style.copy(
-                                    likeList = tempLikeList.value
+                                    likeList = tempLikeList.toList()
                                 )
                             }
                         }
