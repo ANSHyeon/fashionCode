@@ -130,7 +130,7 @@ fun OtherProfileScreen(navController: NavHostController, userId: String) {
                                     }
                                 ) {
                                     Text(
-                                        text = if (true) "팔로우" else "팔로잉",
+                                        text = if (isFollow) "팔로잉" else "팔로우",
                                         fontWeight = FontWeight.Bold
                                     )
                                 }
