@@ -20,7 +20,6 @@ import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -48,12 +47,6 @@ import com.anshyeon.fashioncode.ui.theme.SkyBlue
 fun OtherProfileScreen(navController: NavHostController, userId: String) {
 
     val viewModel: OtherProfileViewModel = hiltViewModel()
-    LaunchedEffect(true) {
-        viewModel.getUser(userId)
-        viewModel.getFollower(userId)
-        viewModel.getFollowing(userId)
-        viewModel.getStyleList(userId)
-    }
 
     val userState by viewModel.user.collectAsStateWithLifecycle()
     val styleListState by viewModel.styleList.collectAsStateWithLifecycle()
@@ -71,6 +64,13 @@ fun OtherProfileScreen(navController: NavHostController, userId: String) {
     val snackBarTextState by viewModel.snackBarText.collectAsStateWithLifecycle()
     val showSnackBarState by viewModel.showSnackBar.collectAsStateWithLifecycle()
 
+    if (!isGetUserCompleteState) {
+        viewModel.getUser(userId)
+        viewModel.getFollower(userId)
+        viewModel.getFollowing(userId)
+        viewModel.getStyleList(userId)
+    }
+
     Scaffold(
         topBar = {
             BackButtonAppBar("") {
@@ -85,7 +85,8 @@ fun OtherProfileScreen(navController: NavHostController, userId: String) {
         ) {
 
             if (isGetStyleListCompleteState && isGetUserCompleteState &&
-                isGetFollowerCompleteState && isGetFollowingCompleteState) {
+                isGetFollowerCompleteState && isGetFollowingCompleteState
+            ) {
                 LazyVerticalGrid(
                     modifier = Modifier
                         .fillMaxSize()
