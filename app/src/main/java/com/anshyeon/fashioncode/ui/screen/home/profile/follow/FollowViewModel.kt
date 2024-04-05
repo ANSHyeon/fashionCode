@@ -156,4 +156,8 @@ class FollowViewModel @Inject constructor(
     fun navigateBack(navController: NavHostController) {
         navController.popBackStack()
     }
+
+    fun navigateOtherUserProfile(navController: NavHostController, userId: String?) {
+        navController.navigate("${DetailHomeScreen.OtherProfile.route}/${userId}")
+    }
 }
