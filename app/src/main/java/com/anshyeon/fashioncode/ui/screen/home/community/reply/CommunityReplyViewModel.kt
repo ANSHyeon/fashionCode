@@ -124,10 +124,8 @@ class CommunityReplyViewModel @Inject constructor(
                     _snackBarText.value = "잠시 후 다시 시도해 주십시오"
                 }
             )
-            response.collectLatest {
-                it.onSuccess { user ->
-                    _user.value = user
-                }
+            response.collectLatest { user ->
+                _user.value = user
             }
         }
     }

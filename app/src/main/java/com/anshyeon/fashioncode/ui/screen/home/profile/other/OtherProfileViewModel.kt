@@ -8,7 +8,6 @@ import com.anshyeon.fashioncode.data.model.Style
 import com.anshyeon.fashioncode.data.model.User
 import com.anshyeon.fashioncode.data.repository.AuthRepository
 import com.anshyeon.fashioncode.data.repository.StyleRepository
-import com.anshyeon.fashioncode.network.extentions.onSuccess
 import com.anshyeon.fashioncode.ui.graph.DetailHomeScreen
 import com.anshyeon.fashioncode.util.SerializationUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -140,10 +139,8 @@ class OtherProfileViewModel @Inject constructor(
                     _snackBarText.value = "잠시 후 다시 시도해 주십시오"
                 }
             )
-            response.collectLatest {
-                it.onSuccess { user ->
-                    _user.value = user
-                }
+            response.collectLatest { user ->
+                _user.value = user
             }
         }
     }
