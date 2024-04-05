@@ -12,10 +12,12 @@ import com.anshyeon.fashioncode.network.extentions.onException
 import com.anshyeon.fashioncode.network.extentions.onSuccess
 import com.anshyeon.fashioncode.network.model.ApiResponse
 import com.anshyeon.fashioncode.network.model.ApiResultException
-import com.anshyeon.fashioncode.network.model.ApiResultSuccess
 import com.anshyeon.fashioncode.util.Constants
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.onCompletion
@@ -189,6 +191,94 @@ class AuthRepository @Inject constructor(
                 emit(data.map { entry ->
                     entry.value
                 })
+            }.onError { _, _ ->
+                onError()
+            }.onException {
+                onError()
+            }
+        } catch (e: Exception) {
+            onError()
+        }
+    }.onCompletion {
+        onComplete()
+    }.flowOn(Dispatchers.Default)
+
+    fun getFollowerListWithUserInfo(
+        viewModelScope: CoroutineScope,
+        userId: String,
+        onComplete: () -> Unit,
+        onError: () -> Unit
+    ): Flow<List<Follow>> = flow {
+        try {
+            val response = fireBaseApiClient.getFollower(
+                userDataSource.getIdToken(),
+                "\"${userId}\""
+            )
+            response.onSuccess { data ->
+                val followerListWithUserInfo = viewModelScope.async {
+                    data.map { entry ->
+                        viewModelScope.async {
+                            var user: User? = null
+                            val getUserResponse = getUserInfo(
+                                entry.value.follower,
+                                {},
+                                {}
+                            )
+                            getUserResponse.collectLatest { result ->
+                                user = result
+                            }
+                            entry.value.copy(
+                                nickName = user?.nickName,
+                                profileUrl = user?.profileUrl
+                            )
+                        }
+                    }
+                }
+                emit(followerListWithUserInfo.await().map { it.await() })
+            }.onError { _, _ ->
+                onError()
+            }.onException {
+                onError()
+            }
+        } catch (e: Exception) {
+            onError()
+        }
+    }.onCompletion {
+        onComplete()
+    }.flowOn(Dispatchers.Default)
+
+    fun getFollowingListWithUserInfo(
+        viewModelScope: CoroutineScope,
+        userId: String,
+        onComplete: () -> Unit,
+        onError: () -> Unit
+    ): Flow<List<Follow>> = flow {
+        try {
+            val response = fireBaseApiClient.getFollowing(
+                userDataSource.getIdToken(),
+                "\"${userId}\""
+            )
+            response.onSuccess { data ->
+                val followerListWithUserInfo = viewModelScope.async {
+                    data.map { entry ->
+                        viewModelScope.async {
+                            var user: User? = null
+                            val getUserResponse = getUserInfo(
+                                entry.value.following,
+                                {},
+                                {}
+                            )
+                            getUserResponse.collectLatest { result ->
+                                user = result
+                            }
+                            entry.value.copy(
+                                nickName = user?.nickName,
+                                profileUrl = user?.profileUrl
+                            )
+                        }
+                    }
+                }
+                emit(followerListWithUserInfo.await().map { it.await() })
             }.onError { _, _ ->
                 onError()
             }.onException {

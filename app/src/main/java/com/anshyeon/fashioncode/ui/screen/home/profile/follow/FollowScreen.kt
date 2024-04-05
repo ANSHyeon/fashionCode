@@ -49,9 +49,22 @@ fun FollowScreen(navController: NavHostController, userId: String) {
 
     val viewModel: FollowViewModel = hiltViewModel()
 
+    val followerListState by viewModel.followerList.collectAsStateWithLifecycle()
+    val followingListState by viewModel.followingList.collectAsStateWithLifecycle()
+    val myFollowingListState by viewModel.myFollowingList.collectAsStateWithLifecycle()
+    val isGetFollowerLoadingState by viewModel.isGetFollowerLoading.collectAsStateWithLifecycle()
+    val isGetFollowingLoadingState by viewModel.isGetFollowingLoading.collectAsStateWithLifecycle()
+    val isGetMyFollowingLoadingState by viewModel.isGetMyFollowingLoading.collectAsStateWithLifecycle()
+    val isGetFollowerCompleteState by viewModel.isGetFollowerComplete.collectAsStateWithLifecycle()
     val isLoadingState by viewModel.isLoading.collectAsStateWithLifecycle()
     val snackBarTextState by viewModel.snackBarText.collectAsStateWithLifecycle()
     val showSnackBarState by viewModel.showSnackBar.collectAsStateWithLifecycle()
+
+    if (!isGetFollowerCompleteState) {
+        viewModel.getFollower(userId)
+        viewModel.getFollowing(userId)
+        viewModel.getMyFollowing()
+    }
 
     Scaffold(
         topBar = {
@@ -65,10 +78,27 @@ fun FollowScreen(navController: NavHostController, userId: String) {
             showSnackbar = showSnackBarState,
             onDismissSnackbar = { viewModel.dismissSnackBar() }
         ) {
-            Box(modifier = Modifier.padding(it))
+            FollowItems(
+                Modifier.padding(it),
+                viewModel.myUserId,
+                followerListState,
+                followingListState,
+                myFollowingListState,
+                {
+                    viewModel.navigateOtherUserProfile(navController, it)
+                },
+                {
+                    viewModel.createFollow(it)
+                    viewModel.addFollower(it)
+                },
+                {
+                    viewModel.deleteFollow(it)
+                    viewModel.removeFollower()
+                }
+            )
 
             LoadingView(
-                isLoading = isLoadingState
+                isLoading = isLoadingState || isGetFollowerLoadingState || isGetFollowingLoadingState || isGetMyFollowingLoadingState
             )
         }
     }
