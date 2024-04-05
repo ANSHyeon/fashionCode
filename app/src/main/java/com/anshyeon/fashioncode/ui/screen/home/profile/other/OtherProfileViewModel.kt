@@ -259,4 +259,8 @@ class OtherProfileViewModel @Inject constructor(
         val encodedStyleUrl = URLEncoder.encode(styleJson, StandardCharsets.UTF_8.toString())
         navController.navigate("${DetailHomeScreen.StyleDetail.route}/${encodedStyleUrl}")
     }
+
+    fun navigateFollow(navController: NavHostController, userId: String?) {
+        navController.navigate("${DetailHomeScreen.Follow.route}/${userId}")
+    }
 }

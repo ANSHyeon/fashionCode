@@ -16,6 +16,7 @@ import com.anshyeon.fashioncode.ui.screen.home.bookmark.BookMarkScreen
 import com.anshyeon.fashioncode.ui.screen.home.community.detail.CommunityDetailScreen
 import com.anshyeon.fashioncode.ui.screen.home.community.reply.CommunityReplyScreen
 import com.anshyeon.fashioncode.ui.screen.home.community.write.CommunityWriteScreen
+import com.anshyeon.fashioncode.ui.screen.home.profile.follow.FollowScreen
 import com.anshyeon.fashioncode.ui.screen.home.profile.other.OtherProfileScreen
 import com.anshyeon.fashioncode.ui.screen.home.setting.SettingScreen
 import com.anshyeon.fashioncode.ui.screen.home.style.create.StyleCreateScreen
@@ -87,6 +88,13 @@ fun HomeNavGraph(navController: NavHostController) {
             val userId = navBackStackEntry.arguments?.getString("userId").toString()
             OtherProfileScreen(navController, userId)
         }
+        composable(
+            route = DetailHomeScreen.Follow.routeWithArgName(),
+            arguments = DetailHomeScreen.Follow.arguments
+        ) { navBackStackEntry ->
+            val userId = navBackStackEntry.arguments?.getString("userId").toString()
+            FollowScreen(navController, userId)
+        }
     }
 }
 
@@ -132,6 +140,7 @@ sealed class DetailHomeScreen(val route: String, val argName: String) {
     object StyleCreate : DetailHomeScreen(route = "STYLE_CREATE", argName = "")
     object StyleDetail : DetailHomeScreen(route = "STYLE_DETAIL", argName = "style")
     object OtherProfile : DetailHomeScreen(route = "OTHER_PROFILE", argName = "userId")
+    object Follow : DetailHomeScreen(route = "FOLLOW", argName = "userId")
 
     val arguments: List<NamedNavArgument> = listOf(
         navArgument(argName) { type = NavType.StringType }

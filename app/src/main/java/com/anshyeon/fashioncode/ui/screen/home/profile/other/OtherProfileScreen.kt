@@ -1,6 +1,7 @@
 package com.anshyeon.fashioncode.ui.screen.home.profile.other
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -102,7 +103,8 @@ fun OtherProfileScreen(navController: NavHostController, userId: String) {
                                 codiCount = styleListState.size,
                                 followerCount = followerListState.size,
                                 followingCount = followingListState.size,
-                            )
+                            ) { viewModel.navigateFollow(navController, userId) }
+
                             if (viewModel.myUserId != userState?.userId) {
                                 val isFollow =
                                     followerListState.any { it.follower == viewModel.myUserId }
@@ -183,6 +185,7 @@ fun OtherUserProfile(
     codiCount: Int?,
     followerCount: Int?,
     followingCount: Int?,
+    navigateFollow: () -> Unit
 ) {
     Row(
         modifier = Modifier
@@ -214,18 +217,31 @@ fun OtherUserProfile(
                 fontWeight = FontWeight.Bold
             )
             Row {
-                OtherUserProfileText("코디 ${codiCount}")
-                OtherUserProfileText("팔로워 ${followerCount}")
-                OtherUserProfileText("팔로잉 ${followingCount}")
+                OtherUserProfileText(
+                    Modifier.padding(10.dp),
+                    "코디 ${codiCount}"
+                )
+                OtherUserProfileText(
+                    Modifier
+                        .padding(10.dp)
+                        .clickable { navigateFollow() },
+                    "팔로워 ${followerCount}"
+                )
+                OtherUserProfileText(
+                    Modifier
+                        .padding(10.dp)
+                        .clickable { navigateFollow() },
+                    "팔로잉 ${followingCount}"
+                )
             }
         }
     }
 }
 
 @Composable
-private fun OtherUserProfileText(text: String) {
+private fun OtherUserProfileText(modifier: Modifier, text: String) {
     Text(
-        modifier = Modifier.padding(10.dp),
+        modifier = modifier,
         text = text,
         fontSize = 14.sp,
         fontWeight = FontWeight.Bold
