@@ -1,6 +1,7 @@
 package com.anshyeon.fashioncode.network
 
 import com.anshyeon.fashioncode.data.model.Comment
+import com.anshyeon.fashioncode.data.model.Follow
 import com.anshyeon.fashioncode.data.model.Post
 import com.anshyeon.fashioncode.data.model.Reply
 import com.anshyeon.fashioncode.data.model.Style
@@ -107,4 +108,29 @@ interface FireBaseApiClient {
         @Path("styleId") styleId: String,
         @Query("auth") auth: String?,
     ): ApiResponse<Map<String, String>>
+
+    @PUT("follows/{followId}.json")
+    suspend fun createFollow(
+        @Path("followId") styleId: String,
+        @Query("auth") auth: String?,
+        @Body body: Follow
+    ): ApiResponse<Unit>
+
+    @DELETE("follows/{followId}.json")
+    suspend fun deleteFollow(
+        @Path("followId") styleId: String,
+        @Query("auth") auth: String?,
+    ): ApiResponse<Unit>
+
+    @GET("follows.json?orderBy=\"following\"")
+    suspend fun getFollower(
+        @Query("auth") auth: String?,
+        @Query("equalTo") following: String
+    ): ApiResponse<Map<String, Follow>>
+
+    @GET("follows.json?orderBy=\"follower\"")
+    suspend fun getFollowing(
+        @Query("auth") auth: String?,
+        @Query("equalTo") follower: String
+    ): ApiResponse<Map<String, Follow>>
 }

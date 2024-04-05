@@ -1,6 +1,7 @@
 package com.anshyeon.fashioncode.ui.screen.home.profile.other
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -39,24 +40,36 @@ import com.anshyeon.fashioncode.ui.component.appBar.BackButtonAppBar
 import com.anshyeon.fashioncode.ui.component.loadingView.LoadingView
 import com.anshyeon.fashioncode.ui.component.snackBar.TextSnackBarContainer
 import com.anshyeon.fashioncode.ui.screen.home.style.home.StyleBox
+import com.anshyeon.fashioncode.ui.theme.Gray
 import com.anshyeon.fashioncode.ui.theme.SkyBlue
 
 @Composable
 fun OtherProfileScreen(navController: NavHostController, userId: String) {
 
     val viewModel: OtherProfileViewModel = hiltViewModel()
-    viewModel.getUser(userId)
-    viewModel.getStyleList(userId)
 
     val userState by viewModel.user.collectAsStateWithLifecycle()
     val styleListState by viewModel.styleList.collectAsStateWithLifecycle()
+    val followerListState by viewModel.followerList.collectAsStateWithLifecycle()
+    val followingListState by viewModel.followingList.collectAsStateWithLifecycle()
     val isGetStyleListLoadingState by viewModel.isGetStyleListLoading.collectAsStateWithLifecycle()
     val isGetUserLoadingState by viewModel.isGetUserLoading.collectAsStateWithLifecycle()
+    val isGetFollowerLoadingState by viewModel.isGetFollowerLoading.collectAsStateWithLifecycle()
+    val isGetFollowingLoadingState by viewModel.isGetFollowingLoading.collectAsStateWithLifecycle()
     val isGetStyleListCompleteState by viewModel.isGetStyleListComplete.collectAsStateWithLifecycle()
     val isGetUserCompleteState by viewModel.isGetUserComplete.collectAsStateWithLifecycle()
+    val isGetFollowerCompleteState by viewModel.isGetFollowerComplete.collectAsStateWithLifecycle()
+    val isGetFollowingCompleteState by viewModel.isGetFollowingComplete.collectAsStateWithLifecycle()
     val isLoadingState by viewModel.isLoading.collectAsStateWithLifecycle()
     val snackBarTextState by viewModel.snackBarText.collectAsStateWithLifecycle()
     val showSnackBarState by viewModel.showSnackBar.collectAsStateWithLifecycle()
+
+    if (!isGetUserCompleteState) {
+        viewModel.getUser(userId)
+        viewModel.getFollower(userId)
+        viewModel.getFollowing(userId)
+        viewModel.getStyleList(userId)
+    }
 
     Scaffold(
         topBar = {
@@ -71,7 +84,9 @@ fun OtherProfileScreen(navController: NavHostController, userId: String) {
             onDismissSnackbar = { viewModel.dismissSnackBar() }
         ) {
 
-            if (isGetStyleListCompleteState && isGetUserCompleteState) {
+            if (isGetStyleListCompleteState && isGetUserCompleteState &&
+                isGetFollowerCompleteState && isGetFollowingCompleteState
+            ) {
                 LazyVerticalGrid(
                     modifier = Modifier
                         .fillMaxSize()
@@ -87,27 +102,38 @@ fun OtherProfileScreen(navController: NavHostController, userId: String) {
                                 profileUrl = userState?.profileUrl,
                                 nickName = userState?.nickName,
                                 codiCount = styleListState.size,
-                                followerCount = null,
-                                followingCount = null,
-                            )
-                            Button(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(top = 5.dp),
-                                shape = RoundedCornerShape(10.dp),
-                                colors = ButtonDefaults.buttonColors(
-                                    backgroundColor = SkyBlue,
-                                    contentColor = Color.White,
-                                    disabledBackgroundColor = Color.Gray,
-                                    disabledContentColor = Color.Black
-                                ),
-                                enabled = true,
-                                onClick = { }
-                            ) {
-                                Text(
-                                    text = if (true) "팔로우" else "팔로잉",
-                                    fontWeight = FontWeight.Bold
-                                )
+                                followerCount = followerListState.size,
+                                followingCount = followingListState.size,
+                            ) { viewModel.navigateFollow(navController, userId) }
+
+                            if (viewModel.myUserId != userState?.userId) {
+                                val isFollow =
+                                    followerListState.any { it.follower == viewModel.myUserId }
+                                Button(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(top = 5.dp),
+                                    shape = RoundedCornerShape(10.dp),
+                                    colors = ButtonDefaults.buttonColors(
+                                        backgroundColor = if (isFollow) Gray else SkyBlue,
+                                        contentColor = if (isFollow) Color.Black else Color.White,
+                                    ),
+                                    enabled = true,
+                                    onClick = {
+                                        if (isFollow) {
+                                            viewModel.deleteFollow(userState?.userId)
+                                            viewModel.removeFollower()
+                                        } else {
+                                            viewModel.createFollow(userState?.userId)
+                                            viewModel.addFollower(userState?.userId)
+                                        }
+                                    }
+                                ) {
+                                    Text(
+                                        text = if (isFollow) "팔로잉" else "팔로우",
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
                             }
                         }
                     }
@@ -116,8 +142,9 @@ fun OtherProfileScreen(navController: NavHostController, userId: String) {
                             Text(
                                 modifier = Modifier
                                     .padding(8.dp)
+                                    .padding(top = 8.dp)
                                     .height(20.dp),
-                                text = "${userState?.nickName}님 코디"
+                                text = "${userState?.nickName}님의 코디"
                             )
                         }
                     }
@@ -143,7 +170,8 @@ fun OtherProfileScreen(navController: NavHostController, userId: String) {
             }
 
             LoadingView(
-                isLoading = isLoadingState || isGetUserLoadingState || isGetStyleListLoadingState
+                isLoading = isLoadingState || isGetUserLoadingState || isGetStyleListLoadingState ||
+                        isGetFollowerLoadingState || isGetFollowingLoadingState
             )
         }
     }
@@ -158,6 +186,7 @@ fun OtherUserProfile(
     codiCount: Int?,
     followerCount: Int?,
     followingCount: Int?,
+    navigateFollow: () -> Unit
 ) {
     Row(
         modifier = Modifier
@@ -189,18 +218,31 @@ fun OtherUserProfile(
                 fontWeight = FontWeight.Bold
             )
             Row {
-                OtherUserProfileText("코디 ${codiCount}")
-                OtherUserProfileText("팔로워 ${followerCount}")
-                OtherUserProfileText("팔로잉 ${followingCount}")
+                OtherUserProfileText(
+                    Modifier.padding(10.dp),
+                    "코디 ${codiCount}"
+                )
+                OtherUserProfileText(
+                    Modifier
+                        .padding(10.dp)
+                        .clickable { navigateFollow() },
+                    "팔로워 ${followerCount}"
+                )
+                OtherUserProfileText(
+                    Modifier
+                        .padding(10.dp)
+                        .clickable { navigateFollow() },
+                    "팔로잉 ${followingCount}"
+                )
             }
         }
     }
 }
 
 @Composable
-private fun OtherUserProfileText(text: String) {
+private fun OtherUserProfileText(modifier: Modifier, text: String) {
     Text(
-        modifier = Modifier.padding(10.dp),
+        modifier = modifier,
         text = text,
         fontSize = 14.sp,
         fontWeight = FontWeight.Bold

@@ -136,7 +136,6 @@ class StyleViewModel @Inject constructor(
     ) {
         val styleJson = SerializationUtils.toJson(style)
         val encodedStyleUrl = URLEncoder.encode(styleJson, StandardCharsets.UTF_8.toString())
-        _isNavigate.value = true
         navController.navigate("${DetailHomeScreen.StyleDetail.route}/${encodedStyleUrl}")
     }
 }

@@ -38,14 +38,15 @@ fun StyleDetailScreen(navController: NavHostController, style: Style) {
 
     val viewModel: StyleDetailViewModel = hiltViewModel()
 
-    viewModel.getStyleList(style.writer)
-
     val styleListState by viewModel.styleList.collectAsStateWithLifecycle()
     val isGetStyleListLoadingState by viewModel.isGetStyleListLoading.collectAsStateWithLifecycle()
     val isGetStyleListCompleteState by viewModel.isGetStyleListComplete.collectAsStateWithLifecycle()
     val isLoadingState by viewModel.isLoading.collectAsStateWithLifecycle()
     val snackBarTextState by viewModel.snackBarText.collectAsStateWithLifecycle()
     val showSnackBarState by viewModel.showSnackBar.collectAsStateWithLifecycle()
+
+    if (styleListState.isEmpty())
+        viewModel.getStyleList(style.writer)
 
     Scaffold(
         topBar = {
