@@ -3,7 +3,6 @@ package com.anshyeon.fashioncode.ui.screen.home.profile.me
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -54,6 +53,18 @@ fun ProfileScreen(navController: NavHostController) {
 
     val viewModel: ProfileViewModel = hiltViewModel()
 
+    val userState by viewModel.user.collectAsStateWithLifecycle()
+    val styleListState by viewModel.styleList.collectAsStateWithLifecycle()
+    val followerListState by viewModel.followerList.collectAsStateWithLifecycle()
+    val followingListState by viewModel.followingList.collectAsStateWithLifecycle()
+    val isGetStyleListLoadingState by viewModel.isGetStyleListLoading.collectAsStateWithLifecycle()
+    val isGetUserLoadingState by viewModel.isGetUserLoading.collectAsStateWithLifecycle()
+    val isGetFollowerLoadingState by viewModel.isGetFollowerLoading.collectAsStateWithLifecycle()
+    val isGetFollowingLoadingState by viewModel.isGetFollowingLoading.collectAsStateWithLifecycle()
+    val isGetStyleListCompleteState by viewModel.isGetStyleListComplete.collectAsStateWithLifecycle()
+    val isGetUserCompleteState by viewModel.isGetUserComplete.collectAsStateWithLifecycle()
+    val isGetFollowerCompleteState by viewModel.isGetFollowerComplete.collectAsStateWithLifecycle()
+    val isGetFollowingCompleteState by viewModel.isGetFollowingComplete.collectAsStateWithLifecycle()
     val isLoadingState by viewModel.isLoading.collectAsStateWithLifecycle()
     val snackBarTextState by viewModel.snackBarText.collectAsStateWithLifecycle()
     val showSnackBarState by viewModel.showSnackBar.collectAsStateWithLifecycle()
@@ -69,10 +80,28 @@ fun ProfileScreen(navController: NavHostController) {
             onDismissSnackbar = { viewModel.dismissSnackBar() }
         ) {
 
-            Box(modifier = Modifier.padding(it))
+            if (isGetStyleListCompleteState && isGetUserCompleteState &&
+                isGetFollowerCompleteState && isGetFollowingCompleteState
+            ) {
+                Column(
+                    Modifier
+                        .padding(it)
+                ) {
+                    ProfileBox(
+                        Modifier.padding(16.dp),
+                        userState,
+                        styleListState,
+                        followerListState,
+                        followingListState
+                    ) {
+                        viewModel.navigateFollow(navController)
+                    }
+                }
+            }
 
             LoadingView(
-                isLoading = isLoadingState
+                isLoading = isLoadingState || isGetUserLoadingState || isGetStyleListLoadingState ||
+                        isGetFollowerLoadingState || isGetFollowingLoadingState
             )
         }
     }
