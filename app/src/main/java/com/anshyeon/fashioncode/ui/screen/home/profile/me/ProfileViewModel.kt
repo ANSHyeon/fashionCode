@@ -1,8 +1,12 @@
 package com.anshyeon.fashioncode.ui.screen.home.profile.me
 
+import android.content.Context
+import android.graphics.Bitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavHostController
+import com.anshyeon.fashioncode.data.model.Clothes
+import com.anshyeon.fashioncode.data.model.ClothesType
 import com.anshyeon.fashioncode.data.model.Follow
 import com.anshyeon.fashioncode.data.model.Style
 import com.anshyeon.fashioncode.data.model.User
@@ -10,6 +14,7 @@ import com.anshyeon.fashioncode.data.repository.AuthRepository
 import com.anshyeon.fashioncode.data.repository.StyleRepository
 import com.anshyeon.fashioncode.ui.graph.DetailHomeScreen
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -26,6 +31,11 @@ class ProfileViewModel @Inject constructor(
 ) : ViewModel() {
 
     val myUserId: String = authRepository.getUserId()
+
+    private var currentClothesType: ClothesType = ClothesType.OUTER
+
+    private val _clothesList = MutableStateFlow(listOf(Clothes()))
+    val clothesList: StateFlow<List<Clothes>> = _clothesList
 
     private val _user = MutableStateFlow<User?>(null)
     var user: StateFlow<User?> = _user
@@ -54,6 +64,9 @@ class ProfileViewModel @Inject constructor(
     private val _isGetFollowingLoading = MutableStateFlow(false)
     val isGetFollowingLoading: StateFlow<Boolean> = _isGetFollowingLoading
 
+    private val _isCutOutLoading = MutableStateFlow(false)
+    val isCutOutLoading: StateFlow<Boolean> = _isCutOutLoading
+
     private val _isGetStyleListComplete = MutableStateFlow(false)
     val isGetStyleListComplete: StateFlow<Boolean> = _isGetStyleListComplete
 
@@ -77,6 +90,54 @@ class ProfileViewModel @Inject constructor(
         getFollower(myUserId)
         getFollowing(myUserId)
         getStyleList(myUserId)
+        viewModelScope.launch {
+            getLocalClothesList()
+        }
+    }
+
+    private suspend fun getLocalClothesList() {
+        transformLocalMessageList().collectLatest {
+            _clothesList.value = mutableListOf(Clothes()).apply {
+                addAll(it)
+            }.toList()
+        }
+    }
+
+    private fun transformLocalMessageList(): Flow<List<Clothes>> {
+        return styleRepository.getClothesListByRoom(
+            onComplete = { }
+        )
+    }
+
+    fun cutoutImage(context: Context, bitmap: Bitmap) {
+        _isCutOutLoading.value = true
+        viewModelScope.launch {
+            val getDropBoxTokenJob = viewModelScope.async {
+                styleRepository.getDropBoxToken()
+            }
+            val getAdobeTokenJob = viewModelScope.async {
+                styleRepository.getAdobeLoginToken()
+            }
+            val dropboxToken = getDropBoxTokenJob.await()
+            val getDropBoxLinkJob = viewModelScope.async {
+                styleRepository.getDropBoxLink(dropboxToken, bitmap)
+            }
+            val adobeToken = getAdobeTokenJob.await()
+            val (dropBoxLink, path) = getDropBoxLinkJob.await()
+
+            styleRepository.createClothes(
+                currentClothesType,
+                adobeToken,
+                dropboxToken,
+                dropBoxLink,
+                path,
+                context
+            ) {
+                _showSnackBar.value = true
+                _snackBarText.value = "잠시 후 다시 시도해 주십시오"
+            }
+            _isCutOutLoading.value = false
+        }
     }
 
     private fun getStyleList(userId: String) {
@@ -167,6 +228,10 @@ class ProfileViewModel @Inject constructor(
 
     fun dismissSnackBar() {
         _showSnackBar.value = false
+    }
+
+    fun changeClothesType(type: ClothesType) {
+        currentClothesType = type
     }
 
     fun navigateBack(navController: NavHostController) {

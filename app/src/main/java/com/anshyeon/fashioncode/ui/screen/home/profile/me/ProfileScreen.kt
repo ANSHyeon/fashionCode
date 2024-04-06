@@ -1,5 +1,8 @@
 package com.anshyeon.fashioncode.ui.screen.home.profile.me
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.result.launch
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -26,6 +29,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -52,11 +56,14 @@ import kotlinx.coroutines.launch
 fun ProfileScreen(navController: NavHostController) {
 
     val viewModel: ProfileViewModel = hiltViewModel()
+    val context = LocalContext.current
 
     val userState by viewModel.user.collectAsStateWithLifecycle()
     val styleListState by viewModel.styleList.collectAsStateWithLifecycle()
     val followerListState by viewModel.followerList.collectAsStateWithLifecycle()
     val followingListState by viewModel.followingList.collectAsStateWithLifecycle()
+    val clothesListState by viewModel.clothesList.collectAsStateWithLifecycle()
+    val isCutOutLoadingState by viewModel.isCutOutLoading.collectAsStateWithLifecycle()
     val isGetStyleListLoadingState by viewModel.isGetStyleListLoading.collectAsStateWithLifecycle()
     val isGetUserLoadingState by viewModel.isGetUserLoading.collectAsStateWithLifecycle()
     val isGetFollowerLoadingState by viewModel.isGetFollowerLoading.collectAsStateWithLifecycle()
@@ -68,6 +75,15 @@ fun ProfileScreen(navController: NavHostController) {
     val isLoadingState by viewModel.isLoading.collectAsStateWithLifecycle()
     val snackBarTextState by viewModel.snackBarText.collectAsStateWithLifecycle()
     val showSnackBarState by viewModel.showSnackBar.collectAsStateWithLifecycle()
+
+    val takePhotoFromCameraLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicturePreview(),
+        onResult = { takenPhoto ->
+            if (takenPhoto != null) {
+                viewModel.cutoutImage(context, takenPhoto)
+            }
+        }
+    )
 
     Scaffold(
         topBar = {
@@ -92,21 +108,28 @@ fun ProfileScreen(navController: NavHostController) {
                         userState,
                         styleListState,
                         followerListState,
-                        followingListState
+                        followingListState,
                     ) {
                         viewModel.navigateFollow(navController)
+                    }
+                    MyItems(
+                        Modifier.padding(top = 8.dp),
+                        styleListState,
+                        clothesListState,
+                    ) {
+                        viewModel.changeClothesType(it)
+                        takePhotoFromCameraLauncher.launch()
                     }
                 }
             }
 
             LoadingView(
                 isLoading = isLoadingState || isGetUserLoadingState || isGetStyleListLoadingState ||
-                        isGetFollowerLoadingState || isGetFollowingLoadingState
+                        isGetFollowerLoadingState || isGetFollowingLoadingState || isCutOutLoadingState
             )
         }
     }
 }
-
 
 @Composable
 private fun ProfileBox(
