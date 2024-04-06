@@ -1,19 +1,53 @@
 package com.anshyeon.fashioncode.ui.screen.home.profile.me
 
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Scaffold
+import androidx.compose.material.Tab
+import androidx.compose.material.TabRow
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
+import coil.compose.AsyncImage
 import com.anshyeon.fashioncode.R
+import com.anshyeon.fashioncode.data.model.Clothes
+import com.anshyeon.fashioncode.data.model.ClothesType
+import com.anshyeon.fashioncode.data.model.Follow
+import com.anshyeon.fashioncode.data.model.Style
+import com.anshyeon.fashioncode.data.model.User
 import com.anshyeon.fashioncode.ui.component.appBar.DefaultAppBar
 import com.anshyeon.fashioncode.ui.component.loadingView.LoadingView
 import com.anshyeon.fashioncode.ui.component.snackBar.TextSnackBarContainer
+import com.anshyeon.fashioncode.ui.screen.home.profile.other.TotalUserProfile
+import com.anshyeon.fashioncode.ui.screen.home.style.create.CodiItems
+import com.anshyeon.fashioncode.ui.theme.Gray
+import kotlinx.coroutines.launch
 
 @Composable
 fun ProfileScreen(navController: NavHostController) {
@@ -39,6 +73,140 @@ fun ProfileScreen(navController: NavHostController) {
 
             LoadingView(
                 isLoading = isLoadingState
+            )
+        }
+    }
+}
+
+
+@Composable
+private fun ProfileBox(
+    modifier: Modifier,
+    userState: User?,
+    styleListState: List<Style>,
+    followerListState: List<Follow>,
+    followingListState: List<Follow>,
+    navigateFollow: () -> Unit
+) {
+    Column(modifier = modifier) {
+        TotalUserProfile(
+            modifier = Modifier.size(72.dp),
+            textUnit = 14.sp,
+            profileUrl = userState?.profileUrl,
+            nickName = userState?.nickName,
+            codiCount = styleListState.size,
+            followerCount = followerListState.size,
+            followingCount = followingListState.size,
+        ) { navigateFollow() }
+
+        Button(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 5.dp),
+            shape = RoundedCornerShape(10.dp),
+            colors = ButtonDefaults.buttonColors(
+                backgroundColor = Gray,
+                contentColor = Color.Black,
+            ),
+            enabled = true,
+            onClick = {
+
+            }
+        ) {
+            Text(
+                text = "프로필 수정",
+                fontWeight = FontWeight.Bold
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun MyItems(
+    modifier: Modifier,
+    styleList: List<Style>,
+    clothesList: List<Clothes>,
+    onAddButtonClick: (ClothesType) -> Unit,
+) {
+    Column(
+        modifier = modifier
+    ) {
+
+        val tabs = listOf("스타일", "옷장")
+        val coroutineScope = rememberCoroutineScope()
+        val pagerState = rememberPagerState {
+            tabs.size
+        }
+
+        TabRow(
+            selectedTabIndex = pagerState.currentPage,
+            contentColor = Color.Black,
+        ) {
+            tabs.forEachIndexed { index, text ->
+                Tab(
+                    modifier = Modifier
+                        .background(Color.White),
+                    selected = pagerState.currentPage == index,
+                    onClick = {
+                        coroutineScope.launch {
+                            pagerState.scrollToPage(index)
+                        }
+                    },
+                    text = {
+                        Text(
+                            text = text,
+                            fontWeight = FontWeight.Bold,
+                        )
+                    },
+                )
+            }
+        }
+
+        HorizontalPager(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(8.dp),
+            state = pagerState,
+            verticalAlignment = Alignment.Top
+        ) { index ->
+            if (index == 0) {
+                StyleItems(
+                    styleList = styleList
+                )
+            } else {
+                CodiItems(
+                    Modifier
+                        .fillMaxWidth(),
+                    clothesList,
+                    {
+                        onAddButtonClick(it)
+                    },
+                    {}
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun StyleItems(
+    modifier: Modifier = Modifier,
+    styleList: List<Style>
+) {
+    LazyVerticalGrid(
+        modifier = modifier
+            .border(1.dp, Gray)
+            .padding(1.dp),
+        columns = GridCells.Fixed(2)
+    ) {
+        items(styleList) { style ->
+            AsyncImage(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .border(1.dp, Gray),
+                model = style.imageUrl,
+                contentDescription = null
             )
         }
     }
