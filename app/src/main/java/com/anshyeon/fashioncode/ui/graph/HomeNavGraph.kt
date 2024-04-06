@@ -17,8 +17,8 @@ import com.anshyeon.fashioncode.ui.screen.home.community.detail.CommunityDetailS
 import com.anshyeon.fashioncode.ui.screen.home.community.reply.CommunityReplyScreen
 import com.anshyeon.fashioncode.ui.screen.home.community.write.CommunityWriteScreen
 import com.anshyeon.fashioncode.ui.screen.home.profile.follow.FollowScreen
+import com.anshyeon.fashioncode.ui.screen.home.profile.me.ProfileScreen
 import com.anshyeon.fashioncode.ui.screen.home.profile.other.OtherProfileScreen
-import com.anshyeon.fashioncode.ui.screen.home.setting.SettingScreen
 import com.anshyeon.fashioncode.ui.screen.home.style.create.StyleCreateScreen
 import com.anshyeon.fashioncode.ui.screen.home.style.detail.StyleDetailScreen
 import com.anshyeon.fashioncode.util.Constants
@@ -43,7 +43,7 @@ fun HomeNavGraph(navController: NavHostController) {
             CommunityScreen(navController)
         }
         composable(route = BottomNavItem.Setting.route) {
-            SettingScreen(navController)
+            ProfileScreen(navController)
         }
         composable(route = DetailHomeScreen.CommunityWrite.route) {
             CommunityWriteScreen(navController)
