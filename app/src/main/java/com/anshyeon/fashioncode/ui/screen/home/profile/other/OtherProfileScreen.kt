@@ -96,7 +96,7 @@ fun OtherProfileScreen(navController: NavHostController, userId: String) {
                 ) {
                     item(span = { GridItemSpan(2) }) {
                         Column {
-                            OtherUserProfile(
+                            TotalUserProfile(
                                 modifier = Modifier.size(72.dp),
                                 textUnit = 14.sp,
                                 profileUrl = userState?.profileUrl,
@@ -178,7 +178,7 @@ fun OtherProfileScreen(navController: NavHostController, userId: String) {
 }
 
 @Composable
-fun OtherUserProfile(
+fun TotalUserProfile(
     modifier: Modifier,
     textUnit: TextUnit,
     profileUrl: String?,
