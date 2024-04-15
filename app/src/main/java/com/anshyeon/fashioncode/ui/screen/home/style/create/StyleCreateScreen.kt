@@ -84,7 +84,7 @@ import com.anshyeon.fashioncode.util.ImageTypeConvertor
 import kotlinx.coroutines.launch
 
 @Composable
-fun StyleCreateScreen(navController: NavHostController) {
+fun StyleCreateScreen(navController: NavHostController, selectedDate: String) {
 
     val viewModel: StyleCreateViewModel = hiltViewModel()
     val context = LocalContext.current

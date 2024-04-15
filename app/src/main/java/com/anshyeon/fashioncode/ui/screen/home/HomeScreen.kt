@@ -52,7 +52,7 @@ fun HomeScreen(navController: NavHostController = rememberNavController()) {
 fun BottomBar(navController: NavHostController) {
     val screens = listOf(
         BottomNavItem.Style,
-        BottomNavItem.BookMark,
+        BottomNavItem.Calendar,
         BottomNavItem.Community,
         BottomNavItem.Setting,
     )
