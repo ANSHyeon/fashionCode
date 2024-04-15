@@ -127,7 +127,7 @@ class StyleViewModel @Inject constructor(
 
     fun navigateStyleCreate(navController: NavHostController) {
         _isNavigate.value = true
-        navController.navigate("${DetailHomeScreen.StyleCreate.route}/${""}")
+        navController.navigate("${DetailHomeScreen.StyleCreate.route}/${DetailHomeScreen.StyleCreate.route}")
     }
 
     fun navigateStyleDetail(

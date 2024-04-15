@@ -78,6 +78,7 @@ import com.anshyeon.fashioncode.data.model.ClothesType
 import com.anshyeon.fashioncode.ui.component.appBar.BackButtonWithActionAppBar
 import com.anshyeon.fashioncode.ui.component.loadingView.LoadingView
 import com.anshyeon.fashioncode.ui.component.snackBar.TextSnackBarContainer
+import com.anshyeon.fashioncode.ui.graph.DetailHomeScreen
 import com.anshyeon.fashioncode.ui.theme.DarkGray
 import com.anshyeon.fashioncode.ui.theme.Gray
 import com.anshyeon.fashioncode.util.ImageTypeConvertor
@@ -111,16 +112,16 @@ fun StyleCreateScreen(navController: NavHostController, selectedDate: String) {
         topBar = {
             BackButtonWithActionAppBar(stringResource(id = R.string.label_app_bar_style_create),
                 { viewModel.navigateBack(navController) }) {
-                if (selectedDate.isNotEmpty()) {
+                if (selectedDate == DetailHomeScreen.StyleCreate.route) {
+                    viewModel.createStyle(
+                        navController,
+                        ImageTypeConvertor.createBitmapFromPicture(picture)
+                    )
+                } else {
                     viewModel.insertStyle(
                         navController,
                         ImageTypeConvertor.createBitmapFromPicture(picture),
                         selectedDate
-                    )
-                } else {
-                    viewModel.createStyle(
-                        navController,
-                        ImageTypeConvertor.createBitmapFromPicture(picture)
                     )
                 }
             }
