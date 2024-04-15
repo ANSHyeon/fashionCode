@@ -26,6 +26,7 @@ fun CalendarScreen(navController: NavHostController) {
 
     val appBarTitleState by viewModel.appBarTitle.collectAsStateWithLifecycle()
     val selectedDateState by viewModel.selectedDate.collectAsStateWithLifecycle()
+    val styleListState by viewModel.styleList.collectAsStateWithLifecycle()
     val isLoadingState by viewModel.isLoading.collectAsStateWithLifecycle()
     val snackBarTextState by viewModel.snackBarText.collectAsStateWithLifecycle()
     val showSnackBarState by viewModel.showSnackBar.collectAsStateWithLifecycle()
@@ -56,6 +57,7 @@ fun CalendarScreen(navController: NavHostController) {
             ) {
                 HorizontalCalendar(
                     selectedDate = selectedDateState,
+                    styleListState = styleListState,
                     onChangeAppBarTitle = { viewModel.onChangeAppBarTitle(it) }) {
                     viewModel.onChangeSelectedDate(
                         it

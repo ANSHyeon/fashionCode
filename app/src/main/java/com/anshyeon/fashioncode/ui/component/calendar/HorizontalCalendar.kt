@@ -29,6 +29,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
+import com.anshyeon.fashioncode.data.model.LocalStyle
 import com.anshyeon.fashioncode.ui.theme.DarkGray
 import com.anshyeon.fashioncode.ui.theme.Gray
 import com.anshyeon.fashioncode.ui.theme.Orange
@@ -43,6 +45,7 @@ import java.util.Locale
 @Composable
 fun HorizontalCalendar(
     modifier: Modifier = Modifier,
+    styleListState: List<LocalStyle>,
     selectedDate: LocalDate,
     onChangeAppBarTitle: (String) -> Unit,
     onChangeSelectedDate: (LocalDate) -> Unit
@@ -75,6 +78,7 @@ fun HorizontalCalendar(
                 CalendarMonthItem(
                     modifier = Modifier
                         .fillMaxWidth(),
+                    styleListState = styleListState,
                     gridHeight = gridHeight,
                     currentDate = date,
                     selectedDate = selectedDate,
@@ -88,6 +92,7 @@ fun HorizontalCalendar(
 @Composable
 fun CalendarMonthItem(
     modifier: Modifier = Modifier,
+    styleListState: List<LocalStyle>,
     gridHeight: Dp,
     currentDate: LocalDate,
     selectedDate: LocalDate,
@@ -120,11 +125,13 @@ fun CalendarMonthItem(
             }
             items(days) { day ->
                 val date = currentDate.withDayOfMonth(day)
+                val styleByDate = styleListState.filter { it.date == date.toString() }
                 val isSelected = remember(selectedDate) {
                     selectedDate.compareTo(date) == 0
                 }
                 CalendarDay(
                     Modifier.height(dayHeight),
+                    styleByDate,
                     date = date,
                     isToday = date == LocalDate.now(),
                     isSelected = isSelected,
@@ -138,6 +145,7 @@ fun CalendarMonthItem(
 @Composable
 fun CalendarDay(
     modifier: Modifier = Modifier,
+    styleByDate: List<LocalStyle>,
     date: LocalDate,
     isToday: Boolean,
     isSelected: Boolean,
@@ -162,6 +170,13 @@ fun CalendarDay(
             text = date.dayOfMonth.toString(),
             fontSize = 12.sp,
         )
+        if (styleByDate.isNotEmpty()) {
+            AsyncImage(
+                modifier = Modifier.fillMaxSize(),
+                model = styleByDate.last().image,
+                contentDescription = null
+            )
+        }
     }
 }
 
