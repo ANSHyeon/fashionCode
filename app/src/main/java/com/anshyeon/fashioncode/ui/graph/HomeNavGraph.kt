@@ -12,7 +12,7 @@ import com.anshyeon.fashioncode.data.model.Comment
 import com.anshyeon.fashioncode.data.model.Style
 import com.anshyeon.fashioncode.ui.screen.home.style.home.StyleScreen
 import com.anshyeon.fashioncode.ui.screen.home.community.home.CommunityScreen
-import com.anshyeon.fashioncode.ui.screen.home.bookmark.BookMarkScreen
+import com.anshyeon.fashioncode.ui.screen.home.bookmark.CalendarScreen
 import com.anshyeon.fashioncode.ui.screen.home.community.detail.CommunityDetailScreen
 import com.anshyeon.fashioncode.ui.screen.home.community.reply.CommunityReplyScreen
 import com.anshyeon.fashioncode.ui.screen.home.community.write.CommunityWriteScreen
@@ -37,7 +37,7 @@ fun HomeNavGraph(navController: NavHostController) {
             StyleScreen(navController)
         }
         composable(route = BottomNavItem.BookMark.route) {
-            BookMarkScreen(navController)
+            CalendarScreen(navController)
         }
         composable(route = BottomNavItem.Community.route) {
             CommunityScreen(navController)
