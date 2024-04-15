@@ -7,6 +7,7 @@ import com.anshyeon.fashioncode.data.PreferenceManager
 import com.anshyeon.fashioncode.data.dataSource.ImageDataSource
 import com.anshyeon.fashioncode.data.dataSource.UserDataSource
 import com.anshyeon.fashioncode.data.local.dao.ClothesDao
+import com.anshyeon.fashioncode.data.local.dao.StyleDao
 import com.anshyeon.fashioncode.data.model.AdobeInput
 import com.anshyeon.fashioncode.data.model.AdobeOutPut
 import com.anshyeon.fashioncode.data.model.AdobeRequestBody
@@ -15,6 +16,7 @@ import com.anshyeon.fashioncode.data.model.ClothesType
 import com.anshyeon.fashioncode.data.model.CommitInfo
 import com.anshyeon.fashioncode.data.model.DropBoxDownloadRequestBody
 import com.anshyeon.fashioncode.data.model.DropBoxRequestBody
+import com.anshyeon.fashioncode.data.model.LocalStyle
 import com.anshyeon.fashioncode.data.model.Style
 import com.anshyeon.fashioncode.network.AdobeApiClient
 import com.anshyeon.fashioncode.network.AdobeLoginApiClient
@@ -45,6 +47,7 @@ class StyleRepository @Inject constructor(
     private val imageDataSource: ImageDataSource,
     private val userDataSource: UserDataSource,
     private val clothesDao: ClothesDao,
+    private val styleDao: StyleDao,
     private val preferenceManager: PreferenceManager,
 ) {
 
@@ -317,5 +320,28 @@ class StyleRepository @Inject constructor(
 
     private suspend fun insertClothes(clothes: Clothes) {
         clothesDao.insert(clothes)
+    }
+
+    suspend fun saveStyle(
+        bitmap: Bitmap,
+        selectedDate: String,
+        onError: () -> Unit
+    ){
+        try {
+            val userId = userDataSource.getUserId()
+            val style = LocalStyle(
+                userId + bitmap.toString(),
+                userId,
+                selectedDate,
+                bitmap,
+            )
+            insertStyle(style)
+        } catch (e: Exception) {
+            onError()
+        }
+    }
+
+    private suspend fun insertStyle(style: LocalStyle) {
+        styleDao.insert(style)
     }
 }

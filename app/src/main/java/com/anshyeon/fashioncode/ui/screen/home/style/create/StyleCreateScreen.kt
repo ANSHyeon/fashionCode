@@ -94,6 +94,7 @@ fun StyleCreateScreen(navController: NavHostController, selectedDate: String) {
     val selectedClothesListState by viewModel.selectedClothesList.collectAsStateWithLifecycle()
     val isCreateStyleLoadingState by viewModel.isCreateStyleLoading.collectAsStateWithLifecycle()
     val isCutOutLoadingState by viewModel.isCutOutLoading.collectAsStateWithLifecycle()
+    val isInsertStyleLoadingState by viewModel.isInsertStyleLoading.collectAsStateWithLifecycle()
     val snackBarTextState by viewModel.snackBarText.collectAsStateWithLifecycle()
     val showSnackBarState by viewModel.showSnackBar.collectAsStateWithLifecycle()
 
@@ -110,7 +111,18 @@ fun StyleCreateScreen(navController: NavHostController, selectedDate: String) {
         topBar = {
             BackButtonWithActionAppBar(stringResource(id = R.string.label_app_bar_style_create),
                 { viewModel.navigateBack(navController) }) {
-                viewModel.createStyle(navController, ImageTypeConvertor.createBitmapFromPicture(picture))
+                if (selectedDate.isNotEmpty()) {
+                    viewModel.insertStyle(
+                        navController,
+                        ImageTypeConvertor.createBitmapFromPicture(picture),
+                        selectedDate
+                    )
+                } else {
+                    viewModel.createStyle(
+                        navController,
+                        ImageTypeConvertor.createBitmapFromPicture(picture)
+                    )
+                }
             }
         }
     ) {
@@ -147,7 +159,7 @@ fun StyleCreateScreen(navController: NavHostController, selectedDate: String) {
                     )
                 }
                 LoadingView(
-                    isLoading = isCreateStyleLoadingState || isCutOutLoadingState
+                    isLoading = isCreateStyleLoadingState || isCutOutLoadingState || isInsertStyleLoadingState
                 )
             }
         }

@@ -39,6 +39,9 @@ class StyleCreateViewModel @Inject constructor(
     private val _isCreateStyleLoading = MutableStateFlow(false)
     val isCreateStyleLoading: StateFlow<Boolean> = _isCreateStyleLoading
 
+    private val _isInsertStyleLoading = MutableStateFlow(false)
+    val isInsertStyleLoading: StateFlow<Boolean> = _isInsertStyleLoading
+
     private val _snackBarText = MutableStateFlow("")
     val snackBarText: StateFlow<String> = _snackBarText
 
@@ -114,6 +117,22 @@ class StyleCreateViewModel @Inject constructor(
                 _showSnackBar.value = true
                 _snackBarText.value = "잠시 후 다시 시도해 주십시오"
             }
+        }
+    }
+
+    fun insertStyle(
+        navController: NavHostController,
+        bitmap: Bitmap,
+        selectedDate: String
+    ) {
+        _isInsertStyleLoading.value = true
+        viewModelScope.launch {
+            styleRepository.saveStyle(bitmap, selectedDate) {
+                _showSnackBar.value = true
+                _snackBarText.value = "잠시 후 다시 시도해 주십시오"
+            }
+            _isInsertStyleLoading.value = false
+            navigateBack(navController)
         }
     }
 
