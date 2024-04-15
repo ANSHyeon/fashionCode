@@ -2,10 +2,15 @@ package com.anshyeon.fashioncode.ui.screen.home.bookmark
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.Scaffold
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
@@ -27,7 +32,17 @@ fun CalendarScreen(navController: NavHostController) {
 
     Scaffold(
         topBar = {
-            DefaultAppBar(appBarTitleState) { }
+            DefaultAppBar(appBarTitleState) {
+                IconButton(
+                    onClick = { viewModel.navigateStyleCreate(navController, selectedDateState) }
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Add,
+                        contentDescription = "Add Icon",
+                        tint = Color.Black
+                    )
+                }
+            }
         }
     ) {
         TextSnackBarContainer(

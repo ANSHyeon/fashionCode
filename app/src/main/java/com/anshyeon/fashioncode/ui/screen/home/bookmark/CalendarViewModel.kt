@@ -1,6 +1,8 @@
 package com.anshyeon.fashioncode.ui.screen.home.bookmark
 
 import androidx.lifecycle.ViewModel
+import androidx.navigation.NavHostController
+import com.anshyeon.fashioncode.ui.graph.DetailHomeScreen
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -37,5 +39,9 @@ class CalendarViewModel @Inject constructor(
 
     fun dismissSnackBar() {
         _showSnackBar.value = false
+    }
+
+    fun navigateStyleCreate(navController: NavHostController, selectedDate: LocalDate) {
+        navController.navigate("${DetailHomeScreen.StyleCreate.route}/${selectedDate}")
     }
 }
