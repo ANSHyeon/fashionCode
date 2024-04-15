@@ -341,6 +341,12 @@ class StyleRepository @Inject constructor(
         }
     }
 
+    fun getStyleListByRoom(
+        onComplete: () -> Unit
+    ): Flow<List<LocalStyle>> {
+        return styleDao.getAllStyleList().onCompletion { onComplete() }
+    }
+
     private suspend fun insertStyle(style: LocalStyle) {
         styleDao.insert(style)
     }
