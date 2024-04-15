@@ -10,6 +10,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.anshyeon.fashioncode.ui.component.appBar.DefaultAppBar
+import com.anshyeon.fashioncode.ui.component.calendar.HorizontalCalendar
 import com.anshyeon.fashioncode.ui.component.loadingView.LoadingView
 import com.anshyeon.fashioncode.ui.component.snackBar.TextSnackBarContainer
 
@@ -18,13 +19,15 @@ fun CalendarScreen(navController: NavHostController) {
 
     val viewModel: CalendarViewModel = hiltViewModel()
 
+    val appBarTitleState by viewModel.appBarTitle.collectAsStateWithLifecycle()
+    val selectedDateState by viewModel.selectedDate.collectAsStateWithLifecycle()
     val isLoadingState by viewModel.isLoading.collectAsStateWithLifecycle()
     val snackBarTextState by viewModel.snackBarText.collectAsStateWithLifecycle()
     val showSnackBarState by viewModel.showSnackBar.collectAsStateWithLifecycle()
 
     Scaffold(
         topBar = {
-            DefaultAppBar("") { }
+            DefaultAppBar(appBarTitleState) { }
         }
     ) {
         TextSnackBarContainer(
@@ -36,7 +39,13 @@ fun CalendarScreen(navController: NavHostController) {
                 modifier = Modifier
                     .padding(it)
             ) {
-
+                HorizontalCalendar(
+                    selectedDate = selectedDateState,
+                    onChangeAppBarTitle = { viewModel.onChangeAppBarTitle(it) }) {
+                    viewModel.onChangeSelectedDate(
+                        it
+                    )
+                }
                 LoadingView(
                     isLoading = isLoadingState
                 )
