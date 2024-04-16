@@ -79,7 +79,7 @@ fun InfoInputScreen() {
 }
 
 @Composable
-private fun SetUserInfo(
+fun SetUserInfo(
     imageUri: Uri?,
     nickName: String,
     launcher: ManagedActivityResultLauncher<String, Uri?>,
