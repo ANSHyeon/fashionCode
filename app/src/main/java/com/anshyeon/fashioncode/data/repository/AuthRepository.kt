@@ -118,6 +118,36 @@ class AuthRepository @Inject constructor(
         }
     }
 
+    suspend fun updateUser(
+        nickname: String,
+        url: String?,
+        uri: Uri?,
+        userKey: String
+    ): ApiResponse<Unit> {
+        return try {
+            val imageUrl =
+                uri?.let { imageDataSource.downloadImage(imageDataSource.uploadImage(it)) } ?: url
+
+            val updates = mapOf(
+                "nickName" to nickname,
+                "profileUrl" to imageUrl
+            )
+            fireBaseApiClient.updateUser(
+                userKey,
+                userDataSource.getIdToken(),
+                updates
+            ).onSuccess {
+                preferenceManager.setUserImage(Constants.KEY_USER_PROFILE_URL, imageUrl)
+            }.onError { code, message ->
+                throw Exception()
+            }.onException {
+                throw Exception()
+            }
+        } catch (e: Exception) {
+            ApiResultException(e)
+        }
+    }
+
     suspend fun createFollow(
         following: String,
     ): ApiResponse<Unit> {

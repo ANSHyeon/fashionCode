@@ -19,6 +19,7 @@ import com.anshyeon.fashioncode.ui.screen.home.community.write.CommunityWriteScr
 import com.anshyeon.fashioncode.ui.screen.home.profile.follow.FollowScreen
 import com.anshyeon.fashioncode.ui.screen.home.profile.me.ProfileScreen
 import com.anshyeon.fashioncode.ui.screen.home.profile.other.OtherProfileScreen
+import com.anshyeon.fashioncode.ui.screen.home.profile.profileEdit.ProfileEditScreen
 import com.anshyeon.fashioncode.ui.screen.home.style.create.StyleCreateScreen
 import com.anshyeon.fashioncode.ui.screen.home.style.detail.StyleDetailScreen
 import com.anshyeon.fashioncode.util.Constants
@@ -99,6 +100,9 @@ fun HomeNavGraph(navController: NavHostController) {
             val userId = navBackStackEntry.arguments?.getString("userId").toString()
             FollowScreen(navController, userId)
         }
+        composable(route = DetailHomeScreen.ProfileEdit.route) {
+            ProfileEditScreen(navController)
+        }
     }
 }
 
@@ -145,6 +149,7 @@ sealed class DetailHomeScreen(val route: String, val argName: String) {
     object StyleDetail : DetailHomeScreen(route = "STYLE_DETAIL", argName = "style")
     object OtherProfile : DetailHomeScreen(route = "OTHER_PROFILE", argName = "userId")
     object Follow : DetailHomeScreen(route = "FOLLOW", argName = "userId")
+    object ProfileEdit : DetailHomeScreen(route = "PROFILE_EDIT", argName = "")
 
     val arguments: List<NamedNavArgument> = listOf(
         navArgument(argName) { type = NavType.StringType }

@@ -241,4 +241,8 @@ class ProfileViewModel @Inject constructor(
     fun navigateFollow(navController: NavHostController) {
         navController.navigate("${DetailHomeScreen.Follow.route}/${myUserId}")
     }
+
+    fun navigateProfileEdit(navController: NavHostController) {
+        navController.navigate(DetailHomeScreen.ProfileEdit.route)
+    }
 }
