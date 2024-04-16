@@ -6,7 +6,11 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavHostController
 import com.anshyeon.fashioncode.data.model.User
 import com.anshyeon.fashioncode.data.repository.AuthRepository
+import com.anshyeon.fashioncode.network.extentions.onError
+import com.anshyeon.fashioncode.network.extentions.onException
+import com.anshyeon.fashioncode.network.extentions.onSuccess
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -35,6 +39,9 @@ class ProfileEditViewModel @Inject constructor(
 
     private val _isGetUserLoading = MutableStateFlow(false)
     val isGetUserLoading: StateFlow<Boolean> = _isGetUserLoading
+
+    private val _isUpdateUserLoading = MutableStateFlow(false)
+    val isUpdateUserLoading: StateFlow<Boolean> = _isUpdateUserLoading
 
     private val _isGetUserComplete = MutableStateFlow(false)
     val isGetUserComplete: StateFlow<Boolean> = _isGetUserComplete
@@ -77,6 +84,30 @@ class ProfileEditViewModel @Inject constructor(
 
     fun changeImageUri(uri: Uri?) {
         _imageUri.value = uri
+    }
+
+    fun updateUserInfo(navController: NavHostController) {
+        _isUpdateUserLoading.value = true
+        viewModelScope.launch {
+            val result =
+                authRepository.updateUser(
+                    nickName.value,
+                    imageUrl.value,
+                    imageUri.value,
+                    user.value?.key!!
+                )
+            result.onSuccess {
+                val saveIdToken = async {
+                    authRepository.saveUserInfo(nickName.value, null)
+                }
+                saveIdToken.await()
+                navigateBack(navController)
+            }.onError { code, message ->
+                _isUpdateUserLoading.value = false
+            }.onException {
+                _isUpdateUserLoading.value = false
+            }
+        }
     }
 
     fun dismissSnackBar() {

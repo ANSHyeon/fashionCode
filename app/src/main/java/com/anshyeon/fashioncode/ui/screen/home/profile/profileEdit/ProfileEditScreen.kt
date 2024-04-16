@@ -40,6 +40,7 @@ fun ProfileEditScreen(navController: NavHostController) {
     val nextButtonVisibility = isValidNickname(nickNameState)
     val isLoadingState by viewModel.isLoading.collectAsStateWithLifecycle()
     val isGetUserLoadingState by viewModel.isGetUserLoading.collectAsStateWithLifecycle()
+    val isUpdateUserLoadingState by viewModel.isUpdateUserLoading.collectAsStateWithLifecycle()
     val isGetUserCompleteState by viewModel.isGetUserComplete.collectAsStateWithLifecycle()
     val snackBarTextState by viewModel.snackBarText.collectAsStateWithLifecycle()
     val showSnackBarState by viewModel.showSnackBar.collectAsStateWithLifecycle()
@@ -74,12 +75,14 @@ fun ProfileEditScreen(navController: NavHostController) {
                         modifier = Modifier.align(Alignment.BottomCenter),
                         text = stringResource(id = R.string.label_start),
                         visibility = nextButtonVisibility
-                    ) { }
+                    ) {
+                        viewModel.updateUserInfo(navController)
+                    }
                 }
             }
 
             LoadingView(
-                isLoading = isLoadingState || isGetUserLoadingState
+                isLoading = isLoadingState || isGetUserLoadingState || isUpdateUserLoadingState
             )
         }
     }
