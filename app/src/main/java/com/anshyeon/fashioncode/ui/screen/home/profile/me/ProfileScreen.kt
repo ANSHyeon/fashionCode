@@ -109,6 +109,7 @@ fun ProfileScreen(navController: NavHostController) {
                         styleListState,
                         followerListState,
                         followingListState,
+                        { viewModel.navigateProfileEdit(navController) }
                     ) {
                         viewModel.navigateFollow(navController)
                     }
@@ -138,6 +139,7 @@ private fun ProfileBox(
     styleListState: List<Style>,
     followerListState: List<Follow>,
     followingListState: List<Follow>,
+    navigateProfileEdit: () -> Unit,
     navigateFollow: () -> Unit
 ) {
     Column(modifier = modifier) {
@@ -162,7 +164,7 @@ private fun ProfileBox(
             ),
             enabled = true,
             onClick = {
-
+                navigateProfileEdit()
             }
         ) {
             Text(
