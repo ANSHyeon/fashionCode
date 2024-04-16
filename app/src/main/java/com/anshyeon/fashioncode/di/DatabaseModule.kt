@@ -5,6 +5,7 @@ import androidx.room.Room
 import com.anshyeon.fashioncode.data.local.AppDatabase
 import com.anshyeon.fashioncode.data.local.dao.ClothesDao
 import com.anshyeon.fashioncode.data.local.dao.StyleDao
+import com.anshyeon.fashioncode.data.local.dao.UserDao
 import com.anshyeon.fashioncode.util.Constants
 import dagger.Module
 import dagger.Provides
@@ -35,5 +36,10 @@ object DatabaseModule {
     @Provides
     fun providerStyleDao(appDatabase: AppDatabase): StyleDao {
         return appDatabase.stylesDao()
+    }
+
+    @Provides
+    fun providerUserDao(appDatabase: AppDatabase): UserDao {
+        return appDatabase.userDao()
     }
 }
