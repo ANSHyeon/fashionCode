@@ -141,10 +141,10 @@ class FollowViewModel @Inject constructor(
         }
     }
 
-    fun removeFollower() {
+    fun removeFollower(followingUserId: String?) {
         _myFollowingList.value = _myFollowingList.value.toMutableList().apply {
             removeIf {
-                it.follower == myUserId
+                it.following == followingUserId
             }
         }
     }

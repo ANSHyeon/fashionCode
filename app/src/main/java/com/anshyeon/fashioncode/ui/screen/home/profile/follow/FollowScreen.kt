@@ -93,7 +93,7 @@ fun FollowScreen(navController: NavHostController, userId: String) {
                 },
                 {
                     viewModel.deleteFollow(it)
-                    viewModel.removeFollower()
+                    viewModel.removeFollower(it)
                 }
             )
 
