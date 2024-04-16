@@ -10,6 +10,7 @@ import com.anshyeon.fashioncode.network.model.ApiResponse
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
+import retrofit2.http.PATCH
 import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Path
@@ -27,6 +28,13 @@ interface FireBaseApiClient {
     suspend fun createUser(
         @Query("auth") auth: String?,
         @Body user: User
+    ): ApiResponse<Unit>
+
+    @PATCH("users/{userKey}.json")
+    suspend fun updateUser(
+        @Path("userKey") userKey: String,
+        @Query("auth") auth: String?,
+        @Body updates: Map<String, String?>
     ): ApiResponse<Unit>
 
     @GET("posts.json")
