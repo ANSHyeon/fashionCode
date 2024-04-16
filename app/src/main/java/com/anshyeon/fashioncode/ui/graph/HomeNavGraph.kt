@@ -12,7 +12,7 @@ import com.anshyeon.fashioncode.data.model.Comment
 import com.anshyeon.fashioncode.data.model.Style
 import com.anshyeon.fashioncode.ui.screen.home.style.home.StyleScreen
 import com.anshyeon.fashioncode.ui.screen.home.community.home.CommunityScreen
-import com.anshyeon.fashioncode.ui.screen.home.bookmark.BookMarkScreen
+import com.anshyeon.fashioncode.ui.screen.home.bookmark.CalendarScreen
 import com.anshyeon.fashioncode.ui.screen.home.community.detail.CommunityDetailScreen
 import com.anshyeon.fashioncode.ui.screen.home.community.reply.CommunityReplyScreen
 import com.anshyeon.fashioncode.ui.screen.home.community.write.CommunityWriteScreen
@@ -36,8 +36,8 @@ fun HomeNavGraph(navController: NavHostController) {
         composable(route = BottomNavItem.Style.route) {
             StyleScreen(navController)
         }
-        composable(route = BottomNavItem.BookMark.route) {
-            BookMarkScreen(navController)
+        composable(route = BottomNavItem.Calendar.route) {
+            CalendarScreen(navController)
         }
         composable(route = BottomNavItem.Community.route) {
             CommunityScreen(navController)
@@ -65,8 +65,12 @@ fun HomeNavGraph(navController: NavHostController) {
 
             CommunityReplyScreen(navController, SerializationUtils.fromJson<Comment>(commentJson)!!)
         }
-        composable(route = DetailHomeScreen.StyleCreate.route) {
-            StyleCreateScreen(navController)
+        composable(
+            route = DetailHomeScreen.StyleCreate.routeWithArgName(),
+            arguments = DetailHomeScreen.StyleCreate.arguments
+        ) { navBackStackEntry ->
+            val selectedDate = navBackStackEntry.arguments?.getString("selectedDate").toString()
+            StyleCreateScreen(navController, selectedDate)
         }
         composable(
             route = DetailHomeScreen.StyleDetail.routeWithArgName(),
@@ -111,11 +115,11 @@ sealed class BottomNavItem(
         outlinedIcon = R.drawable.ic_style_outline,
     )
 
-    object BookMark : BottomNavItem(
-        route = "BOOKMARK",
-        title = "북마크",
-        icon = R.drawable.ic_bookmark,
-        outlinedIcon = R.drawable.ic_bookmark_outline,
+    object Calendar : BottomNavItem(
+        route = "CALENDAR",
+        title = "캘린더",
+        icon = R.drawable.ic_calendar,
+        outlinedIcon = R.drawable.ic_calendar_outline,
     )
 
     object Community : BottomNavItem(
@@ -137,7 +141,7 @@ sealed class DetailHomeScreen(val route: String, val argName: String) {
     object CommunityWrite : DetailHomeScreen(route = "COMMUNITY_WRITE", argName = "")
     object CommunityDetail : DetailHomeScreen(route = "COMMUNITY_DETAIL", argName = "postId")
     object CommunityReply : DetailHomeScreen(route = "COMMUNITY_REPLY", argName = "comment")
-    object StyleCreate : DetailHomeScreen(route = "STYLE_CREATE", argName = "")
+    object StyleCreate : DetailHomeScreen(route = "STYLE_CREATE", argName = "selectedDate")
     object StyleDetail : DetailHomeScreen(route = "STYLE_DETAIL", argName = "style")
     object OtherProfile : DetailHomeScreen(route = "OTHER_PROFILE", argName = "userId")
     object Follow : DetailHomeScreen(route = "FOLLOW", argName = "userId")

@@ -1,11 +1,15 @@
 package com.anshyeon.fashioncode.util
 
 import java.text.SimpleDateFormat
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import java.util.*
 
 object DateFormatText {
 
     private const val DATE_YEAR_MONTH_DAY_TIME_PATTERN = "yyyy-MM-dd'T'HH:mm:ss'Z'"
+    private const val DATE_CALENDAR_PATTERN = "yyyy년 M월"
+
     private val currentLocale
         get() = SystemConfiguration.currentLocale
 
@@ -14,16 +18,20 @@ object DateFormatText {
             ?: Date()
     }
 
+    fun getCalendarFormat(date: LocalDate): String {
+        return date.format(DateTimeFormatter.ofPattern(DATE_CALENDAR_PATTERN, currentLocale))
+    }
+
     fun getCurrentTime(): String {
-        return applyDateFormat(DATE_YEAR_MONTH_DAY_TIME_PATTERN)
+        return applyDateFormat()
     }
 
     private fun getCurrentDate(): Date {
         return Calendar.getInstance(TimeZone.getTimeZone("UTC")).time
     }
 
-    private fun applyDateFormat(pattern: String): String {
-        val formatter = SimpleDateFormat(pattern, currentLocale)
+    private fun applyDateFormat(): String {
+        val formatter = SimpleDateFormat(DATE_YEAR_MONTH_DAY_TIME_PATTERN, currentLocale)
         val currentDate = getCurrentDate()
         return formatter.format(currentDate)
     }

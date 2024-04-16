@@ -78,13 +78,14 @@ import com.anshyeon.fashioncode.data.model.ClothesType
 import com.anshyeon.fashioncode.ui.component.appBar.BackButtonWithActionAppBar
 import com.anshyeon.fashioncode.ui.component.loadingView.LoadingView
 import com.anshyeon.fashioncode.ui.component.snackBar.TextSnackBarContainer
+import com.anshyeon.fashioncode.ui.graph.DetailHomeScreen
 import com.anshyeon.fashioncode.ui.theme.DarkGray
 import com.anshyeon.fashioncode.ui.theme.Gray
 import com.anshyeon.fashioncode.util.ImageTypeConvertor
 import kotlinx.coroutines.launch
 
 @Composable
-fun StyleCreateScreen(navController: NavHostController) {
+fun StyleCreateScreen(navController: NavHostController, selectedDate: String) {
 
     val viewModel: StyleCreateViewModel = hiltViewModel()
     val context = LocalContext.current
@@ -94,6 +95,7 @@ fun StyleCreateScreen(navController: NavHostController) {
     val selectedClothesListState by viewModel.selectedClothesList.collectAsStateWithLifecycle()
     val isCreateStyleLoadingState by viewModel.isCreateStyleLoading.collectAsStateWithLifecycle()
     val isCutOutLoadingState by viewModel.isCutOutLoading.collectAsStateWithLifecycle()
+    val isInsertStyleLoadingState by viewModel.isInsertStyleLoading.collectAsStateWithLifecycle()
     val snackBarTextState by viewModel.snackBarText.collectAsStateWithLifecycle()
     val showSnackBarState by viewModel.showSnackBar.collectAsStateWithLifecycle()
 
@@ -110,7 +112,18 @@ fun StyleCreateScreen(navController: NavHostController) {
         topBar = {
             BackButtonWithActionAppBar(stringResource(id = R.string.label_app_bar_style_create),
                 { viewModel.navigateBack(navController) }) {
-                viewModel.createStyle(navController, ImageTypeConvertor.createBitmapFromPicture(picture))
+                if (selectedDate == DetailHomeScreen.StyleCreate.route) {
+                    viewModel.createStyle(
+                        navController,
+                        ImageTypeConvertor.createBitmapFromPicture(picture)
+                    )
+                } else {
+                    viewModel.insertStyle(
+                        navController,
+                        ImageTypeConvertor.createBitmapFromPicture(picture),
+                        selectedDate
+                    )
+                }
             }
         }
     ) {
@@ -147,7 +160,7 @@ fun StyleCreateScreen(navController: NavHostController) {
                     )
                 }
                 LoadingView(
-                    isLoading = isCreateStyleLoadingState || isCutOutLoadingState
+                    isLoading = isCreateStyleLoadingState || isCutOutLoadingState || isInsertStyleLoadingState
                 )
             }
         }
