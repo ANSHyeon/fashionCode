@@ -60,8 +60,7 @@ class FollowViewModel @Inject constructor(
     fun getFollower(userId: String) {
         _isGetFollowerLoading.value = true
         viewModelScope.launch {
-            val response = authRepository.getFollowerListWithUserInfo(
-                viewModelScope,
+            val response = authRepository.getFollowerList(
                 userId,
                 onComplete = {
                     _isGetFollowerLoading.value = false
@@ -81,8 +80,7 @@ class FollowViewModel @Inject constructor(
     fun getFollowing(userId: String) {
         _isGetFollowingLoading.value = true
         viewModelScope.launch {
-            val response = authRepository.getFollowingListWithUserInfo(
-                viewModelScope,
+            val response = authRepository.getFollowingList(
                 userId,
                 onComplete = {
                     _isGetFollowingLoading.value = false

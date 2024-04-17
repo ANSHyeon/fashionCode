@@ -23,6 +23,7 @@ import androidx.compose.material.Tab
 import androidx.compose.material.TabRow
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -36,6 +37,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.anshyeon.fashioncode.data.model.Follow
+import com.anshyeon.fashioncode.data.model.User
 import com.anshyeon.fashioncode.ui.component.appBar.BackButtonAppBar
 import com.anshyeon.fashioncode.ui.component.loadingView.LoadingView
 import com.anshyeon.fashioncode.ui.component.snackBar.TextSnackBarContainer
@@ -45,7 +47,7 @@ import com.anshyeon.fashioncode.ui.theme.SkyBlue
 import kotlinx.coroutines.launch
 
 @Composable
-fun FollowScreen(navController: NavHostController, userId: String) {
+fun FollowScreen(navController: NavHostController, userList: List<User>, userId: String) {
 
     val viewModel: FollowViewModel = hiltViewModel()
 
@@ -56,11 +58,13 @@ fun FollowScreen(navController: NavHostController, userId: String) {
     val isGetFollowingLoadingState by viewModel.isGetFollowingLoading.collectAsStateWithLifecycle()
     val isGetMyFollowingLoadingState by viewModel.isGetMyFollowingLoading.collectAsStateWithLifecycle()
     val isGetFollowerCompleteState by viewModel.isGetFollowerComplete.collectAsStateWithLifecycle()
+    val isGetFollowingCompleteState by viewModel.isGetFollowingComplete.collectAsStateWithLifecycle()
+    val isGetMyFollowingCompleteState by viewModel.isGetMyFollowingComplete.collectAsStateWithLifecycle()
     val isLoadingState by viewModel.isLoading.collectAsStateWithLifecycle()
     val snackBarTextState by viewModel.snackBarText.collectAsStateWithLifecycle()
     val showSnackBarState by viewModel.showSnackBar.collectAsStateWithLifecycle()
 
-    if (!isGetFollowerCompleteState) {
+    LaunchedEffect(key1 = userId) {
         viewModel.getFollower(userId)
         viewModel.getFollowing(userId)
         viewModel.getMyFollowing()
@@ -78,12 +82,16 @@ fun FollowScreen(navController: NavHostController, userId: String) {
             showSnackbar = showSnackBarState,
             onDismissSnackbar = { viewModel.dismissSnackBar() }
         ) {
+            val isVisible =
+                isGetFollowerCompleteState && isGetFollowingCompleteState && isGetMyFollowingCompleteState
             FollowItems(
                 Modifier.padding(it),
                 viewModel.myUserId,
                 followerListState,
                 followingListState,
                 myFollowingListState,
+                userList,
+                isVisible,
                 {
                     viewModel.navigateOtherUserProfile(navController, it)
                 },
@@ -112,6 +120,8 @@ fun FollowItems(
     followerList: List<Follow>,
     followingList: List<Follow>,
     myFollowingListState: List<Follow>,
+    userList: List<User>,
+    isVisible: Boolean,
     onNavigateOtherProfile: (String) -> Unit,
     addFollow: (String) -> Unit,
     removeFollow: (String) -> Unit
@@ -149,44 +159,47 @@ fun FollowItems(
                 )
             }
         }
-
-        HorizontalPager(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(8.dp),
-            state = pagerState,
-            verticalAlignment = Alignment.Top
-        ) { index ->
-            if (index == 0) {
-                LazyColumn {
-                    items(followerList) { follower ->
-                        UserProfileWithFollowButton(
-                            Modifier.size(32.dp),
-                            myUserId == follower.follower,
-                            myFollowingListState.any { it.following == follower.follower },
-                            12.sp,
-                            follower.profileUrl,
-                            follower.nickName,
-                            { onNavigateOtherProfile(follower.follower) },
-                            { addFollow(follower.follower) },
-                            { removeFollow(follower.follower) }
-                        )
+        if (isVisible){
+            HorizontalPager(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(8.dp),
+                state = pagerState,
+                verticalAlignment = Alignment.Top
+            ) { index ->
+                if (index == 0) {
+                    LazyColumn {
+                        items(followerList) { follower ->
+                            val user = userList.first { it.userId == follower.follower }
+                            UserProfileWithFollowButton(
+                                Modifier.size(32.dp),
+                                myUserId == follower.follower,
+                                myFollowingListState.any { it.following == follower.follower },
+                                12.sp,
+                                user.profileUrl,
+                                user.nickName,
+                                { onNavigateOtherProfile(follower.follower) },
+                                { addFollow(follower.follower) },
+                                { removeFollow(follower.follower) }
+                            )
+                        }
                     }
-                }
-            } else {
-                LazyColumn {
-                    items(followingList) { following ->
-                        UserProfileWithFollowButton(
-                            Modifier.size(32.dp),
-                            myUserId == following.following,
-                            myFollowingListState.any { it.following == following.following },
-                            12.sp,
-                            following.profileUrl,
-                            following.nickName,
-                            { onNavigateOtherProfile(following.following) },
-                            { addFollow(following.following) },
-                            { removeFollow(following.following) }
-                        )
+                } else {
+                    LazyColumn {
+                        items(followingList) { following ->
+                            val user = userList.first { it.userId == following.following }
+                            UserProfileWithFollowButton(
+                                Modifier.size(32.dp),
+                                myUserId == following.following,
+                                myFollowingListState.any { it.following == following.following },
+                                12.sp,
+                                user.profileUrl,
+                                user.nickName,
+                                { onNavigateOtherProfile(following.following) },
+                                { addFollow(following.following) },
+                                { removeFollow(following.following) }
+                            )
+                        }
                     }
                 }
             }

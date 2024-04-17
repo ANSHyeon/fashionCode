@@ -104,7 +104,7 @@ fun HomeNavGraph(navController: NavHostController, userList: List<User>) {
             arguments = DetailHomeScreen.Follow.arguments
         ) { navBackStackEntry ->
             val userId = navBackStackEntry.arguments?.getString("userId").toString()
-            FollowScreen(navController, userId)
+            FollowScreen(navController, userList, userId)
         }
         composable(route = DetailHomeScreen.ProfileEdit.route) {
             ProfileEditScreen(navController)
