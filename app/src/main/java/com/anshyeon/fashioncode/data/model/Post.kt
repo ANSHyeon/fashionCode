@@ -8,10 +8,8 @@ data class Post(
     val title: String,
     val body: String,
     val writer: String,
-    val writerNickName: String,
-    val writerProfileImageUrl: String? = null,
     val createdDate: String,
     val imageUrlList: List<String> = emptyList(),
-    val profileImageUrl: String? = null,
+    val thumbnailImageUrl: String? = null,
     val commentList: List<String> = emptyList()
 )

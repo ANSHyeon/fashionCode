@@ -55,7 +55,7 @@ fun HomeNavGraph(navController: NavHostController, userList: List<User>) {
             arguments = DetailHomeScreen.CommunityDetail.arguments
         ) { navBackStackEntry ->
             val postId = navBackStackEntry.arguments?.getString("postId").toString()
-            CommunityDetailScreen(navController, postId)
+            CommunityDetailScreen(navController, userList, postId)
         }
         composable(
             route = DetailHomeScreen.CommunityReply.routeWithArgName(),
