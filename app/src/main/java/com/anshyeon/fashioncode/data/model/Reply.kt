@@ -8,7 +8,5 @@ data class Reply(
     val commentId: String,
     val body: String,
     val writer: String,
-    val nickName: String,
     val createdDate: String,
-    val profileImageUrl: String? = null,
 )

@@ -26,6 +26,7 @@ import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import com.anshyeon.fashioncode.R
 import com.anshyeon.fashioncode.data.model.Style
+import com.anshyeon.fashioncode.data.model.User
 import com.anshyeon.fashioncode.ui.component.appBar.BackButtonAppBar
 import com.anshyeon.fashioncode.ui.component.loadingView.LoadingView
 import com.anshyeon.fashioncode.ui.component.snackBar.TextSnackBarContainer
@@ -34,7 +35,7 @@ import com.anshyeon.fashioncode.ui.screen.home.style.home.UserProfileDefault
 import com.anshyeon.fashioncode.ui.screen.home.style.home.likeArea
 
 @Composable
-fun StyleDetailScreen(navController: NavHostController, style: Style) {
+fun StyleDetailScreen(navController: NavHostController, userList: List<User>, style: Style) {
 
     val viewModel: StyleDetailViewModel = hiltViewModel()
 
@@ -61,7 +62,7 @@ fun StyleDetailScreen(navController: NavHostController, style: Style) {
             onDismissSnackbar = { viewModel.dismissSnackBar() }
         ) {
             if (isGetStyleListCompleteState) {
-
+                val user = userList.first { it.userId == style.writer }
                 LazyVerticalGrid(
                     modifier = Modifier
                         .fillMaxSize()
@@ -74,6 +75,7 @@ fun StyleDetailScreen(navController: NavHostController, style: Style) {
                             modifier = Modifier
                                 .padding(8.dp),
                             style = style,
+                            user,
                             { isCheck, count ->
                                 viewModel.setStyleLike(
                                     style.styleId,
@@ -93,7 +95,7 @@ fun StyleDetailScreen(navController: NavHostController, style: Style) {
                                 modifier = Modifier
                                     .padding(8.dp)
                                     .height(20.dp),
-                                text = "${style.nickName}님의 다른 코디"
+                                text = "${user.nickName}님의 다른 코디"
                             )
                         }
                     }
@@ -101,6 +103,7 @@ fun StyleDetailScreen(navController: NavHostController, style: Style) {
                         StyleBox(
                             modifier = Modifier,
                             style = style,
+                            user,
                             { isCheck, count ->
                                 viewModel.setStyleLike(
                                     style.styleId,
@@ -128,6 +131,7 @@ fun StyleDetailScreen(navController: NavHostController, style: Style) {
 fun StyleDetail(
     modifier: Modifier,
     style: Style,
+    user: User,
     setLike: (Boolean, Int) -> Unit,
     styleList: List<Style>,
     createLike: (String) -> Unit,
@@ -147,8 +151,8 @@ fun StyleDetail(
                 UserProfileDefault(
                     Modifier.size(32.dp),
                     10.sp,
-                    currentStyle?.profileImageUrl,
-                    style.nickName
+                    user.profileUrl,
+                    user.nickName
                 )
             }
             AsyncImage(

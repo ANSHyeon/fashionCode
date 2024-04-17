@@ -34,6 +34,7 @@ import coil.compose.AsyncImage
 import com.anshyeon.fashioncode.R
 import com.anshyeon.fashioncode.data.model.Comment
 import com.anshyeon.fashioncode.data.model.Post
+import com.anshyeon.fashioncode.data.model.User
 import com.anshyeon.fashioncode.ui.component.appBar.BackButtonAppBar
 import com.anshyeon.fashioncode.ui.component.commentSubmit.CommentSubmit
 import com.anshyeon.fashioncode.ui.component.loadingView.LoadingView
@@ -45,7 +46,7 @@ import com.anshyeon.fashioncode.util.DateFormatText
 import com.anshyeon.fashioncode.util.DateFormatText.getDefaultDatePattern
 
 @Composable
-fun CommunityDetailScreen(navController: NavHostController, postId: String) {
+fun CommunityDetailScreen(navController: NavHostController, userList: List<User>, postId: String) {
 
     val viewModel: CommunityDetailViewModel = hiltViewModel()
     viewModel.setPostId(postId)
@@ -90,7 +91,8 @@ fun CommunityDetailScreen(navController: NavHostController, postId: String) {
                     .verticalScroll(scrollState)
             ) {
                 if (isGetPostCompleteState && isGetCommentListCompleteState) {
-                    DetailContent(postState) {
+                    val user = userList.first { it.userId == postState?.writer }
+                    DetailContent(postState, user) {
                         viewModel.navigateOtherUserProfile(navController, postState?.writer)
                     }
                     if (commentListState.isNotEmpty() || addedCommentListState.isNotEmpty()) {
@@ -110,6 +112,7 @@ fun CommunityDetailScreen(navController: NavHostController, postId: String) {
                         commentListState.forEach { comment ->
                             Comment(
                                 comment,
+                                userList,
                                 {
                                     viewModel.navigateOtherUserProfile(
                                         navController,
@@ -122,6 +125,7 @@ fun CommunityDetailScreen(navController: NavHostController, postId: String) {
                         addedCommentListState.forEach { comment ->
                             Comment(
                                 comment,
+                                userList,
                                 {
                                     viewModel.navigateOtherUserProfile(
                                         navController,
@@ -143,9 +147,12 @@ fun CommunityDetailScreen(navController: NavHostController, postId: String) {
 }
 
 @Composable
-fun DetailContent(post: Post?, onNavigateOtherProfile: () -> Unit
+fun DetailContent(
+    post: Post?,
+    user: User,
+    onNavigateOtherProfile: () -> Unit
 ) {
-    UserProfileDefault(post?.createdDate, post?.writerNickName, post?.writerProfileImageUrl) {
+    UserProfileDefault(post?.createdDate, user.nickName, user.profileUrl) {
         onNavigateOtherProfile()
     }
     Spacer(modifier = Modifier.size(20.dp))
@@ -228,6 +235,7 @@ private fun ImageList(post: Post?) {
 @Composable
 private fun Comment(
     comment: Comment,
+    userList: List<User>,
     onNavigateOtherProfile: (String) -> Unit,
     onclick: (comment: Comment) -> Unit
 ) {
@@ -236,7 +244,8 @@ private fun Comment(
             .fillMaxWidth()
             .padding(vertical = 5.dp)
     ) {
-        if (comment.profileImageUrl == null) {
+        val commentWriter = userList.first { it.userId == comment.writer }
+        if (commentWriter.profileUrl == null) {
             Image(
                 modifier = Modifier
                     .size(40.dp)
@@ -250,7 +259,7 @@ private fun Comment(
                     .size(40.dp)
                     .clip(CircleShape)
                     .clickable { onNavigateOtherProfile(comment.writer) },
-                model = comment.profileImageUrl,
+                model = commentWriter.profileUrl,
                 contentDescription = null,
                 contentScale = ContentScale.Crop
             )
@@ -259,7 +268,7 @@ private fun Comment(
         Column {
             Text(
                 modifier = Modifier.clickable { onNavigateOtherProfile(comment.writer) },
-                text = comment.nickName,
+                text = commentWriter.nickName,
                 fontWeight = FontWeight.Bold
             )
             Spacer(modifier = Modifier.size(5.dp))
@@ -286,11 +295,13 @@ private fun Comment(
             }
             comment.replyList?.let { replyList ->
                 replyList.take(4).forEach { reply ->
+                    val replyWriter = userList.first { it.userId == reply.writer }
                     Reply(
                         Modifier
                             .fillMaxWidth()
                             .padding(top = 10.dp),
-                        reply
+                        reply,
+                        replyWriter
                     ) {
                         onNavigateOtherProfile(reply.writer)
                     }

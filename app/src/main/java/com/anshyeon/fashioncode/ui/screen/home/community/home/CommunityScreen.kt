@@ -132,12 +132,12 @@ fun PostContent(post: Post, onClick: () -> Unit) {
                     color = DarkGray
                 )
             }
-            if (!post.profileImageUrl.isNullOrEmpty()) {
+            if (!post.thumbnailImageUrl.isNullOrEmpty()) {
                 AsyncImage(
                     modifier = Modifier
                         .clip(RoundedCornerShape(10.dp))
                         .size(70.dp),
-                    model = post.profileImageUrl,
+                    model = post.thumbnailImageUrl,
                     contentDescription = null,
                     contentScale = ContentScale.Crop,
                     placeholder = painterResource(id = R.drawable.ic_place_holder)

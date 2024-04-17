@@ -13,6 +13,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
@@ -25,6 +26,8 @@ fun HomeScreen(navController: NavHostController = rememberNavController()) {
 
     val viewModel: HomeViewModel = hiltViewModel()
     val localGoogleIdToken = viewModel.getLocalGoogleIdToken()
+
+    val userListState by viewModel.userList.collectAsStateWithLifecycle(emptyList())
 
     if (localGoogleIdToken.isEmpty()) {
         with(LocalContext.current) {
@@ -41,10 +44,10 @@ fun HomeScreen(navController: NavHostController = rememberNavController()) {
     ) {
         Box(Modifier.padding(it)) {
             HomeNavGraph(
-                navController = navController
+                navController = navController,
+                userList = userListState
             )
         }
-
     }
 }
 

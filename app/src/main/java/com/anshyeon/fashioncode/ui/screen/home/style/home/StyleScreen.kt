@@ -43,13 +43,14 @@ import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import com.anshyeon.fashioncode.R
 import com.anshyeon.fashioncode.data.model.Style
+import com.anshyeon.fashioncode.data.model.User
 import com.anshyeon.fashioncode.ui.component.appBar.DefaultAppBar
 import com.anshyeon.fashioncode.ui.component.loadingView.LoadingView
 import com.anshyeon.fashioncode.ui.component.snackBar.TextSnackBarContainer
 import com.anshyeon.fashioncode.ui.theme.Gray
 
 @Composable
-fun StyleScreen(navController: NavHostController) {
+fun StyleScreen(navController: NavHostController, userList: List<User>) {
 
     val viewModel: StyleViewModel = hiltViewModel()
 
@@ -93,9 +94,11 @@ fun StyleScreen(navController: NavHostController) {
                 columns = GridCells.Fixed(2)
             ) {
                 itemsIndexed(styleListState) { index, style ->
+                    val user = userList.first { it.userId == style.writer }
                     StyleBox(
                         modifier = Modifier,
                         style = style,
+                        user = user,
                         { isCheck, count -> viewModel.setStyleLike(index, isCheck, count) },
                         { viewModel.createLike(it) },
                         { viewModel.deleteLike(it) },
@@ -116,6 +119,7 @@ fun StyleScreen(navController: NavHostController) {
 fun StyleBox(
     modifier: Modifier,
     style: Style,
+    user: User,
     setLike: (Boolean, Int) -> Unit,
     createLike: (String) -> Unit,
     deleteLike: (String) -> Unit,
@@ -132,8 +136,8 @@ fun StyleBox(
             UserProfileDefault(
                 Modifier.size(32.dp),
                 10.sp,
-                style.profileImageUrl,
-                style.nickName
+                user.profileUrl,
+                user.nickName
             )
             AsyncImage(
                 modifier = Modifier.fillMaxWidth(),

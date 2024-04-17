@@ -4,8 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavHostController
 import com.anshyeon.fashioncode.data.model.Reply
-import com.anshyeon.fashioncode.data.model.User
-import com.anshyeon.fashioncode.data.repository.AuthRepository
 import com.anshyeon.fashioncode.data.repository.ReplyRepository
 import com.anshyeon.fashioncode.network.extentions.onError
 import com.anshyeon.fashioncode.network.extentions.onException
@@ -23,12 +21,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class CommunityReplyViewModel @Inject constructor(
-    private val authRepository: AuthRepository,
     private val replyRepository: ReplyRepository,
 ) : ViewModel() {
-
-    private val _user = MutableStateFlow<User?>(null)
-    var user: StateFlow<User?> = _user
 
     private val _replyBody = MutableStateFlow("")
     var replyBody: StateFlow<String> = _replyBody
@@ -45,14 +39,8 @@ class CommunityReplyViewModel @Inject constructor(
     private val _isGetReplyLoading = MutableStateFlow(false)
     val isGetReplyLoading: StateFlow<Boolean> = _isGetReplyLoading
 
-    private val _isGetUserLoading = MutableStateFlow(false)
-    val isGetUserLoading: StateFlow<Boolean> = _isGetUserLoading
-
     private val _isGetReplyComplete = MutableStateFlow(false)
     val isGetReplyComplete: StateFlow<Boolean> = _isGetReplyComplete
-
-    private val _isGetUserComplete = MutableStateFlow(false)
-    val isGetUserComplete: StateFlow<Boolean> = _isGetUserComplete
 
     private val _snackBarText = MutableStateFlow("")
     val snackBarText: StateFlow<String> = _snackBarText
@@ -106,26 +94,6 @@ class CommunityReplyViewModel @Inject constructor(
                 _isCreateReplyLoading.value = false
                 _showSnackBar.value = true
                 _snackBarText.value = "잠시 후 다시 시도해 주십시오"
-            }
-        }
-    }
-
-    fun getUser(userId: String) {
-        _isGetUserLoading.value = true
-        viewModelScope.launch {
-            val response = authRepository.getUserInfo(
-                userId,
-                onComplete = {
-                    _isGetUserLoading.value = false
-                    _isGetUserComplete.value = true
-                },
-                onError = {
-                    _showSnackBar.value = true
-                    _snackBarText.value = "잠시 후 다시 시도해 주십시오"
-                }
-            )
-            response.collectLatest { user ->
-                _user.value = user
             }
         }
     }

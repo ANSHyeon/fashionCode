@@ -3,7 +3,6 @@ package com.anshyeon.fashioncode.data.repository
 import android.content.Context
 import android.graphics.Bitmap
 import com.anshyeon.fashioncode.BuildConfig
-import com.anshyeon.fashioncode.data.PreferenceManager
 import com.anshyeon.fashioncode.data.dataSource.ImageDataSource
 import com.anshyeon.fashioncode.data.dataSource.UserDataSource
 import com.anshyeon.fashioncode.data.local.dao.ClothesDao
@@ -27,7 +26,6 @@ import com.anshyeon.fashioncode.network.extentions.onException
 import com.anshyeon.fashioncode.network.extentions.onSuccess
 import com.anshyeon.fashioncode.network.model.ApiResponse
 import com.anshyeon.fashioncode.network.model.ApiResultException
-import com.anshyeon.fashioncode.util.Constants
 import com.anshyeon.fashioncode.util.DateFormatText
 import kotlinx.coroutines.delay
 import com.anshyeon.fashioncode.util.ImageTypeConvertor
@@ -48,7 +46,6 @@ class StyleRepository @Inject constructor(
     private val userDataSource: UserDataSource,
     private val clothesDao: ClothesDao,
     private val styleDao: StyleDao,
-    private val preferenceManager: PreferenceManager,
 ) {
 
     suspend fun getDropBoxLink(token: String?, bitmap: Bitmap): List<String?> {
@@ -192,8 +189,6 @@ class StyleRepository @Inject constructor(
             styleId,
             userId,
             DateFormatText.getCurrentTime(),
-            preferenceManager.getString(Constants.KEY_USER_NICKNAME, ""),
-            preferenceManager.getString(Constants.KEY_USER_PROFILE_URL, ""),
             imageUrl
         )
         return try {

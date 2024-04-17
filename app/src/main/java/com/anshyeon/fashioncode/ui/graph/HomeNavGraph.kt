@@ -10,6 +10,7 @@ import androidx.navigation.navArgument
 import com.anshyeon.fashioncode.R
 import com.anshyeon.fashioncode.data.model.Comment
 import com.anshyeon.fashioncode.data.model.Style
+import com.anshyeon.fashioncode.data.model.User
 import com.anshyeon.fashioncode.ui.screen.home.style.home.StyleScreen
 import com.anshyeon.fashioncode.ui.screen.home.community.home.CommunityScreen
 import com.anshyeon.fashioncode.ui.screen.home.bookmark.CalendarScreen
@@ -28,14 +29,14 @@ import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
 
 @Composable
-fun HomeNavGraph(navController: NavHostController) {
+fun HomeNavGraph(navController: NavHostController, userList: List<User>) {
     NavHost(
         navController = navController,
         startDestination = BottomNavItem.Style.route,
         route = Constants.HOME_GRAPH
     ) {
         composable(route = BottomNavItem.Style.route) {
-            StyleScreen(navController)
+            StyleScreen(navController, userList)
         }
         composable(route = BottomNavItem.Calendar.route) {
             CalendarScreen(navController)
@@ -44,7 +45,7 @@ fun HomeNavGraph(navController: NavHostController) {
             CommunityScreen(navController)
         }
         composable(route = BottomNavItem.Setting.route) {
-            ProfileScreen(navController)
+            ProfileScreen(navController, userList)
         }
         composable(route = DetailHomeScreen.CommunityWrite.route) {
             CommunityWriteScreen(navController)
@@ -54,7 +55,7 @@ fun HomeNavGraph(navController: NavHostController) {
             arguments = DetailHomeScreen.CommunityDetail.arguments
         ) { navBackStackEntry ->
             val postId = navBackStackEntry.arguments?.getString("postId").toString()
-            CommunityDetailScreen(navController, postId)
+            CommunityDetailScreen(navController, userList, postId)
         }
         composable(
             route = DetailHomeScreen.CommunityReply.routeWithArgName(),
@@ -64,7 +65,11 @@ fun HomeNavGraph(navController: NavHostController) {
             val commentJson =
                 URLDecoder.decode(encodedCommentJson, StandardCharsets.UTF_8.toString())
 
-            CommunityReplyScreen(navController, SerializationUtils.fromJson<Comment>(commentJson)!!)
+            CommunityReplyScreen(
+                navController,
+                userList,
+                SerializationUtils.fromJson<Comment>(commentJson)!!
+            )
         }
         composable(
             route = DetailHomeScreen.StyleCreate.routeWithArgName(),
@@ -83,6 +88,7 @@ fun HomeNavGraph(navController: NavHostController) {
 
             StyleDetailScreen(
                 navController,
+                userList,
                 SerializationUtils.fromJson<Style>(styleJson)!!,
             )
         }
@@ -91,14 +97,14 @@ fun HomeNavGraph(navController: NavHostController) {
             arguments = DetailHomeScreen.OtherProfile.arguments
         ) { navBackStackEntry ->
             val userId = navBackStackEntry.arguments?.getString("userId").toString()
-            OtherProfileScreen(navController, userId)
+            OtherProfileScreen(navController, userList, userId)
         }
         composable(
             route = DetailHomeScreen.Follow.routeWithArgName(),
             arguments = DetailHomeScreen.Follow.arguments
         ) { navBackStackEntry ->
             val userId = navBackStackEntry.arguments?.getString("userId").toString()
-            FollowScreen(navController, userId)
+            FollowScreen(navController, userList, userId)
         }
         composable(route = DetailHomeScreen.ProfileEdit.route) {
             ProfileEditScreen(navController)
