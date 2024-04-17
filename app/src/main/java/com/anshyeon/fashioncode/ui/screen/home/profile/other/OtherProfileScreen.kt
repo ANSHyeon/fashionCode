@@ -20,6 +20,7 @@ import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -49,24 +50,20 @@ fun OtherProfileScreen(navController: NavHostController, userList: List<User>, u
 
     val viewModel: OtherProfileViewModel = hiltViewModel()
 
-    val userState by viewModel.user.collectAsStateWithLifecycle()
     val styleListState by viewModel.styleList.collectAsStateWithLifecycle()
     val followerListState by viewModel.followerList.collectAsStateWithLifecycle()
     val followingListState by viewModel.followingList.collectAsStateWithLifecycle()
     val isGetStyleListLoadingState by viewModel.isGetStyleListLoading.collectAsStateWithLifecycle()
-    val isGetUserLoadingState by viewModel.isGetUserLoading.collectAsStateWithLifecycle()
     val isGetFollowerLoadingState by viewModel.isGetFollowerLoading.collectAsStateWithLifecycle()
     val isGetFollowingLoadingState by viewModel.isGetFollowingLoading.collectAsStateWithLifecycle()
     val isGetStyleListCompleteState by viewModel.isGetStyleListComplete.collectAsStateWithLifecycle()
-    val isGetUserCompleteState by viewModel.isGetUserComplete.collectAsStateWithLifecycle()
     val isGetFollowerCompleteState by viewModel.isGetFollowerComplete.collectAsStateWithLifecycle()
     val isGetFollowingCompleteState by viewModel.isGetFollowingComplete.collectAsStateWithLifecycle()
     val isLoadingState by viewModel.isLoading.collectAsStateWithLifecycle()
     val snackBarTextState by viewModel.snackBarText.collectAsStateWithLifecycle()
     val showSnackBarState by viewModel.showSnackBar.collectAsStateWithLifecycle()
 
-    if (!isGetUserCompleteState) {
-        viewModel.getUser(userId)
+    LaunchedEffect(userId) {
         viewModel.getFollower(userId)
         viewModel.getFollowing(userId)
         viewModel.getStyleList(userId)
@@ -85,9 +82,10 @@ fun OtherProfileScreen(navController: NavHostController, userList: List<User>, u
             onDismissSnackbar = { viewModel.dismissSnackBar() }
         ) {
 
-            if (isGetStyleListCompleteState && isGetUserCompleteState &&
+            if (isGetStyleListCompleteState &&
                 isGetFollowerCompleteState && isGetFollowingCompleteState
             ) {
+                val user = userList.first { it.userId == userId }
                 LazyVerticalGrid(
                     modifier = Modifier
                         .fillMaxSize()
@@ -100,14 +98,14 @@ fun OtherProfileScreen(navController: NavHostController, userList: List<User>, u
                             TotalUserProfile(
                                 modifier = Modifier.size(72.dp),
                                 textUnit = 14.sp,
-                                profileUrl = userState?.profileUrl,
-                                nickName = userState?.nickName,
+                                profileUrl = user.profileUrl,
+                                nickName = user.nickName,
                                 codiCount = styleListState.size,
                                 followerCount = followerListState.size,
                                 followingCount = followingListState.size,
                             ) { viewModel.navigateFollow(navController, userId) }
 
-                            if (viewModel.myUserId != userState?.userId) {
+                            if (viewModel.myUserId != user.userId) {
                                 val isFollow =
                                     followerListState.any { it.follower == viewModel.myUserId }
                                 Button(
@@ -122,11 +120,11 @@ fun OtherProfileScreen(navController: NavHostController, userList: List<User>, u
                                     enabled = true,
                                     onClick = {
                                         if (isFollow) {
-                                            viewModel.deleteFollow(userState?.userId)
+                                            viewModel.deleteFollow(user.userId)
                                             viewModel.removeFollower()
                                         } else {
-                                            viewModel.createFollow(userState?.userId)
-                                            viewModel.addFollower(userState?.userId)
+                                            viewModel.createFollow(user.userId)
+                                            viewModel.addFollower(user.userId)
                                         }
                                     }
                                 ) {
@@ -145,16 +143,16 @@ fun OtherProfileScreen(navController: NavHostController, userList: List<User>, u
                                     .padding(8.dp)
                                     .padding(top = 8.dp)
                                     .height(20.dp),
-                                text = "${userState?.nickName}님의 코디"
+                                text = "${user.nickName}님의 코디"
                             )
                         }
                     }
                     itemsIndexed(styleListState) { index, style ->
-                        val user = userList.first { it.userId == style.writer }
+                        val styleWriter = userList.first { it.userId == style.writer }
                         StyleBox(
                             modifier = Modifier,
                             style = style,
-                            user,
+                            styleWriter,
                             { isCheck, count ->
                                 viewModel.setStyleLike(
                                     index,
@@ -173,7 +171,7 @@ fun OtherProfileScreen(navController: NavHostController, userList: List<User>, u
             }
 
             LoadingView(
-                isLoading = isLoadingState || isGetUserLoadingState || isGetStyleListLoadingState ||
+                isLoading = isLoadingState || isGetStyleListLoadingState ||
                         isGetFollowerLoadingState || isGetFollowingLoadingState
             )
         }
