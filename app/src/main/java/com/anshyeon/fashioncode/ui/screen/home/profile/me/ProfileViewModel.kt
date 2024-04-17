@@ -76,8 +76,6 @@ class ProfileViewModel @Inject constructor(
     val showSnackBar: StateFlow<Boolean> = _showSnackBar
 
     init {
-        getFollower(myUserId)
-        getFollowing(myUserId)
         getStyleList(myUserId)
         viewModelScope.launch {
             getLocalClothesList()
@@ -155,11 +153,11 @@ class ProfileViewModel @Inject constructor(
         }
     }
 
-    private fun getFollower(userId: String) {
+    fun getFollower() {
         _isGetFollowerLoading.value = true
         viewModelScope.launch {
             val response = authRepository.getFollowerList(
-                userId,
+                myUserId,
                 onComplete = {
                     _isGetFollowerLoading.value = false
                     _isGetFollowerComplete.value = true
@@ -175,11 +173,11 @@ class ProfileViewModel @Inject constructor(
         }
     }
 
-    private fun getFollowing(userId: String) {
+    fun getFollowing() {
         _isGetFollowingLoading.value = true
         viewModelScope.launch {
             val response = authRepository.getFollowingList(
-                userId,
+                myUserId,
                 onComplete = {
                     _isGetFollowingLoading.value = false
                     _isGetFollowingComplete.value = true

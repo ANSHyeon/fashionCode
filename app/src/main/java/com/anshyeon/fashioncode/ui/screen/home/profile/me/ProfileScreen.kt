@@ -24,6 +24,7 @@ import androidx.compose.material.Tab
 import androidx.compose.material.TabRow
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -82,6 +83,10 @@ fun ProfileScreen(navController: NavHostController, userList: List<User>) {
         }
     )
 
+    LaunchedEffect(true) {
+        viewModel.getFollower()
+        viewModel.getFollowing()
+    }
     Scaffold(
         topBar = {
             DefaultAppBar(stringResource(id = R.string.label_app_bar_my_profile))
