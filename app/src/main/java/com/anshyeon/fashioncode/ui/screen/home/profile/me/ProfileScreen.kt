@@ -86,6 +86,8 @@ fun ProfileScreen(navController: NavHostController, userList: List<User>) {
     LaunchedEffect(true) {
         viewModel.getFollower()
         viewModel.getFollowing()
+        viewModel.getStyleList()
+        viewModel.getLocalClothesList()
     }
     Scaffold(
         topBar = {

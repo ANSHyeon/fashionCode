@@ -75,18 +75,13 @@ class ProfileViewModel @Inject constructor(
     private val _showSnackBar = MutableStateFlow(false)
     val showSnackBar: StateFlow<Boolean> = _showSnackBar
 
-    init {
-        getStyleList(myUserId)
+    fun getLocalClothesList() {
         viewModelScope.launch {
-            getLocalClothesList()
-        }
-    }
-
-    private suspend fun getLocalClothesList() {
-        transformLocalMessageList().collectLatest {
-            _clothesList.value = mutableListOf(Clothes()).apply {
-                addAll(it)
-            }.toList()
+            transformLocalMessageList().collectLatest {
+                _clothesList.value = mutableListOf(Clothes()).apply {
+                    addAll(it)
+                }.toList()
+            }
         }
     }
 
@@ -127,10 +122,10 @@ class ProfileViewModel @Inject constructor(
         }
     }
 
-    private fun getStyleList(userId: String) {
+    fun getStyleList() {
         _isGetStyleListLoading.value = true
         viewModelScope.launch {
-            transformStyleList(userId)
+            transformStyleList(myUserId)
                 .onCompletion {
                     _isGetStyleListLoading.value = false
                     _isGetStyleListComplete.value = true
