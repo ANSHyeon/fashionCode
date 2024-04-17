@@ -65,7 +65,11 @@ fun HomeNavGraph(navController: NavHostController, userList: List<User>) {
             val commentJson =
                 URLDecoder.decode(encodedCommentJson, StandardCharsets.UTF_8.toString())
 
-            CommunityReplyScreen(navController, SerializationUtils.fromJson<Comment>(commentJson)!!)
+            CommunityReplyScreen(
+                navController,
+                userList,
+                SerializationUtils.fromJson<Comment>(commentJson)!!
+            )
         }
         composable(
             route = DetailHomeScreen.StyleCreate.routeWithArgName(),

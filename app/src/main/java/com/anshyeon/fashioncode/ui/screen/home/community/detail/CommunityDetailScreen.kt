@@ -110,8 +110,10 @@ fun CommunityDetailScreen(navController: NavHostController, userList: List<User>
                         )
                         Spacer(modifier = Modifier.size(15.dp))
                         commentListState.forEach { comment ->
+                            val commentWriter = userList.first { it.userId == comment.writer }
                             Comment(
                                 comment,
+                                commentWriter,
                                 {
                                     viewModel.navigateOtherUserProfile(
                                         navController,
@@ -122,8 +124,10 @@ fun CommunityDetailScreen(navController: NavHostController, userList: List<User>
                             }
                         }
                         addedCommentListState.forEach { comment ->
+                            val commentWriter = userList.first { it.userId == comment.writer }
                             Comment(
                                 comment,
+                                commentWriter,
                                 {
                                     viewModel.navigateOtherUserProfile(
                                         navController,
@@ -233,6 +237,7 @@ private fun ImageList(post: Post?) {
 @Composable
 private fun Comment(
     comment: Comment,
+    user: User,
     onNavigateOtherProfile: (String) -> Unit,
     onclick: (comment: Comment) -> Unit
 ) {
@@ -241,7 +246,7 @@ private fun Comment(
             .fillMaxWidth()
             .padding(vertical = 5.dp)
     ) {
-        if (comment.profileImageUrl == null) {
+        if (user.profileUrl == null) {
             Image(
                 modifier = Modifier
                     .size(40.dp)
@@ -255,7 +260,7 @@ private fun Comment(
                     .size(40.dp)
                     .clip(CircleShape)
                     .clickable { onNavigateOtherProfile(comment.writer) },
-                model = comment.profileImageUrl,
+                model = user.profileUrl,
                 contentDescription = null,
                 contentScale = ContentScale.Crop
             )
@@ -264,7 +269,7 @@ private fun Comment(
         Column {
             Text(
                 modifier = Modifier.clickable { onNavigateOtherProfile(comment.writer) },
-                text = comment.nickName,
+                text = user.nickName,
                 fontWeight = FontWeight.Bold
             )
             Spacer(modifier = Modifier.size(5.dp))

@@ -40,11 +40,10 @@ import com.anshyeon.fashioncode.ui.theme.DarkGray
 import com.anshyeon.fashioncode.util.DateFormatText
 
 @Composable
-fun CommunityReplyScreen(navController: NavHostController, comment: Comment) {
+fun CommunityReplyScreen(navController: NavHostController, userList: List<User>, comment: Comment) {
 
     val viewModel: CommunityReplyViewModel = hiltViewModel()
 
-    viewModel.getUser(comment.writer)
     viewModel.getReplyList(comment.commentId)
 
     val scrollState = rememberScrollState()
@@ -52,11 +51,8 @@ fun CommunityReplyScreen(navController: NavHostController, comment: Comment) {
     val replyBodyState by viewModel.replyBody.collectAsStateWithLifecycle()
     val replyListState by viewModel.replyList.collectAsStateWithLifecycle()
     val addedReplyListState by viewModel.addedReplyList.collectAsStateWithLifecycle()
-    val userState by viewModel.user.collectAsStateWithLifecycle()
     val isCreateReplyLoadingState by viewModel.isCreateReplyLoading.collectAsStateWithLifecycle()
-    val isGetUserLoadingState by viewModel.isGetUserLoading.collectAsStateWithLifecycle()
     val isGetReplyLoadingState by viewModel.isGetReplyLoading.collectAsStateWithLifecycle()
-    val isGetUserCompleteState by viewModel.isGetUserComplete.collectAsStateWithLifecycle()
     val isGetReplyCompleteState by viewModel.isGetReplyComplete.collectAsStateWithLifecycle()
     val snackBarTextState by viewModel.snackBarText.collectAsStateWithLifecycle()
     val showSnackBarState by viewModel.showSnackBar.collectAsStateWithLifecycle()
@@ -73,7 +69,7 @@ fun CommunityReplyScreen(navController: NavHostController, comment: Comment) {
             }
         }
     ) {
-        if (isGetUserCompleteState && isGetReplyCompleteState) {
+        if (isGetReplyCompleteState) {
             TextSnackBarContainer(
                 snackbarText = snackBarTextState,
                 showSnackbar = showSnackBarState,
@@ -86,8 +82,9 @@ fun CommunityReplyScreen(navController: NavHostController, comment: Comment) {
                         .padding(15.dp)
                         .verticalScroll(scrollState)
                 ) {
-                    ReplyComment(comment, userState) {
-                        viewModel.navigateOtherUserProfile(navController, userState?.userId)
+                    val commentWriter = userList.first { it.userId == comment.writer }
+                    ReplyComment(comment, commentWriter) {
+                        viewModel.navigateOtherUserProfile(navController, comment.writer)
                     }
                     replyListState.forEach { reply ->
                         Reply(
@@ -113,19 +110,19 @@ fun CommunityReplyScreen(navController: NavHostController, comment: Comment) {
             }
         }
         LoadingView(
-            isLoading = isCreateReplyLoadingState || isGetReplyLoadingState || isGetUserLoadingState
+            isLoading = isCreateReplyLoadingState || isGetReplyLoadingState
         )
     }
 }
 
 @Composable
-private fun ReplyComment(comment: Comment, user: User?, onNavigateOtherProfile: () -> Unit) {
+private fun ReplyComment(comment: Comment, user: User, onNavigateOtherProfile: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 5.dp)
     ) {
-        if (user?.profileUrl == null) {
+        if (user.profileUrl == null) {
             Image(
                 modifier = Modifier
                     .size(40.dp)
@@ -148,7 +145,7 @@ private fun ReplyComment(comment: Comment, user: User?, onNavigateOtherProfile: 
         Column {
             Text(
                 modifier = Modifier.clickable { onNavigateOtherProfile() },
-                text = comment.nickName,
+                text = user.nickName,
                 fontWeight = FontWeight.Bold
             )
             Spacer(modifier = Modifier.size(5.dp))

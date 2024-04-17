@@ -8,8 +8,6 @@ data class Comment(
     val postId: String,
     val body: String,
     val writer: String,
-    val nickName: String,
     val createdDate: String,
-    val profileImageUrl: String? = null,
     val replyList: List<Reply>? = null,
 )
