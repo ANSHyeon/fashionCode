@@ -10,6 +10,7 @@ import androidx.navigation.navArgument
 import com.anshyeon.fashioncode.R
 import com.anshyeon.fashioncode.data.model.Comment
 import com.anshyeon.fashioncode.data.model.Style
+import com.anshyeon.fashioncode.data.model.User
 import com.anshyeon.fashioncode.ui.screen.home.style.home.StyleScreen
 import com.anshyeon.fashioncode.ui.screen.home.community.home.CommunityScreen
 import com.anshyeon.fashioncode.ui.screen.home.bookmark.CalendarScreen
@@ -28,7 +29,7 @@ import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
 
 @Composable
-fun HomeNavGraph(navController: NavHostController) {
+fun HomeNavGraph(navController: NavHostController, userList: List<User>) {
     NavHost(
         navController = navController,
         startDestination = BottomNavItem.Style.route,
