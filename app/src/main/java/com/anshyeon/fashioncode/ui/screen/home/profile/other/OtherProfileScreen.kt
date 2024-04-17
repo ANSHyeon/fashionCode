@@ -36,6 +36,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import com.anshyeon.fashioncode.R
+import com.anshyeon.fashioncode.data.model.User
 import com.anshyeon.fashioncode.ui.component.appBar.BackButtonAppBar
 import com.anshyeon.fashioncode.ui.component.loadingView.LoadingView
 import com.anshyeon.fashioncode.ui.component.snackBar.TextSnackBarContainer
@@ -44,7 +45,7 @@ import com.anshyeon.fashioncode.ui.theme.Gray
 import com.anshyeon.fashioncode.ui.theme.SkyBlue
 
 @Composable
-fun OtherProfileScreen(navController: NavHostController, userId: String) {
+fun OtherProfileScreen(navController: NavHostController, userList: List<User>, userId: String) {
 
     val viewModel: OtherProfileViewModel = hiltViewModel()
 
@@ -149,9 +150,11 @@ fun OtherProfileScreen(navController: NavHostController, userId: String) {
                         }
                     }
                     itemsIndexed(styleListState) { index, style ->
+                        val user = userList.first { it.userId == style.writer }
                         StyleBox(
                             modifier = Modifier,
                             style = style,
+                            user,
                             { isCheck, count ->
                                 viewModel.setStyleLike(
                                     index,

@@ -36,7 +36,7 @@ fun HomeNavGraph(navController: NavHostController, userList: List<User>) {
         route = Constants.HOME_GRAPH
     ) {
         composable(route = BottomNavItem.Style.route) {
-            StyleScreen(navController)
+            StyleScreen(navController, userList)
         }
         composable(route = BottomNavItem.Calendar.route) {
             CalendarScreen(navController)
@@ -84,6 +84,7 @@ fun HomeNavGraph(navController: NavHostController, userList: List<User>) {
 
             StyleDetailScreen(
                 navController,
+                userList,
                 SerializationUtils.fromJson<Style>(styleJson)!!,
             )
         }
@@ -92,7 +93,7 @@ fun HomeNavGraph(navController: NavHostController, userList: List<User>) {
             arguments = DetailHomeScreen.OtherProfile.arguments
         ) { navBackStackEntry ->
             val userId = navBackStackEntry.arguments?.getString("userId").toString()
-            OtherProfileScreen(navController, userId)
+            OtherProfileScreen(navController, userList, userId)
         }
         composable(
             route = DetailHomeScreen.Follow.routeWithArgName(),
