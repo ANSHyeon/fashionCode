@@ -8,23 +8,30 @@ import androidx.activity.result.contract.ActivityResultContract
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.Scaffold
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.anshyeon.fashioncode.BuildConfig
 import com.anshyeon.fashioncode.R
+import com.anshyeon.fashioncode.ui.component.loadingView.LoadingView
+import com.anshyeon.fashioncode.ui.component.snackBar.TextSnackBarContainer
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
@@ -39,6 +46,9 @@ fun SignInScreen(
     navController: NavHostController,
     viewModel: SignInViewModel = hiltViewModel()
 ) {
+    val isLoadingState by viewModel.isLoading.collectAsStateWithLifecycle()
+    val snackBarTextState by viewModel.snackBarText.collectAsStateWithLifecycle()
+    val showSnackBarState by viewModel.showSnackBar.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val googleSignInClient = getGoogleSignInClient(LocalContext.current)
     val signInRequestCode = 1
@@ -60,21 +70,38 @@ fun SignInScreen(
             }
         }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize(),
-        verticalArrangement = Arrangement.Top,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Spacer(modifier = Modifier.fillMaxHeight(0.2f))
-        Text(
-            text = "Fashion Code",
-            style = MaterialTheme.typography.headlineLarge,
-            modifier = Modifier.fillMaxHeight(0.3f)
-        )
-        Spacer(modifier = Modifier.fillMaxHeight(0.1f))
-        SignInGoogleButton {
-            authResultLauncher.launch(signInRequestCode)
+    Scaffold {
+        TextSnackBarContainer(
+            snackbarText = snackBarTextState,
+            showSnackbar = showSnackBarState,
+            onDismissSnackbar = { viewModel.dismissSnackBar() }
+        ) {
+            Box(
+                modifier = Modifier
+                    .padding(it)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize(),
+                    verticalArrangement = Arrangement.Top,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Spacer(modifier = Modifier.fillMaxHeight(0.2f))
+                    Text(
+                        text = "Fashion Code",
+                        style = MaterialTheme.typography.headlineLarge,
+                        modifier = Modifier.fillMaxHeight(0.3f)
+                    )
+                    Spacer(modifier = Modifier.fillMaxHeight(0.1f))
+                    SignInGoogleButton {
+                        authResultLauncher.launch(signInRequestCode)
+                    }
+                }
+
+                LoadingView(
+                    isLoading = isLoadingState
+                )
+            }
         }
     }
 }

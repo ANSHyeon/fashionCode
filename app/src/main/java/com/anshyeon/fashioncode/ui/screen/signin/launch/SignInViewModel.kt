@@ -13,6 +13,8 @@ import com.anshyeon.fashioncode.network.extentions.onSuccess
 import com.anshyeon.fashioncode.ui.graph.AuthScreen
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -21,7 +23,17 @@ class SignInViewModel @Inject constructor(
     private val repository: AuthRepository
 ) : ViewModel() {
 
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading: StateFlow<Boolean> = _isLoading
+
+    private val _snackBarText = MutableStateFlow("")
+    val snackBarText: StateFlow<String> = _snackBarText
+
+    private val _showSnackBar = MutableStateFlow(false)
+    val showSnackBar: StateFlow<Boolean> = _showSnackBar
+
     fun getUserInfo(context: Context, navController: NavController) {
+        _isLoading.value = true
         viewModelScope.launch {
             val result = repository.getUser()
             result.onSuccess {
@@ -36,8 +48,13 @@ class SignInViewModel @Inject constructor(
                     }
                 }
             }.onError { _, message ->
+                _showSnackBar.value = true
+                _snackBarText.value = "잠시 후 다시 시도해 주십시오"
             }.onException {
+                _showSnackBar.value = true
+                _snackBarText.value = "잠시 후 다시 시도해 주십시오"
             }
+            _isLoading.value = false
         }
     }
 
@@ -47,5 +64,9 @@ class SignInViewModel @Inject constructor(
         }
         getSaveIdToken.await()
         context.startActivity(Intent(context, MainActivity::class.java))
+    }
+
+    fun dismissSnackBar() {
+        _showSnackBar.value = false
     }
 }

@@ -28,6 +28,15 @@ class InfoInputViewModel @Inject constructor(
     private val _imageUri = MutableStateFlow<Uri?>(null)
     val imageUri: StateFlow<Uri?> = _imageUri
 
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading: StateFlow<Boolean> = _isLoading
+
+    private val _snackBarText = MutableStateFlow("")
+    val snackBarText: StateFlow<String> = _snackBarText
+
+    private val _showSnackBar = MutableStateFlow(false)
+    val showSnackBar: StateFlow<Boolean> = _showSnackBar
+
     fun changeNickName(newNickName: String) {
         _nickName.value = newNickName
     }
@@ -37,6 +46,7 @@ class InfoInputViewModel @Inject constructor(
     }
 
     fun saveUserInfo(context: Context) {
+        _isLoading.value = true
         viewModelScope.launch {
             val result = authRepository.createUser(nickName.value, imageUri.value)
             result.onSuccess {
@@ -51,8 +61,17 @@ class InfoInputViewModel @Inject constructor(
                 context.startActivity(intent)
 
             }.onError { code, message ->
+                _showSnackBar.value = true
+                _snackBarText.value = "잠시 후 다시 시도해 주십시오"
             }.onException {
+                _showSnackBar.value = true
+                _snackBarText.value = "잠시 후 다시 시도해 주십시오"
             }
+            _isLoading.value = false
         }
+    }
+
+    fun dismissSnackBar() {
+        _showSnackBar.value = false
     }
 }
