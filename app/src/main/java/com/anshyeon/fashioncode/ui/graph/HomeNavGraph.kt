@@ -45,7 +45,7 @@ fun HomeNavGraph(navController: NavHostController, userList: List<User>) {
             CommunityScreen(navController)
         }
         composable(route = BottomNavItem.Setting.route) {
-            ProfileScreen(navController)
+            ProfileScreen(navController, userList)
         }
         composable(route = DetailHomeScreen.CommunityWrite.route) {
             CommunityWriteScreen(navController)

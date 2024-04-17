@@ -53,23 +53,20 @@ import com.anshyeon.fashioncode.ui.theme.Gray
 import kotlinx.coroutines.launch
 
 @Composable
-fun ProfileScreen(navController: NavHostController) {
+fun ProfileScreen(navController: NavHostController, userList: List<User>) {
 
     val viewModel: ProfileViewModel = hiltViewModel()
     val context = LocalContext.current
 
-    val userState by viewModel.user.collectAsStateWithLifecycle()
     val styleListState by viewModel.styleList.collectAsStateWithLifecycle()
     val followerListState by viewModel.followerList.collectAsStateWithLifecycle()
     val followingListState by viewModel.followingList.collectAsStateWithLifecycle()
     val clothesListState by viewModel.clothesList.collectAsStateWithLifecycle()
     val isCutOutLoadingState by viewModel.isCutOutLoading.collectAsStateWithLifecycle()
     val isGetStyleListLoadingState by viewModel.isGetStyleListLoading.collectAsStateWithLifecycle()
-    val isGetUserLoadingState by viewModel.isGetUserLoading.collectAsStateWithLifecycle()
     val isGetFollowerLoadingState by viewModel.isGetFollowerLoading.collectAsStateWithLifecycle()
     val isGetFollowingLoadingState by viewModel.isGetFollowingLoading.collectAsStateWithLifecycle()
     val isGetStyleListCompleteState by viewModel.isGetStyleListComplete.collectAsStateWithLifecycle()
-    val isGetUserCompleteState by viewModel.isGetUserComplete.collectAsStateWithLifecycle()
     val isGetFollowerCompleteState by viewModel.isGetFollowerComplete.collectAsStateWithLifecycle()
     val isGetFollowingCompleteState by viewModel.isGetFollowingComplete.collectAsStateWithLifecycle()
     val isLoadingState by viewModel.isLoading.collectAsStateWithLifecycle()
@@ -96,16 +93,17 @@ fun ProfileScreen(navController: NavHostController) {
             onDismissSnackbar = { viewModel.dismissSnackBar() }
         ) {
 
-            if (isGetStyleListCompleteState && isGetUserCompleteState &&
+            if (isGetStyleListCompleteState &&
                 isGetFollowerCompleteState && isGetFollowingCompleteState
             ) {
                 Column(
                     Modifier
                         .padding(it)
                 ) {
+                    val user = userList.first { it.userId == viewModel.myUserId }
                     ProfileBox(
                         Modifier.padding(16.dp),
-                        userState,
+                        user,
                         styleListState,
                         followerListState,
                         followingListState,
@@ -125,7 +123,7 @@ fun ProfileScreen(navController: NavHostController) {
             }
 
             LoadingView(
-                isLoading = isLoadingState || isGetUserLoadingState || isGetStyleListLoadingState ||
+                isLoading = isLoadingState || isGetStyleListLoadingState ||
                         isGetFollowerLoadingState || isGetFollowingLoadingState || isCutOutLoadingState
             )
         }

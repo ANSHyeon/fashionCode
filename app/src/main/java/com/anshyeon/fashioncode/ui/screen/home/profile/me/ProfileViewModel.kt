@@ -9,7 +9,6 @@ import com.anshyeon.fashioncode.data.model.Clothes
 import com.anshyeon.fashioncode.data.model.ClothesType
 import com.anshyeon.fashioncode.data.model.Follow
 import com.anshyeon.fashioncode.data.model.Style
-import com.anshyeon.fashioncode.data.model.User
 import com.anshyeon.fashioncode.data.repository.AuthRepository
 import com.anshyeon.fashioncode.data.repository.StyleRepository
 import com.anshyeon.fashioncode.ui.graph.DetailHomeScreen
@@ -37,9 +36,6 @@ class ProfileViewModel @Inject constructor(
     private val _clothesList = MutableStateFlow(listOf(Clothes()))
     val clothesList: StateFlow<List<Clothes>> = _clothesList
 
-    private val _user = MutableStateFlow<User?>(null)
-    var user: StateFlow<User?> = _user
-
     private val _styleList = MutableStateFlow<List<Style>>(emptyList())
     var styleList: StateFlow<List<Style>> = _styleList
 
@@ -55,9 +51,6 @@ class ProfileViewModel @Inject constructor(
     private val _isGetStyleListLoading = MutableStateFlow(false)
     val isGetStyleListLoading: StateFlow<Boolean> = _isGetStyleListLoading
 
-    private val _isGetUserLoading = MutableStateFlow(false)
-    val isGetUserLoading: StateFlow<Boolean> = _isGetUserLoading
-
     private val _isGetFollowerLoading = MutableStateFlow(false)
     val isGetFollowerLoading: StateFlow<Boolean> = _isGetFollowerLoading
 
@@ -69,9 +62,6 @@ class ProfileViewModel @Inject constructor(
 
     private val _isGetStyleListComplete = MutableStateFlow(false)
     val isGetStyleListComplete: StateFlow<Boolean> = _isGetStyleListComplete
-
-    private val _isGetUserComplete = MutableStateFlow(false)
-    val isGetUserComplete: StateFlow<Boolean> = _isGetUserComplete
 
     private val _isGetFollowerComplete = MutableStateFlow(false)
     val isGetFollowerComplete: StateFlow<Boolean> = _isGetFollowerComplete
@@ -86,7 +76,6 @@ class ProfileViewModel @Inject constructor(
     val showSnackBar: StateFlow<Boolean> = _showSnackBar
 
     init {
-        getUser(myUserId)
         getFollower(myUserId)
         getFollowing(myUserId)
         getStyleList(myUserId)
@@ -163,26 +152,6 @@ class ProfileViewModel @Inject constructor(
             }
         ).map {
             it.sortedBy { reply -> reply.createdDate }
-        }
-    }
-
-    private fun getUser(userId: String) {
-        _isGetUserLoading.value = true
-        viewModelScope.launch {
-            val response = authRepository.getUserInfo(
-                userId,
-                onComplete = {
-                    _isGetUserLoading.value = false
-                    _isGetUserComplete.value = true
-                },
-                onError = {
-                    _showSnackBar.value = true
-                    _snackBarText.value = "잠시 후 다시 시도해 주십시오"
-                }
-            )
-            response.collectLatest { user ->
-                _user.value = user
-            }
         }
     }
 
