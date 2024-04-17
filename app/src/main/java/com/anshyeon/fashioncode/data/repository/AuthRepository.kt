@@ -4,6 +4,7 @@ import android.net.Uri
 import com.anshyeon.fashioncode.data.PreferenceManager
 import com.anshyeon.fashioncode.data.dataSource.ImageDataSource
 import com.anshyeon.fashioncode.data.dataSource.UserDataSource
+import com.anshyeon.fashioncode.data.local.dao.UserDao
 import com.anshyeon.fashioncode.data.model.Follow
 import com.anshyeon.fashioncode.data.model.User
 import com.anshyeon.fashioncode.network.FireBaseApiClient
@@ -12,6 +13,7 @@ import com.anshyeon.fashioncode.network.extentions.onException
 import com.anshyeon.fashioncode.network.extentions.onSuccess
 import com.anshyeon.fashioncode.network.model.ApiResponse
 import com.anshyeon.fashioncode.network.model.ApiResultException
+import com.anshyeon.fashioncode.network.model.ApiResultSuccess
 import com.anshyeon.fashioncode.util.Constants
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -28,6 +30,7 @@ class AuthRepository @Inject constructor(
     private val preferenceManager: PreferenceManager,
     private val userDataSource: UserDataSource,
     private val imageDataSource: ImageDataSource,
+    private val userDao: UserDao,
 ) {
 
     fun getLocalIdToken(): String {
@@ -95,6 +98,42 @@ class AuthRepository @Inject constructor(
         onComplete()
     }.flowOn(Dispatchers.Default)
 
+    suspend fun getUserList(): ApiResponse<Unit> {
+        return try {
+            val response = fireBaseApiClient.getUserList(
+                userDataSource.getIdToken()
+            )
+            response.onSuccess { data ->
+                insertUserList(data.map { entry ->
+                    entry.value.run {
+                        copy(
+                            key = entry.key,
+                        )
+                    }
+                })
+            }.onError { _, _ ->
+                throw Exception()
+            }.onException {
+                throw Exception()
+            }
+            ApiResultSuccess(Unit)
+        } catch (e: Exception) {
+            ApiResultException(e)
+        }
+    }
+
+    fun getStyleListByRoom(): Flow<List<User>> {
+        return userDao.getAllUserList()
+    }
+
+    private suspend fun insertUserList(users: List<User>) {
+        userDao.insertAll(users)
+    }
+
+    private suspend fun updateUser(nickname: String, profileUrl: String?) {
+        userDao.update(getUserId(), nickname, profileUrl)
+    }
+
     suspend fun createUser(
         nickname: String,
         uri: Uri?
@@ -138,6 +177,7 @@ class AuthRepository @Inject constructor(
                 updates
             ).onSuccess {
                 preferenceManager.setUserImage(Constants.KEY_USER_PROFILE_URL, imageUrl)
+                updateUser(nickname, imageUrl)
             }.onError { code, message ->
                 throw Exception()
             }.onException {

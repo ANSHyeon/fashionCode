@@ -24,6 +24,11 @@ interface FireBaseApiClient {
         @Query("equalTo") userId: String
     ): ApiResponse<Map<String, User>>
 
+    @GET("users.json")
+    suspend fun getUserList(
+        @Query("auth") auth: String?,
+    ): ApiResponse<Map<String, User>>
+
     @POST("users.json")
     suspend fun createUser(
         @Query("auth") auth: String?,
