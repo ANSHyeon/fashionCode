@@ -87,21 +87,25 @@ fun CommunityReplyScreen(navController: NavHostController, userList: List<User>,
                         viewModel.navigateOtherUserProfile(navController, comment.writer)
                     }
                     replyListState.forEach { reply ->
+                        val replyWriter = userList.first { it.userId == reply.writer }
                         Reply(
                             Modifier
                                 .fillMaxWidth()
                                 .padding(start = 45.dp, top = 10.dp),
-                            reply
+                            reply,
+                            replyWriter
                         ) {
                             viewModel.navigateOtherUserProfile(navController, it)
                         }
                     }
                     addedReplyListState.forEach { reply ->
+                        val replyWriter = userList.first { it.userId == reply.writer }
                         Reply(
                             Modifier
                                 .fillMaxWidth()
                                 .padding(start = 45.dp, top = 10.dp),
-                            reply
+                            reply,
+                            replyWriter
                         ) {
                             viewModel.navigateOtherUserProfile(navController, it)
                         }
@@ -165,11 +169,11 @@ private fun ReplyComment(comment: Comment, user: User, onNavigateOtherProfile: (
 }
 
 @Composable
-fun Reply(modifier: Modifier, reply: Reply, onNavigateOtherProfile: (String) -> Unit) {
+fun Reply(modifier: Modifier, reply: Reply, user: User, onNavigateOtherProfile: (String) -> Unit) {
     Row(
         modifier = modifier
     ) {
-        if (reply.profileImageUrl == null) {
+        if (user.profileUrl == null) {
             Image(
                 modifier = Modifier
                     .size(30.dp)
@@ -183,7 +187,7 @@ fun Reply(modifier: Modifier, reply: Reply, onNavigateOtherProfile: (String) -> 
                     .size(30.dp)
                     .clip(CircleShape)
                     .clickable { onNavigateOtherProfile(reply.writer) },
-                model = reply.profileImageUrl,
+                model = user.profileUrl,
                 contentDescription = null,
                 contentScale = ContentScale.Crop
             )
@@ -192,7 +196,7 @@ fun Reply(modifier: Modifier, reply: Reply, onNavigateOtherProfile: (String) -> 
         Column {
             Text(
                 modifier = Modifier.clickable { onNavigateOtherProfile(reply.writer) },
-                text = reply.nickName,
+                text = user.nickName,
                 fontWeight = FontWeight.Bold
             )
             Spacer(modifier = Modifier.size(5.dp))

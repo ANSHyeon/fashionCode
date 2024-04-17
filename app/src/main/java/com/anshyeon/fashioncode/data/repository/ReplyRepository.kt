@@ -1,6 +1,5 @@
 package com.anshyeon.fashioncode.data.repository
 
-import com.anshyeon.fashioncode.data.PreferenceManager
 import com.anshyeon.fashioncode.data.dataSource.UserDataSource
 import com.anshyeon.fashioncode.data.model.Reply
 import com.anshyeon.fashioncode.network.FireBaseApiClient
@@ -10,7 +9,6 @@ import com.anshyeon.fashioncode.network.extentions.onSuccess
 import com.anshyeon.fashioncode.network.model.ApiResponse
 import com.anshyeon.fashioncode.network.model.ApiResultException
 import com.anshyeon.fashioncode.network.model.ApiResultSuccess
-import com.anshyeon.fashioncode.util.Constants
 import com.anshyeon.fashioncode.util.DateFormatText
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -25,7 +23,6 @@ import javax.inject.Inject
 class ReplyRepository @Inject constructor(
     private val fireBaseApiClient: FireBaseApiClient,
     private val userDataSource: UserDataSource,
-    private val preferenceManager: PreferenceManager,
 ) {
 
     suspend fun createReply(
@@ -40,9 +37,7 @@ class ReplyRepository @Inject constructor(
             commentId,
             body,
             userId,
-            preferenceManager.getString(Constants.KEY_USER_NICKNAME, ""),
             DateFormatText.getCurrentTime(),
-            preferenceManager.getString(Constants.KEY_USER_PROFILE_URL, ""),
         )
         return try {
             fireBaseApiClient.createReply(
