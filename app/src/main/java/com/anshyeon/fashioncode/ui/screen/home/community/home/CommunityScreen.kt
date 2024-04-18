@@ -106,7 +106,7 @@ fun PostContent(post: Post, onClick: () -> Unit) {
             modifier = Modifier.fillMaxSize(),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Column {
+            Column(modifier = Modifier.weight(1f)) {
                 Text(
                     modifier = Modifier
                         .height(24.dp),

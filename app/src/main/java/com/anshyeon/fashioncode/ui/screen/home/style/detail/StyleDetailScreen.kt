@@ -17,6 +17,7 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -159,6 +160,7 @@ fun StyleDetail(
                 modifier = Modifier.fillMaxWidth(),
                 model = currentStyle?.imageUrl,
                 contentDescription = null,
+                contentScale = ContentScale.FillWidth,
                 placeholder = painterResource(id = R.drawable.ic_place_holder)
             )
             likeArea(

@@ -75,20 +75,13 @@ class ProfileViewModel @Inject constructor(
     private val _showSnackBar = MutableStateFlow(false)
     val showSnackBar: StateFlow<Boolean> = _showSnackBar
 
-    init {
-        getFollower(myUserId)
-        getFollowing(myUserId)
-        getStyleList(myUserId)
+    fun getLocalClothesList() {
         viewModelScope.launch {
-            getLocalClothesList()
-        }
-    }
-
-    private suspend fun getLocalClothesList() {
-        transformLocalMessageList().collectLatest {
-            _clothesList.value = mutableListOf(Clothes()).apply {
-                addAll(it)
-            }.toList()
+            transformLocalMessageList().collectLatest {
+                _clothesList.value = mutableListOf(Clothes()).apply {
+                    addAll(it)
+                }.toList()
+            }
         }
     }
 
@@ -129,10 +122,10 @@ class ProfileViewModel @Inject constructor(
         }
     }
 
-    private fun getStyleList(userId: String) {
+    fun getStyleList() {
         _isGetStyleListLoading.value = true
         viewModelScope.launch {
-            transformStyleList(userId)
+            transformStyleList(myUserId)
                 .onCompletion {
                     _isGetStyleListLoading.value = false
                     _isGetStyleListComplete.value = true
@@ -155,11 +148,11 @@ class ProfileViewModel @Inject constructor(
         }
     }
 
-    private fun getFollower(userId: String) {
+    fun getFollower() {
         _isGetFollowerLoading.value = true
         viewModelScope.launch {
             val response = authRepository.getFollowerList(
-                userId,
+                myUserId,
                 onComplete = {
                     _isGetFollowerLoading.value = false
                     _isGetFollowerComplete.value = true
@@ -175,11 +168,11 @@ class ProfileViewModel @Inject constructor(
         }
     }
 
-    private fun getFollowing(userId: String) {
+    fun getFollowing() {
         _isGetFollowingLoading.value = true
         viewModelScope.launch {
             val response = authRepository.getFollowingList(
-                userId,
+                myUserId,
                 onComplete = {
                     _isGetFollowingLoading.value = false
                     _isGetFollowingComplete.value = true

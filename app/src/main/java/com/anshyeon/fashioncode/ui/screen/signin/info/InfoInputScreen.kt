@@ -20,10 +20,9 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
-import androidx.compose.material.Surface
+import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -44,6 +43,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.anshyeon.fashioncode.R
 import com.anshyeon.fashioncode.ui.component.button.RectangleButton
+import com.anshyeon.fashioncode.ui.component.loadingView.LoadingView
+import com.anshyeon.fashioncode.ui.component.snackBar.TextSnackBarContainer
 import com.anshyeon.fashioncode.util.isValidNickname
 
 @Composable
@@ -52,30 +53,53 @@ fun InfoInputScreen() {
     val viewModel: InfoInputViewModel = hiltViewModel()
     val context = LocalContext.current
 
+    val nickNameState by viewModel.nickName.collectAsStateWithLifecycle()
+    val imageUriState by viewModel.imageUri.collectAsStateWithLifecycle()
+    val nextButtonVisibility = isValidNickname(nickNameState)
+    val isLoadingState by viewModel.isLoading.collectAsStateWithLifecycle()
+    val snackBarTextState by viewModel.snackBarText.collectAsStateWithLifecycle()
+    val showSnackBarState by viewModel.showSnackBar.collectAsStateWithLifecycle()
+
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
         viewModel.changeImageUri(uri)
     }
 
-    val nickNameState by viewModel.nickName.collectAsStateWithLifecycle()
-    val imageUriState by viewModel.imageUri.collectAsStateWithLifecycle()
-    val nextButtonVisibility = isValidNickname(nickNameState)
-
-    Surface(
-        modifier = Modifier.fillMaxSize(),
-        color = MaterialTheme.colorScheme.background
-    ) {
-        SetUserInfo(imageUriState, nickNameState, launcher) { newNickName ->
-            viewModel.changeNickName(newNickName)
-        }
-        RectangleButton(
-            text = stringResource(id = R.string.label_start),
-            visibility = nextButtonVisibility
+    Scaffold {
+        TextSnackBarContainer(
+            snackbarText = snackBarTextState,
+            showSnackbar = showSnackBarState,
+            onDismissSnackbar = { viewModel.dismissSnackBar() }
         ) {
-            viewModel.saveUserInfo(context)
+            Box(
+                modifier = Modifier
+                    .padding(it)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                ) {
+                    SetUserInfo(imageUriState, nickNameState, launcher) { newNickName ->
+                        viewModel.changeNickName(newNickName)
+                    }
+                    RectangleButton(
+                        modifier = Modifier.align(Alignment.BottomCenter),
+                        text = stringResource(id = R.string.label_start),
+                        visibility = nextButtonVisibility
+                    ) {
+                        viewModel.saveUserInfo(context)
+                    }
+                }
+
+                LoadingView(
+                    isLoading = isLoadingState
+                )
+            }
         }
     }
+
+
 }
 
 @Composable
