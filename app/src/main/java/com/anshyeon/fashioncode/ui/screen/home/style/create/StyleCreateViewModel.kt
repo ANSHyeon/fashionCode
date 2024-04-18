@@ -157,6 +157,11 @@ class StyleCreateViewModel @Inject constructor(
             _selectedClothesList.value.toMutableList().apply { add(clothes) }.toList()
     }
 
+    fun removeSelectedClothes(index: Int) {
+        _selectedClothesList.value =
+            _selectedClothesList.value.toMutableList().apply { removeAt(index) }.toList()
+    }
+
     fun changeClothesType(type: ClothesType) {
         currentClothesType = type
     }

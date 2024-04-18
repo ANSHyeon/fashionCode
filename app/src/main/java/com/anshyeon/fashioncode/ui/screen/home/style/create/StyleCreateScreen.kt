@@ -11,6 +11,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.rememberTransformableState
 import androidx.compose.foundation.gestures.transformable
 import androidx.compose.foundation.layout.Box
@@ -28,6 +29,8 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.AlertDialog
+import androidx.compose.material.Button
 import androidx.compose.material.Icon
 import androidx.compose.material.Scaffold
 import androidx.compose.material.ScrollableTabRow
@@ -145,7 +148,9 @@ fun StyleCreateScreen(navController: NavHostController, selectedDate: String) {
                             .background(Gray),
                         picture,
                         selectedClothesListState
-                    )
+                    ) {
+                        viewModel.removeSelectedClothes(it)
+                    }
                     CodiItems(
                         Modifier
                             .weight(4f)
@@ -169,11 +174,13 @@ fun StyleCreateScreen(navController: NavHostController, selectedDate: String) {
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun CodiCanvas(
     modifier: Modifier,
     picture: Picture,
     clothesListState: List<Clothes>,
+    removeClothes: (Int) -> Unit
 ) {
     Box(
         modifier = modifier
@@ -197,7 +204,30 @@ fun CodiCanvas(
                 }
             }
     ) {
+        var removeClotheIndex by remember { mutableStateOf(9999) }
+        var showDialog by remember { mutableStateOf(false) }
         var zIndexCount by remember { mutableStateOf(1) }
+        if (showDialog) {
+            AlertDialog(
+                onDismissRequest = {},
+                text = { Text(stringResource(id = R.string.message_dialog_removee)) },
+                dismissButton = {
+                    Button(onClick = {
+                        showDialog = false
+                    }) {
+                        Text("CANCEL")
+                    }
+                },
+                confirmButton = {
+                    Button(onClick = {
+                        removeClothes(removeClotheIndex)
+                        showDialog = false
+                    }) {
+                        Text("OK")
+                    }
+                }
+            )
+        }
         clothesListState.forEachIndexed { index, clothes ->
             var scale by remember { mutableStateOf(1f) }
             var rotation by remember { mutableStateOf(0f) }
@@ -223,9 +253,13 @@ fun CodiCanvas(
                     )
                     .transformable(state = state)
                     .size(200.dp * scale)
-                    .clickable {
-                        zIndex = zIndexCount++.toFloat()
-                    }
+                    .combinedClickable(
+                        onLongClick = {
+                            removeClotheIndex = index
+                            showDialog = true
+                        },
+                        onClick = { zIndex = zIndexCount++.toFloat() }
+                    )
                     .zIndex(zIndex),
                 model = clothes.image,
                 contentDescription = null,
