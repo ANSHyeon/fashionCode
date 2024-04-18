@@ -96,6 +96,7 @@ fun StyleCreateScreen(navController: NavHostController, selectedDate: String) {
     val isCreateStyleLoadingState by viewModel.isCreateStyleLoading.collectAsStateWithLifecycle()
     val isCutOutLoadingState by viewModel.isCutOutLoading.collectAsStateWithLifecycle()
     val isInsertStyleLoadingState by viewModel.isInsertStyleLoading.collectAsStateWithLifecycle()
+    val isDeleteClothesLoadingState by viewModel.isDeleteClothesLoading.collectAsStateWithLifecycle()
     val snackBarTextState by viewModel.snackBarText.collectAsStateWithLifecycle()
     val showSnackBarState by viewModel.showSnackBar.collectAsStateWithLifecycle()
 
@@ -150,6 +151,7 @@ fun StyleCreateScreen(navController: NavHostController, selectedDate: String) {
                             .weight(4f)
                             .fillMaxWidth(),
                         clothesListState,
+                        { viewModel.deleteClothes(it) },
                         {
                             viewModel.changeClothesType(it)
                             takePhotoFromCameraLauncher.launch()
@@ -160,7 +162,7 @@ fun StyleCreateScreen(navController: NavHostController, selectedDate: String) {
                     )
                 }
                 LoadingView(
-                    isLoading = isCreateStyleLoadingState || isCutOutLoadingState || isInsertStyleLoadingState
+                    isLoading = isCreateStyleLoadingState || isCutOutLoadingState || isInsertStyleLoadingState || isDeleteClothesLoadingState
                 )
             }
         }
@@ -242,6 +244,7 @@ fun CodiCanvas(
 fun CodiItems(
     modifier: Modifier,
     clothesListState: List<Clothes>,
+    removeClothes: (Clothes) -> Unit,
     onAddButtonClick: (ClothesType) -> Unit,
     onCodiItemClick: (Clothes) -> Unit
 ) {
@@ -317,7 +320,9 @@ fun CodiItems(
                             onAddButtonClick(tabs[index])
                         }
                     } else {
-                        CodiItem(clothes = it) {
+                        CodiItem(clothes = it,
+                            { clothes -> removeClothes(clothes) }
+                        ) {
                             onCodiItemClick(it)
                         }
                     }
@@ -358,15 +363,41 @@ fun CodiItemAddButton(onClick: () -> Unit) {
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun CodiItem(clothes: Clothes, onClick: () -> Unit) {
+fun CodiItem(clothes: Clothes, removeClothes: (Clothes) -> Unit, onClick: () -> Unit) {
+    var showDialog by remember { mutableStateOf(false) }
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = {},
+            text = { Text(stringResource(id = R.string.message_dialog_removee)) },
+            dismissButton = {
+                Button(onClick = {
+                    showDialog = false
+                }) {
+                    Text("CANCEL")
+                }
+            },
+            confirmButton = {
+                Button(onClick = {
+                    removeClothes(clothes)
+                    showDialog = false
+                }) {
+                    Text("OK")
+                }
+            }
+        )
+    }
     Box(
         Modifier
             .size(100.dp)
             .padding(5.dp)
-            .clickable {
-                onClick()
-            }
+            .combinedClickable(
+                onLongClick = {
+                    showDialog = true
+                },
+                onClick = { onClick() }
+            )
     ) {
         AsyncImage(
             modifier = Modifier

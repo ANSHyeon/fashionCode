@@ -17,4 +17,6 @@
     <string name="hint_info_input_nickname">2~6자 닉네임을 입력해주세요.</string>
     <string name="hint_post_title">제목을 입력하세요</string>
     <string name="hint_post_body">내용을 입력하세요</string>
+
+    <string name="message_dialog_removee">제거하시겠습니까?</string>
 </resources>

@@ -122,6 +122,7 @@ fun ProfileScreen(navController: NavHostController, userList: List<User>) {
                         Modifier.padding(top = 8.dp),
                         styleListState,
                         clothesListState,
+                        { viewModel.deleteClothes(it) }
                     ) {
                         viewModel.changeClothesType(it)
                         takePhotoFromCameraLauncher.launch()
@@ -186,6 +187,7 @@ fun MyItems(
     modifier: Modifier,
     styleList: List<Style>,
     clothesList: List<Clothes>,
+    deleteClothes: (Clothes) -> Unit,
     onAddButtonClick: (ClothesType) -> Unit,
 ) {
     Column(
@@ -238,6 +240,7 @@ fun MyItems(
                     Modifier
                         .fillMaxWidth(),
                     clothesList,
+                    { deleteClothes(it) },
                     {
                         onAddButtonClick(it)
                     },

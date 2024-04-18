@@ -42,6 +42,9 @@ class StyleCreateViewModel @Inject constructor(
     private val _isInsertStyleLoading = MutableStateFlow(false)
     val isInsertStyleLoading: StateFlow<Boolean> = _isInsertStyleLoading
 
+    private val _isDeleteClothesLoading = MutableStateFlow(false)
+    val isDeleteClothesLoading: StateFlow<Boolean> = _isDeleteClothesLoading
+
     private val _snackBarText = MutableStateFlow("")
     val snackBarText: StateFlow<String> = _snackBarText
 
@@ -133,6 +136,19 @@ class StyleCreateViewModel @Inject constructor(
             }
             _isInsertStyleLoading.value = false
             navigateBack(navController)
+        }
+    }
+
+    fun deleteClothes(
+        clothes: Clothes,
+    ) {
+        _isDeleteClothesLoading.value = true
+        viewModelScope.launch {
+            styleRepository.deleteClothes(clothes) {
+                _showSnackBar.value = true
+                _snackBarText.value = "잠시 후 다시 시도해 주십시오"
+            }
+            _isDeleteClothesLoading.value = false
         }
     }
 
