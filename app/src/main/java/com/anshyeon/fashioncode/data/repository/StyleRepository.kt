@@ -317,6 +317,17 @@ class StyleRepository @Inject constructor(
         clothesDao.insert(clothes)
     }
 
+    suspend fun deleteClothes(
+        clothes: Clothes,
+        onError: () -> Unit
+    ) {
+        try {
+            clothesDao.deleteClothe(clothes)
+        } catch (e: Exception) {
+            onError()
+        }
+    }
+
     suspend fun saveStyle(
         bitmap: Bitmap,
         selectedDate: String,

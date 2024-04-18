@@ -11,7 +11,10 @@ interface ClothesDao {
     fun getAllClothesList(): Flow<List<Clothes>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(chatRoom: Clothes)
+    suspend fun insert(clothes: Clothes)
+
+    @Delete
+    suspend fun deleteClothe(clothes: Clothes)
 
     @Query("DELETE FROM clothes")
     suspend fun deleteAll()

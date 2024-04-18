@@ -11,6 +11,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.rememberTransformableState
 import androidx.compose.foundation.gestures.transformable
 import androidx.compose.foundation.layout.Box
@@ -28,6 +29,8 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.AlertDialog
+import androidx.compose.material.Button
 import androidx.compose.material.Icon
 import androidx.compose.material.Scaffold
 import androidx.compose.material.ScrollableTabRow
@@ -96,6 +99,7 @@ fun StyleCreateScreen(navController: NavHostController, selectedDate: String) {
     val isCreateStyleLoadingState by viewModel.isCreateStyleLoading.collectAsStateWithLifecycle()
     val isCutOutLoadingState by viewModel.isCutOutLoading.collectAsStateWithLifecycle()
     val isInsertStyleLoadingState by viewModel.isInsertStyleLoading.collectAsStateWithLifecycle()
+    val isDeleteClothesLoadingState by viewModel.isDeleteClothesLoading.collectAsStateWithLifecycle()
     val snackBarTextState by viewModel.snackBarText.collectAsStateWithLifecycle()
     val showSnackBarState by viewModel.showSnackBar.collectAsStateWithLifecycle()
 
@@ -144,12 +148,15 @@ fun StyleCreateScreen(navController: NavHostController, selectedDate: String) {
                             .background(Gray),
                         picture,
                         selectedClothesListState
-                    )
+                    ) {
+                        viewModel.removeSelectedClothes(it)
+                    }
                     CodiItems(
                         Modifier
                             .weight(4f)
                             .fillMaxWidth(),
                         clothesListState,
+                        { viewModel.deleteClothes(it) },
                         {
                             viewModel.changeClothesType(it)
                             takePhotoFromCameraLauncher.launch()
@@ -160,18 +167,20 @@ fun StyleCreateScreen(navController: NavHostController, selectedDate: String) {
                     )
                 }
                 LoadingView(
-                    isLoading = isCreateStyleLoadingState || isCutOutLoadingState || isInsertStyleLoadingState
+                    isLoading = isCreateStyleLoadingState || isCutOutLoadingState || isInsertStyleLoadingState || isDeleteClothesLoadingState
                 )
             }
         }
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun CodiCanvas(
     modifier: Modifier,
     picture: Picture,
     clothesListState: List<Clothes>,
+    removeClothes: (Int) -> Unit
 ) {
     Box(
         modifier = modifier
@@ -195,7 +204,30 @@ fun CodiCanvas(
                 }
             }
     ) {
+        var removeClotheIndex by remember { mutableStateOf(9999) }
+        var showDialog by remember { mutableStateOf(false) }
         var zIndexCount by remember { mutableStateOf(1) }
+        if (showDialog) {
+            AlertDialog(
+                onDismissRequest = {},
+                text = { Text(stringResource(id = R.string.message_dialog_removee)) },
+                dismissButton = {
+                    Button(onClick = {
+                        showDialog = false
+                    }) {
+                        Text("CANCEL")
+                    }
+                },
+                confirmButton = {
+                    Button(onClick = {
+                        removeClothes(removeClotheIndex)
+                        showDialog = false
+                    }) {
+                        Text("OK")
+                    }
+                }
+            )
+        }
         clothesListState.forEachIndexed { index, clothes ->
             var scale by remember { mutableStateOf(1f) }
             var rotation by remember { mutableStateOf(0f) }
@@ -221,9 +253,13 @@ fun CodiCanvas(
                     )
                     .transformable(state = state)
                     .size(200.dp * scale)
-                    .clickable {
-                        zIndex = zIndexCount++.toFloat()
-                    }
+                    .combinedClickable(
+                        onLongClick = {
+                            removeClotheIndex = index
+                            showDialog = true
+                        },
+                        onClick = { zIndex = zIndexCount++.toFloat() }
+                    )
                     .zIndex(zIndex),
                 model = clothes.image,
                 contentDescription = null,
@@ -242,6 +278,7 @@ fun CodiCanvas(
 fun CodiItems(
     modifier: Modifier,
     clothesListState: List<Clothes>,
+    removeClothes: (Clothes) -> Unit,
     onAddButtonClick: (ClothesType) -> Unit,
     onCodiItemClick: (Clothes) -> Unit
 ) {
@@ -317,7 +354,9 @@ fun CodiItems(
                             onAddButtonClick(tabs[index])
                         }
                     } else {
-                        CodiItem(clothes = it) {
+                        CodiItem(clothes = it,
+                            { clothes -> removeClothes(clothes) }
+                        ) {
                             onCodiItemClick(it)
                         }
                     }
@@ -358,15 +397,41 @@ fun CodiItemAddButton(onClick: () -> Unit) {
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun CodiItem(clothes: Clothes, onClick: () -> Unit) {
+fun CodiItem(clothes: Clothes, removeClothes: (Clothes) -> Unit, onClick: () -> Unit) {
+    var showDialog by remember { mutableStateOf(false) }
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = {},
+            text = { Text(stringResource(id = R.string.message_dialog_removee)) },
+            dismissButton = {
+                Button(onClick = {
+                    showDialog = false
+                }) {
+                    Text("CANCEL")
+                }
+            },
+            confirmButton = {
+                Button(onClick = {
+                    removeClothes(clothes)
+                    showDialog = false
+                }) {
+                    Text("OK")
+                }
+            }
+        )
+    }
     Box(
         Modifier
             .size(100.dp)
             .padding(5.dp)
-            .clickable {
-                onClick()
-            }
+            .combinedClickable(
+                onLongClick = {
+                    showDialog = true
+                },
+                onClick = { onClick() }
+            )
     ) {
         AsyncImage(
             modifier = Modifier

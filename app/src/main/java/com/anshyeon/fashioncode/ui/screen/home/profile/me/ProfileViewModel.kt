@@ -188,6 +188,17 @@ class ProfileViewModel @Inject constructor(
         }
     }
 
+    fun deleteClothes(
+        clothes: Clothes,
+    ) {
+        viewModelScope.launch {
+            styleRepository.deleteClothes(clothes) {
+                _showSnackBar.value = true
+                _snackBarText.value = "잠시 후 다시 시도해 주십시오"
+            }
+        }
+    }
+
     fun dismissSnackBar() {
         _showSnackBar.value = false
     }
