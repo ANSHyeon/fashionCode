@@ -49,20 +49,21 @@
 
 <div align="center">
 
-| 게시물 작성 | 댓글 작성 | 대댓글 작성 |
-| :---------------: | :---------------: | :---------------: |
-| <img src="https://github.com/ANSHyeon/fashionCode/assets/127817240/e720cdd5-12f7-4f30-8420-c55931dfd616" align="center" width="250px"/> | <img src="https://github.com/ANSHyeon/fashionCode/assets/127817240/5418cfbe-e10a-4340-8b90-d59717f40f50" align="center" width="250px"/> | <img src="https://github.com/ANSHyeon/fashionCode/assets/127817240/1c9a4089-e98e-4faa-88fa-9aa58369c9f7" align="center" width="250px"/> |
+| 캘린더 | 옷장에 옷 추가 |
+| :---------------: | :---------------: |
+| <img src="https://github.com/ANSHyeon/fashionCode/assets/127817240/8aef4743-3b05-4eb6-b67f-7b04ddbb60e5" align="center" width="250px"/> | <img src="https://github.com/ANSHyeon/fashionCode/assets/127817240/510171fd-e1a4-4c45-8200-5be3039d3d8e" align="center" width="250px"/> |
 
 </div>
 
 
 <div align="center">
 
-| 캘린더 | 옷장에 옷 추가 |
-| :---------------: | :---------------: |
-| <img src="https://github.com/ANSHyeon/fashionCode/assets/127817240/8aef4743-3b05-4eb6-b67f-7b04ddbb60e5" align="center" width="250px"/> | <img src="https://github.com/ANSHyeon/fashionCode/assets/127817240/510171fd-e1a4-4c45-8200-5be3039d3d8e" align="center" width="250px"/> |
+| 게시물 작성 | 댓글 작성 | 대댓글 작성 |
+| :---------------: | :---------------: | :---------------: |
+| <img src="https://github.com/ANSHyeon/fashionCode/assets/127817240/e720cdd5-12f7-4f30-8420-c55931dfd616" align="center" width="250px"/> | <img src="https://github.com/ANSHyeon/fashionCode/assets/127817240/5418cfbe-e10a-4340-8b90-d59717f40f50" align="center" width="250px"/> | <img src="https://github.com/ANSHyeon/fashionCode/assets/127817240/1c9a4089-e98e-4faa-88fa-9aa58369c9f7" align="center" width="250px"/> |
 
 </div>
+
 
 <div align="center">
 
