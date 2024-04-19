@@ -21,10 +21,12 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onCompletion
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
@@ -57,7 +59,7 @@ class CommunityDetailViewModel @AssistedInject constructor(
     private val _isCreateCommentLoading = MutableStateFlow(false)
     val isCreateCommentLoading: StateFlow<Boolean> = _isCreateCommentLoading
 
-    private val _isGetCommentListLoading = MutableStateFlow(false)
+    private val _isGetCommentListLoading = MutableStateFlow(true)
     val isGetCommentListLoading: StateFlow<Boolean> = _isGetCommentListLoading
 
     private val _isGetPostComplete = MutableStateFlow(false)
@@ -72,38 +74,42 @@ class CommunityDetailViewModel @AssistedInject constructor(
     private val _showSnackBar = MutableStateFlow(false)
     val showSnackBar: StateFlow<Boolean> = _showSnackBar
 
-    private fun getCommentList(postId: String) {
-        _isGetCommentListLoading.value = true
-        viewModelScope.launch {
-            transformCommentList(postId).map {
-                val commentListWithReply = viewModelScope.async {
-                    it.map { comment ->
-                        viewModelScope.async {
-                            val tempReplyList = mutableListOf<Reply>()
-                            val response = replyRepository.getReplyList(
-                                viewModelScope,
-                                comment.commentId,
-                                {},
-                                {}
-                            )
-                            response.collectLatest { replys ->
-                                tempReplyList.addAll(replys)
-                            }
-                            comment.copy(
-                                replyList = tempReplyList.sortedBy { reply -> reply.createdDate }
-                                    .toList()
-                            )
-                        }
-                    }
-                }
-                commentListWithReply.await().map { it.await() }
-            }.onCompletion {
-                _isGetCommentListLoading.value = false
-                _isGetCommentListComplete.value = true
-            }.collectLatest {
-                _commentList.value = it
+    init {
+        getPost(postId)
+    }
+
+    val commentList = transformCommentList(postId).map {
+        val commentListWithReply = viewModelScope.async {
+            it.map { comment ->
+                getCommentWithReplysJob(comment)
             }
         }
+        commentListWithReply.await().map { it.await() }
+    }.onCompletion {
+        _isGetCommentListLoading.value = false
+        _isGetCommentListComplete.value = true
+        _addedCommentList.value = emptyList()
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(500),
+        initialValue = emptyList()
+    )
+
+    private fun getCommentWithReplysJob(comment: Comment) = viewModelScope.async {
+        val tempReplyList = mutableListOf<Reply>()
+        val response = replyRepository.getReplyList(
+            viewModelScope,
+            comment.commentId,
+            {},
+            {}
+        )
+        response.collectLatest { replys ->
+            tempReplyList.addAll(replys)
+        }
+        comment.copy(
+            replyList = tempReplyList.sortedBy { reply -> reply.createdDate }
+                .toList()
+        )
     }
 
     private fun transformCommentList(postId: String): Flow<List<Comment>> {
@@ -162,9 +168,6 @@ class CommunityDetailViewModel @AssistedInject constructor(
             response.collectLatest {
                 it.onSuccess { post ->
                     _post.value = post
-                    if (post.commentList.isNotEmpty()) {
-                        getCommentList(post.postId)
-                    }
                 }
             }
         }
@@ -176,15 +179,6 @@ class CommunityDetailViewModel @AssistedInject constructor(
 
     fun dismissSnackBar() {
         _showSnackBar.value = false
-    }
-
-    fun setPostId(newPostId: String) {
-        val isFirst = postId == null
-        postId = newPostId
-        if (isFirst) {
-            getPost(postId!!)
-            getCommentList(postId!!)
-        }
     }
 
     fun navigateCommunityReply(navController: NavHostController, comment: Comment) {
