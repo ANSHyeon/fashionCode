@@ -14,6 +14,9 @@ import com.anshyeon.fashioncode.network.extentions.onException
 import com.anshyeon.fashioncode.network.extentions.onSuccess
 import com.anshyeon.fashioncode.ui.graph.DetailHomeScreen
 import com.anshyeon.fashioncode.util.SerializationUtils
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
@@ -25,25 +28,25 @@ import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.launch
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
-import javax.inject.Inject
 
-@HiltViewModel
-class CommunityDetailViewModel @Inject constructor(
+@HiltViewModel(assistedFactory = CommunityDetailViewModel.Factory::class)
+class CommunityDetailViewModel @AssistedInject constructor(
+    @Assisted private val postId: String,
     private val postRepository: PostRepository,
     private val commentRepository: CommentRepository,
     private val replyRepository: ReplyRepository,
 ) : ViewModel() {
 
-    private var postId: String? = null
+    @AssistedFactory
+    interface Factory {
+        fun create(postId: String): CommunityDetailViewModel
+    }
 
     private val _post = MutableStateFlow<Post?>(null)
     var post: StateFlow<Post?> = _post
 
     private val _commentBody = MutableStateFlow("")
     var commentBody: StateFlow<String> = _commentBody
-
-    private val _commentList = MutableStateFlow<List<Comment>>(emptyList())
-    var commentList: StateFlow<List<Comment>> = _commentList
 
     private val _addedCommentList = MutableStateFlow<List<Comment>>(emptyList())
     var addedCommentList: StateFlow<List<Comment>> = _addedCommentList
