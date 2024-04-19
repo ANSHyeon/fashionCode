@@ -92,19 +92,19 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_19
+        targetCompatibility = JavaVersion.VERSION_19
     }
 
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_17.toString()
+        jvmTarget = JavaVersion.VERSION_19.toString()
     }
     buildFeatures {
         compose = true
         buildConfig = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.4.3"
+        kotlinCompilerExtensionVersion = "1.5.8"
     }
     packaging {
         resources {
@@ -141,10 +141,10 @@ dependencies {
     implementation("androidx.navigation:navigation-dynamic-features-fragment:2.5.3")
 
     // Hilt
-    implementation("com.google.dagger:hilt-android:2.48.1")
-    implementation("androidx.hilt:hilt-navigation-fragment:1.1.0")
-    kapt("com.google.dagger:hilt-android-compiler:2.48.1")
-    implementation("androidx.hilt:hilt-navigation-compose:1.1.0-alpha01")
+    implementation("com.google.dagger:hilt-android:2.49")
+    kapt("com.google.dagger:hilt-android-compiler:2.49")
+    implementation("androidx.hilt:hilt-navigation-fragment:1.2.0")
+    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
 
     //Firebase
     implementation(platform("com.google.firebase:firebase-bom:32.7.3"))
@@ -172,7 +172,7 @@ dependencies {
     implementation("com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter:0.8.0")
 
     // Room
-    implementation("androidx.room:room-runtime:2.5.0")
-    implementation("androidx.room:room-ktx:2.5.0")
-    ksp("androidx.room:room-compiler:2.5.0")
+    implementation("androidx.room:room-runtime:2.6.1")
+    implementation("androidx.room:room-ktx:2.6.1")
+    ksp("androidx.room:room-compiler:2.6.1")
 }
