@@ -1,52 +1,33 @@
 # FashionCode
 
+## 프로젝트 소개
 
 
-# 기술스택
-- Architecture
-   * MVVM
 
-- Jetpack
-   * Compose
-   * ViewModel
-   * Navigation
-   * Room
-
-- Kotlin Coroutine
-  
-- Network
-   * Retrofit
-   * OkHttp3
-     
-- JSON
-   * Kotlin Serialization
-    
-- Image Loading
-   * Coil
-     
- - DI
-   * Hilt
-     
- - Firebase
-   * Auth
-   * Realtime DB
-   * Storage
-     
-- Open API
-   * Adobe PhotoShop API
+## 기술스택
 
 
-# 주요 기능
 
+
+## 배운점? 고민한점?
+
+
+
+
+## 기능소개
+
+
+### 스타일
 <div align="center">
 
-| 로그인 | 스타일 상세 | 스타일 생성 |
-| :---------------: | :---------------: | :---------------: |
-| <img src="https://github.com/ANSHyeon/fashionCode/assets/127817240/23e0e2cd-b9df-4537-8f1e-bb9328c4c441" align="center" width="250px"/> | <img src="https://github.com/ANSHyeon/fashionCode/assets/127817240/5483af12-702d-4d90-a0dc-149d26cd111e" align="center" width="250px"/> | <img src="https://github.com/ANSHyeon/fashionCode/assets/127817240/c8a74bc5-51c8-47ab-ad0b-6d4f28913b82" align="center" width="250px"/> |
+| 스타일 상세 | 스타일 생성 |
+| :---------------: | :---------------: |
+| <img src="https://github.com/ANSHyeon/fashionCode/assets/127817240/5483af12-702d-4d90-a0dc-149d26cd111e" align="center" width="250px"/> | <img src="https://github.com/ANSHyeon/fashionCode/assets/127817240/c8a74bc5-51c8-47ab-ad0b-6d4f28913b82" align="center" width="250px"/> |
 
-</div>!
+</div>
 
 
+### 캘린더
 <div align="center">
 
 | 캘린더 | 옷장에 옷 추가 |
@@ -56,6 +37,7 @@
 </div>
 
 
+### 커뮤니티
 <div align="center">
 
 | 게시물 작성 | 댓글 작성 | 대댓글 작성 |
@@ -65,6 +47,7 @@
 </div>
 
 
+### 유저
 <div align="center">
 
 | 마이페이지 | 팔로우 | 프로필 수정 |
