@@ -94,18 +94,13 @@ class ProfileViewModel @Inject constructor(
     fun cutoutImage(context: Context, bitmap: Bitmap) {
         _isCutOutLoading.value = true
         viewModelScope.launch {
-            val getDropBoxTokenJob = viewModelScope.async {
-                styleRepository.getDropBoxToken()
-            }
-            val dropboxToken = getDropBoxTokenJob.await()
             val getDropBoxLinkJob = viewModelScope.async {
-                styleRepository.getDropBoxLink(dropboxToken, bitmap)
+                styleRepository.getDropBoxLink(bitmap)
             }
             val (dropBoxLink, path) = getDropBoxLinkJob.await()
 
             styleRepository.createClothes(
                 currentClothesType,
-                dropboxToken,
                 dropBoxLink,
                 path,
                 context

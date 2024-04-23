@@ -3,14 +3,14 @@ package com.anshyeon.fashioncode.data.repository
 import com.anshyeon.fashioncode.BuildConfig
 import com.anshyeon.fashioncode.data.datastore.DataStore
 import com.anshyeon.fashioncode.network.AdobeLoginApiClient
-import com.anshyeon.fashioncode.network.DropboxApiClient
+import com.anshyeon.fashioncode.network.DropBoxLoginApiClient
 import com.anshyeon.fashioncode.network.extentions.onSuccess
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 class TokenRepository @Inject constructor(
     private val adobeLoginApiClient: AdobeLoginApiClient,
-    private val dropBoxApiClient: DropboxApiClient,
+    private val dropBoxLoginApiClient: DropBoxLoginApiClient,
     private val dataStore: DataStore,
 ) {
 
@@ -24,6 +24,10 @@ class TokenRepository @Inject constructor(
 
     suspend fun getAdobeToken(): Flow<String> {
         return dataStore.getAdobeToken()
+    }
+
+    suspend fun getDropBoxToken(): Flow<String> {
+        return dataStore.getDropBoxToken()
     }
 
     suspend fun getAdobeRefreshToken(): String? {
@@ -48,7 +52,7 @@ class TokenRepository @Inject constructor(
     suspend fun getDropBoxRefreshToken(): String? {
         var result: String? = null
         return try {
-            val response = dropBoxApiClient.getDropBoxToken(
+            val response = dropBoxLoginApiClient.getDropBoxToken(
                 "refresh_token",
                 BuildConfig.DROPBOX_REFRESH_TOKEN,
                 BuildConfig.DROPBOX_APP_KEY,
