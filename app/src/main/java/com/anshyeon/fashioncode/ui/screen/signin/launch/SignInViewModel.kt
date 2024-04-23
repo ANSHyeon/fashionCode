@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import com.anshyeon.fashioncode.MainActivity
 import com.anshyeon.fashioncode.data.repository.AuthRepository
+import com.anshyeon.fashioncode.data.repository.TokenRepository
 import com.anshyeon.fashioncode.network.extentions.onError
 import com.anshyeon.fashioncode.network.extentions.onException
 import com.anshyeon.fashioncode.network.extentions.onSuccess
@@ -20,7 +21,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SignInViewModel @Inject constructor(
-    private val repository: AuthRepository
+    private val authRepository: AuthRepository,
+    private val tokenRepository: TokenRepository,
 ) : ViewModel() {
 
     private val _isLoading = MutableStateFlow(false)
@@ -35,7 +37,7 @@ class SignInViewModel @Inject constructor(
     fun getUserInfo(context: Context, navController: NavController) {
         _isLoading.value = true
         viewModelScope.launch {
-            val result = repository.getUser()
+            val result = authRepository.getUser()
             result.onSuccess {
                 if (it.values.isNotEmpty()) {
                     val user = it.values.first()
@@ -59,10 +61,22 @@ class SignInViewModel @Inject constructor(
     }
 
     private suspend fun saveUserInfo(context: Context, nickName: String, url: String?) {
-        val getSaveIdToken = viewModelScope.async {
-            repository.saveUserInfo(nickName, url)
+        val saveIdTokenJob = viewModelScope.async {
+            authRepository.saveUserInfo(nickName, url)
         }
-        getSaveIdToken.await()
+        val saveImageTokenJob = viewModelScope.async {
+            val getDropBoxTokenJob = viewModelScope.async {
+                tokenRepository.getDropBoxToken()
+            }
+            val getAdobeTokenJob = viewModelScope.async {
+                tokenRepository.getAdobeLoginToken()
+            }
+            val dropboxToken = getDropBoxTokenJob.await()
+            val adobeToken = getAdobeTokenJob.await()
+            tokenRepository.saveImageToken(adobeToken, dropboxToken)
+        }
+        saveIdTokenJob.await()
+        saveImageTokenJob.await()
         context.startActivity(Intent(context, MainActivity::class.java))
     }
 
