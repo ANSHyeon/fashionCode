@@ -71,7 +71,7 @@ class SignInViewModel @Inject constructor(
         }
         val getAdobeTokenJob = viewModelScope.async {
             val token = tokenRepository.getAdobeRefreshToken()
-            tokenRepository.saveAdobeToken("zzzzzzzzzzzzzzzzzzzzzzzzzz")
+            tokenRepository.saveAdobeToken(token)
         }
         getDropBoxTokenJob.await()
         getAdobeTokenJob.await()

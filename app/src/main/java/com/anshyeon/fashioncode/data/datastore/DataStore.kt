@@ -34,7 +34,7 @@ class DataStore @Inject constructor(
     }
 
     suspend fun saveDropBoxToken(dropBoxToken: String) {
-        context.adobeTokenDataStore.edit { prefs ->
+        context.dropBoxTokenDataStore.edit { prefs ->
             prefs[PreferenceKeys.DROPBOX_ACCESS_TOKEN] = dropBoxToken
         }
     }
