@@ -13,11 +13,15 @@ class TokenRepository @Inject constructor(
     private val dataStore: DataStore,
 ) {
 
-    suspend fun saveImageToken(adobeToken: String?, dropBoxToken: String?) {
-        dataStore.saveToken(adobeToken ?: "", dropBoxToken ?: "")
+    suspend fun saveAdobeToken(adobeToken: String?) {
+        dataStore.saveAdobeToken(adobeToken ?: "")
     }
 
-    suspend fun getAdobeLoginToken(): String? {
+    suspend fun saveDropBoxToken(dropBoxToken: String?) {
+        dataStore.saveDropBoxToken(dropBoxToken ?: "")
+    }
+
+    suspend fun getAdobeRefreshToken(): String? {
         var result: String? = null
         return try {
             val response = adobeLoginApiClient.getAdobeToken(
@@ -36,7 +40,7 @@ class TokenRepository @Inject constructor(
         }
     }
 
-    suspend fun getDropBoxToken(): String? {
+    suspend fun getDropBoxRefreshToken(): String? {
         var result: String? = null
         return try {
             val response = dropBoxApiClient.getDropBoxToken(

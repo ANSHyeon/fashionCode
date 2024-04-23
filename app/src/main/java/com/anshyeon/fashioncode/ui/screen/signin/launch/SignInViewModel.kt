@@ -64,19 +64,19 @@ class SignInViewModel @Inject constructor(
         val saveIdTokenJob = viewModelScope.async {
             authRepository.saveUserInfo(nickName, url)
         }
-        val saveImageTokenJob = viewModelScope.async {
-            val getDropBoxTokenJob = viewModelScope.async {
-                tokenRepository.getDropBoxToken()
-            }
-            val getAdobeTokenJob = viewModelScope.async {
-                tokenRepository.getAdobeLoginToken()
-            }
-            val dropboxToken = getDropBoxTokenJob.await()
-            val adobeToken = getAdobeTokenJob.await()
-            tokenRepository.saveImageToken(adobeToken, dropboxToken)
+
+        val getDropBoxTokenJob = viewModelScope.async {
+            val token = tokenRepository.getDropBoxRefreshToken()
+            tokenRepository.saveDropBoxToken(token)
         }
+        val getAdobeTokenJob = viewModelScope.async {
+            val token = tokenRepository.getAdobeRefreshToken()
+            tokenRepository.saveAdobeToken("zzzzzzzzzzzzzzzzzzzzzzzzzz")
+        }
+        getDropBoxTokenJob.await()
+        getAdobeTokenJob.await()
         saveIdTokenJob.await()
-        saveImageTokenJob.await()
+
         context.startActivity(Intent(context, MainActivity::class.java))
     }
 

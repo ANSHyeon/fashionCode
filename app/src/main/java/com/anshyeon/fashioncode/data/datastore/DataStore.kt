@@ -24,17 +24,23 @@ class DataStore @Inject constructor(
         val DROPBOX_ACCESS_TOKEN = stringPreferencesKey("dropbox_access_token")
     }
 
-    private val Context.tokenDataStore by preferencesDataStore(Constants.TOKEN_DATASTORE_NAME)
+    private val Context.adobeTokenDataStore by preferencesDataStore(Constants.ADOBE_TOKEN_DATASTORE_NAME)
+    private val Context.dropBoxTokenDataStore by preferencesDataStore(Constants.DROPBOX_TOKEN_DATASTORE_NAME)
 
-    suspend fun saveToken(adobeToken: String, dropBoxToken: String) {
-        context.tokenDataStore.edit { prefs ->
+    suspend fun saveAdobeToken(adobeToken: String) {
+        context.adobeTokenDataStore.edit { prefs ->
             prefs[PreferenceKeys.ADOBE_ACCESS_TOKEN] = adobeToken
+        }
+    }
+
+    suspend fun saveDropBoxToken(dropBoxToken: String) {
+        context.adobeTokenDataStore.edit { prefs ->
             prefs[PreferenceKeys.DROPBOX_ACCESS_TOKEN] = dropBoxToken
         }
     }
 
-    suspend fun getToken(): Flow<List<String>> {
-        return context.tokenDataStore.data
+    suspend fun getAdobeToken(): Flow<String> {
+        return context.adobeTokenDataStore.data
             .catch { exception ->
                 if (exception is IOException) {
                     exception.printStackTrace()
@@ -44,9 +50,22 @@ class DataStore @Inject constructor(
                 }
             }
             .map { prefs ->
-                prefs.asMap().values.toList().map {
-                    it.toString()
+                prefs[PreferenceKeys.ADOBE_ACCESS_TOKEN] ?: ""
+            }
+    }
+
+    suspend fun getDropBoxToken(): Flow<String> {
+        return context.dropBoxTokenDataStore.data
+            .catch { exception ->
+                if (exception is IOException) {
+                    exception.printStackTrace()
+                    emit(emptyPreferences())
+                } else {
+                    throw exception
                 }
+            }
+            .map { prefs ->
+                prefs[PreferenceKeys.DROPBOX_ACCESS_TOKEN] ?: ""
             }
     }
 }

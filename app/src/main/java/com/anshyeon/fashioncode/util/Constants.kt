@@ -7,5 +7,6 @@ object Constants {
     const val KEY_USER_NICKNAME = "user_nick_name"
     const val KEY_USER_PROFILE_URL = "user_profile_url"
     const val DATABASE_NAME = "fashionCode_database"
-    const val TOKEN_DATASTORE_NAME = "token_datastore"
+    const val ADOBE_TOKEN_DATASTORE_NAME = "adobe_token_datastore"
+    const val DROPBOX_TOKEN_DATASTORE_NAME = "dropbox_token_datastore"
 }

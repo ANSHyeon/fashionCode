@@ -55,20 +55,18 @@ class InfoInputViewModel @Inject constructor(
                 val saveIdToken = async {
                     authRepository.saveUserInfo(nickName.value, null)
                 }
-                val saveImageTokenJob = viewModelScope.async {
-                    val getDropBoxTokenJob = viewModelScope.async {
-                        tokenRepository.getDropBoxToken()
-                    }
-                    val getAdobeTokenJob = viewModelScope.async {
-                        tokenRepository.getAdobeLoginToken()
-                    }
-                    val dropboxToken = getDropBoxTokenJob.await()
-                    val adobeToken = getAdobeTokenJob.await()
-                    tokenRepository.saveImageToken(adobeToken, dropboxToken)
+                val getDropBoxTokenJob = viewModelScope.async {
+                    val token = tokenRepository.getDropBoxRefreshToken()
+                    tokenRepository.saveDropBoxToken(token)
+                }
+                val getAdobeTokenJob = viewModelScope.async {
+                    val token = tokenRepository.getAdobeRefreshToken()
+                    tokenRepository.saveAdobeToken(token)
                 }
 
                 saveIdToken.await()
-                saveImageTokenJob.await()
+                getDropBoxTokenJob.await()
+                getAdobeTokenJob.await()
                 val intent = Intent(context, MainActivity::class.java).apply {
                     addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
                     addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
