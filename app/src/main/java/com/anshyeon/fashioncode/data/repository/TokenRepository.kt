@@ -5,6 +5,7 @@ import com.anshyeon.fashioncode.data.datastore.DataStore
 import com.anshyeon.fashioncode.network.AdobeLoginApiClient
 import com.anshyeon.fashioncode.network.DropboxApiClient
 import com.anshyeon.fashioncode.network.extentions.onSuccess
+import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 class TokenRepository @Inject constructor(
@@ -19,6 +20,10 @@ class TokenRepository @Inject constructor(
 
     suspend fun saveDropBoxToken(dropBoxToken: String?) {
         dataStore.saveDropBoxToken(dropBoxToken ?: "")
+    }
+
+    suspend fun getAdobeToken(): Flow<String> {
+        return dataStore.getAdobeToken()
     }
 
     suspend fun getAdobeRefreshToken(): String? {

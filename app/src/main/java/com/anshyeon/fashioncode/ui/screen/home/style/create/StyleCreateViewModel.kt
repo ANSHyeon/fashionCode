@@ -77,19 +77,14 @@ class StyleCreateViewModel @Inject constructor(
             val getDropBoxTokenJob = viewModelScope.async {
                 styleRepository.getDropBoxToken()
             }
-            val getAdobeTokenJob = viewModelScope.async {
-                styleRepository.getAdobeLoginToken()
-            }
             val dropboxToken = getDropBoxTokenJob.await()
             val getDropBoxLinkJob = viewModelScope.async {
                 styleRepository.getDropBoxLink(dropboxToken, bitmap)
             }
-            val adobeToken = getAdobeTokenJob.await()
             val (dropBoxLink, path) = getDropBoxLinkJob.await()
 
             styleRepository.createClothes(
                 currentClothesType,
-                adobeToken,
                 dropboxToken,
                 dropBoxLink,
                 path,

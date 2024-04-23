@@ -1,6 +1,7 @@
 package com.anshyeon.fashioncode.di
 
 import com.anshyeon.fashioncode.BuildConfig
+import com.anshyeon.fashioncode.data.interceptror.AdobeTokenInterceptor
 import com.anshyeon.fashioncode.network.DropboxApiClient
 import com.anshyeon.fashioncode.network.AdobeApiClient
 import com.anshyeon.fashioncode.network.AdobeLoginApiClient
@@ -80,10 +81,14 @@ object NetworkModule {
     @AdobeRetrofit
     @Singleton
     @Provides
-    fun provideAdobeRetrofit(client: OkHttpClient, json: Json): Retrofit {
+    fun provideAdobeRetrofit(
+        client: OkHttpClient, json: Json,
+        adobeTokenInterceptor: AdobeTokenInterceptor
+    ): Retrofit {
+        val newClient = client.newBuilder().addInterceptor(adobeTokenInterceptor).authenticator(adobeTokenInterceptor).build()
         return Retrofit.Builder()
             .baseUrl(BuildConfig.ADOBE_PHOTOSHOP_URL)
-            .client(client)
+            .client(newClient)
             .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
             .addCallAdapterFactory(ApiCallAdapterFactory.create())
             .build()

@@ -79,7 +79,6 @@ class StyleRepository @Inject constructor(
 
     suspend fun createClothes(
         currentClothesType: ClothesType,
-        adobeToken: String?,
         dropBoxToken: String?,
         dropBoxLink: String?,
         path: String?,
@@ -93,7 +92,6 @@ class StyleRepository @Inject constructor(
                 AdobeOutPut(dropBoxLink ?: "", "dropbox")
             )
             val response = adobeApiClient.cutoutImage(
-                "Bearer ${adobeToken}",
                 BuildConfig.ADOBE_CLIENT_ID,
                 "application/json",
                 adobeRequestBody
@@ -118,25 +116,6 @@ class StyleRepository @Inject constructor(
             }
         } catch (e: Exception) {
             onError()
-        }
-    }
-
-    suspend fun getAdobeLoginToken(): String? {
-        var result: String? = null
-        return try {
-            val response = adobeLoginApiClient.getAdobeToken(
-                "application/x-www-form-urlencoded",
-                "client_credentials",
-                BuildConfig.ADOBE_CLIENT_ID,
-                BuildConfig.ADOBE_CLIENT_SECRET,
-                "openid,AdobeID,read_organizations"
-            )
-            response.onSuccess {
-                result = it.accessToken
-            }
-            result
-        } catch (e: Exception) {
-            result
         }
     }
 
