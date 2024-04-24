@@ -1,8 +1,19 @@
 # FashionCode
 
-## 프로젝트 소개
+## ✨ 프로젝트 소개
 
-추가 예정
+자신이 소유한 옷으로 스타일을 코디하고 공유하는  SNS 앱.
+
+
+## 💡 프로젝트 동기
+
+Jetpack Compose를 사용하는 것을 가장 큰 목적으로 프로젝트를 진행했습니다.
+
+공식문서를 통해 기존 Xml 방식과 달리 선언형 UI인 Compose를 사용 시 간략하고 직관적이며 빠른 개발이 가능하다는 내용을 확인했습니다. 
+
+기본적으로 지원하는 Composable 함수들 외에도 커스텀 UI를 구현하고 싶었고, 이미지를 이동하고 회전하며 확대/축소하는 기능과 UI에 보여지는 우선순위를 변경하는 경험을 하고 싶었습니다.
+
+이러한 과정을 통해 Compose의 상태관리와 Recomposition에 대해 이해하고자 했습니다.
 
 ## 📚 기술스택
 
@@ -20,10 +31,7 @@
 
 ## 💬 배운점
 
-1. Compose 적용
-   - 수정 예정
-
-2. 공식문서만으로 기능 구현
+1. 공식문서만으로 기능 구현
    - 이미지 background remove 기능을 사용하기 위한 APi로 Remove.bg API와 Adobe Photoshop API 2개가 있었습니다.
    - Remove.bg API는 안드로이드 SDK가 제공되고 관련 가이드 자료도 풍부했지만 월 50회만 무료였습니다.
    - Adobe Photoshop API는 월 5,000회 무료라는 장점이 있지만 Android SDK가 제공되지 않고 REST API만 제공됐으며, 관련 자료도 공식문서 뿐이였습니다.
@@ -31,13 +39,13 @@
    - API를 사용하기 위해서는 Token이 필요했는데 Console에서 생성할 수 있는 Token은 24시간의 유효기간을 가져 Token을 갱신하는 요청과 Refresh Token을 발급받는 방법을 공식문서를 살펴보며 찾았습니다.
    - 공식문서는 문어체와 함께 대명사가 많아 이해하기 어려울 것이라 생각했지만 이번 경험을 통해 자신감을 얻을 수 있었습니다.
   
-3. 만료된 AccessToken 갱신 구현
+2. 만료된 AccessToken 갱신 구현
    - Adobe Photoshop API와 DropBox API를 사용하면서 Access Token이 만료되어 갱신해야하는 문제가 발생했습니다.
    - API 요청시 마다 새로운 Token을 발급 받을 수도 있었지만 불필요한 리소스가 소모된다고 생각했습니다.
    - Retrofit을 이용한 통신 시 Header를 변경해야 했기에 Interceptor에 관한 키워드로 내용을 찾은 결과 Authenticator를 사용해 해결할 수 있다는 내용을 확인했습니다.
    - Authenticator를 사용해 runBlocking으로 스레드를 잠시 막고, Token 갱신요청에 대한 응답이 오면 Interceptor로 Header를 추가해 이전 요청을 다시 하도록 구현해 해결했습니다.
 
-4. Hilt AssistedInject - 런타임 주입
+3. Hilt AssistedInject - 런타임 주입
    - 게시물 상세 화면에서 getPost() 함수는 viewModel이 생성될 때 한번만 동작하도록 구현하고자 했습니다.
    - 그런데 이때 필요한 변수 ‘postId’는 이전 화면에서 navigate시 argument로 Composable에 전달됐습니다.
    - 그렇기에 ViewModel 생성 시 parameter를 전달할 필요가 있어 런타임 주입을 구현했습니다.
