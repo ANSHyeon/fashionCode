@@ -18,7 +18,6 @@ import com.anshyeon.fashioncode.data.model.DropBoxRequestBody
 import com.anshyeon.fashioncode.data.model.LocalStyle
 import com.anshyeon.fashioncode.data.model.Style
 import com.anshyeon.fashioncode.network.AdobeApiClient
-import com.anshyeon.fashioncode.network.AdobeLoginApiClient
 import com.anshyeon.fashioncode.network.DropboxApiClient
 import com.anshyeon.fashioncode.network.FireBaseApiClient
 import com.anshyeon.fashioncode.network.extentions.onError
@@ -39,7 +38,6 @@ import javax.inject.Inject
 
 class StyleRepository @Inject constructor(
     private val adobeApiClient: AdobeApiClient,
-    private val adobeLoginApiClient: AdobeLoginApiClient,
     private val dropBoxApiClient: DropboxApiClient,
     private val fireBaseApiClient: FireBaseApiClient,
     private val imageDataSource: ImageDataSource,
@@ -48,7 +46,7 @@ class StyleRepository @Inject constructor(
     private val styleDao: StyleDao,
 ) {
 
-    suspend fun getDropBoxLink(token: String?, bitmap: Bitmap): List<String?> {
+    suspend fun getDropBoxLink(bitmap: Bitmap): List<String?> {
         val imageLocation = imageDataSource.uploadBitMap(bitmap)
         val path = imageLocation.substringAfterLast("images/clothes_")
         val dropBoxRequestBody = DropBoxRequestBody(
@@ -64,7 +62,6 @@ class StyleRepository @Inject constructor(
         var result: String? = null
         return try {
             val response = dropBoxApiClient.getDropBoxLink(
-                "Bearer ${token}",
                 "application/json",
                 dropBoxRequestBody
             )
@@ -79,8 +76,6 @@ class StyleRepository @Inject constructor(
 
     suspend fun createClothes(
         currentClothesType: ClothesType,
-        adobeToken: String?,
-        dropBoxToken: String?,
         dropBoxLink: String?,
         path: String?,
         context: Context,
@@ -93,14 +88,13 @@ class StyleRepository @Inject constructor(
                 AdobeOutPut(dropBoxLink ?: "", "dropbox")
             )
             val response = adobeApiClient.cutoutImage(
-                "Bearer ${adobeToken}",
                 BuildConfig.ADOBE_CLIENT_ID,
                 "application/json",
                 adobeRequestBody
             )
             response.onSuccess {
                 delay(8000)
-                val result = getDropBoxImage(dropBoxToken, path)
+                val result = getDropBoxImage(path)
                 result?.let { imageUri ->
                     val userId = userDataSource.getUserId()
                     val clothes = Clothes(
@@ -121,51 +115,13 @@ class StyleRepository @Inject constructor(
         }
     }
 
-    suspend fun getAdobeLoginToken(): String? {
-        var result: String? = null
-        return try {
-            val response = adobeLoginApiClient.getAdobeToken(
-                "application/x-www-form-urlencoded",
-                "client_credentials",
-                BuildConfig.ADOBE_CLIENT_ID,
-                BuildConfig.ADOBE_CLIENT_SECRET,
-                "openid,AdobeID,read_organizations"
-            )
-            response.onSuccess {
-                result = it.accessToken
-            }
-            result
-        } catch (e: Exception) {
-            result
-        }
-    }
-
-    suspend fun getDropBoxToken(): String? {
-        var result: String? = null
-        return try {
-            val response = dropBoxApiClient.getDropBoxToken(
-                "refresh_token",
-                BuildConfig.DROPBOX_REFRESH_TOKEN,
-                BuildConfig.DROPBOX_APP_KEY,
-                BuildConfig.DROPBOX_APP_SECRET
-            )
-            response.onSuccess {
-                result = it.accessToken
-            }
-            result
-        } catch (e: Exception) {
-            result
-        }
-    }
-
-    suspend fun getDropBoxImage(token: String?, path: String?): String? {
+    private suspend fun getDropBoxImage(path: String?): String? {
         var result: String? = null
         return try {
             val requestBody = DropBoxDownloadRequestBody(
                 "/adobe/${path}.png"
             )
             val response = dropBoxApiClient.getDropBoxDownloadLink(
-                "Bearer ${token}",
                 "application/json",
                 requestBody
             )

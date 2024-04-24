@@ -11,7 +11,6 @@ interface AdobeApiClient {
 
     @POST("sensei/cutout")
     suspend fun cutoutImage(
-        @Header("Authorization") authorization: String,
         @Header("x-api-key") apiKey: String,
         @Header("content-type") contentType: String,
         @Body requestBody: AdobeRequestBody

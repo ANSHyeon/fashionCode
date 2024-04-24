@@ -1,10 +1,13 @@
 package com.anshyeon.fashioncode.di
 
 import com.anshyeon.fashioncode.BuildConfig
+import com.anshyeon.fashioncode.data.interceptror.AdobeTokenInterceptor
+import com.anshyeon.fashioncode.data.interceptror.DropBoxTokenInterceptor
 import com.anshyeon.fashioncode.network.DropboxApiClient
 import com.anshyeon.fashioncode.network.AdobeApiClient
 import com.anshyeon.fashioncode.network.AdobeLoginApiClient
 import com.anshyeon.fashioncode.network.ApiCallAdapterFactory
+import com.anshyeon.fashioncode.network.DropBoxLoginApiClient
 import com.anshyeon.fashioncode.network.FireBaseApiClient
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import dagger.Module
@@ -34,6 +37,10 @@ annotation class AdobeLoginRetrofit
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
 annotation class DropBoxRetrofit
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class DropBoxLoginRetrofit
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -80,10 +87,14 @@ object NetworkModule {
     @AdobeRetrofit
     @Singleton
     @Provides
-    fun provideAdobeRetrofit(client: OkHttpClient, json: Json): Retrofit {
+    fun provideAdobeRetrofit(
+        client: OkHttpClient, json: Json,
+        adobeTokenInterceptor: AdobeTokenInterceptor
+    ): Retrofit {
+        val newClient = client.newBuilder().addInterceptor(adobeTokenInterceptor).authenticator(adobeTokenInterceptor).build()
         return Retrofit.Builder()
             .baseUrl(BuildConfig.ADOBE_PHOTOSHOP_URL)
-            .client(client)
+            .client(newClient)
             .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
             .addCallAdapterFactory(ApiCallAdapterFactory.create())
             .build()
@@ -98,10 +109,14 @@ object NetworkModule {
     @DropBoxRetrofit
     @Singleton
     @Provides
-    fun provideDropBoxRetrofit(client: OkHttpClient, json: Json): Retrofit {
+    fun provideDropBoxRetrofit(
+        client: OkHttpClient, json: Json,
+        dropBoxTokenInterceptor: DropBoxTokenInterceptor
+    ): Retrofit {
+        val newClient = client.newBuilder().addInterceptor(dropBoxTokenInterceptor).authenticator(dropBoxTokenInterceptor).build()
         return Retrofit.Builder()
             .baseUrl(BuildConfig.DROPBOX_URL)
-            .client(client)
+            .client(newClient)
             .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
             .addCallAdapterFactory(ApiCallAdapterFactory.create())
             .build()
@@ -129,5 +144,23 @@ object NetworkModule {
     @Provides
     fun provideAdobeLoginClient(@AdobeLoginRetrofit retrofit: Retrofit): AdobeLoginApiClient {
         return retrofit.create(AdobeLoginApiClient::class.java)
+    }
+
+    @DropBoxLoginRetrofit
+    @Singleton
+    @Provides
+    fun provideDropBoxLoginRetrofit(client: OkHttpClient, json: Json): Retrofit {
+        return Retrofit.Builder()
+            .baseUrl(BuildConfig.DROPBOX_URL)
+            .client(client)
+            .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
+            .addCallAdapterFactory(ApiCallAdapterFactory.create())
+            .build()
+    }
+
+    @Singleton
+    @Provides
+    fun provideDropBoxLoginClient(@DropBoxLoginRetrofit retrofit: Retrofit): DropBoxLoginApiClient {
+        return retrofit.create(DropBoxLoginApiClient::class.java)
     }
 }

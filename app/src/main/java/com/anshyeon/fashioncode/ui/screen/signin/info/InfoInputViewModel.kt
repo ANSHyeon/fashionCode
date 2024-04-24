@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.anshyeon.fashioncode.MainActivity
 import com.anshyeon.fashioncode.data.repository.AuthRepository
+import com.anshyeon.fashioncode.data.repository.TokenRepository
 import com.anshyeon.fashioncode.network.extentions.onError
 import com.anshyeon.fashioncode.network.extentions.onException
 import com.anshyeon.fashioncode.network.extentions.onSuccess
@@ -19,7 +20,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class InfoInputViewModel @Inject constructor(
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
+    private val tokenRepository: TokenRepository,
 ) : ViewModel() {
 
     private val _nickName = MutableStateFlow("")
@@ -53,7 +55,18 @@ class InfoInputViewModel @Inject constructor(
                 val saveIdToken = async {
                     authRepository.saveUserInfo(nickName.value, null)
                 }
+                val getDropBoxTokenJob = viewModelScope.async {
+                    val token = tokenRepository.getDropBoxRefreshToken()
+                    tokenRepository.saveDropBoxToken(token)
+                }
+                val getAdobeTokenJob = viewModelScope.async {
+                    val token = tokenRepository.getAdobeRefreshToken()
+                    tokenRepository.saveAdobeToken(token)
+                }
+
                 saveIdToken.await()
+                getDropBoxTokenJob.await()
+                getAdobeTokenJob.await()
                 val intent = Intent(context, MainActivity::class.java).apply {
                     addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
                     addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
