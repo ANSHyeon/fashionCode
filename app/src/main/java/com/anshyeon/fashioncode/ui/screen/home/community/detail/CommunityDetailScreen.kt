@@ -48,8 +48,9 @@ import com.anshyeon.fashioncode.util.DateFormatText.getDefaultDatePattern
 @Composable
 fun CommunityDetailScreen(navController: NavHostController, userList: List<User>, postId: String) {
 
-    val viewModel: CommunityDetailViewModel = hiltViewModel()
-    viewModel.setPostId(postId)
+    val viewModel = hiltViewModel<CommunityDetailViewModel, CommunityDetailViewModel.Factory>(
+        creationCallback = { factory -> factory.create(postId = postId) }
+    )
 
     val scrollState = rememberScrollState()
 
